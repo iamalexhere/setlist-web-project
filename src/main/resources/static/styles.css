@@ -1,0 +1,442 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap');
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1e1e2e; /* Base */
+    color: #cdd6f4; /* Text */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden; /* Prevent horizontal scroll on animation */
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #313244; /* Surface0 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+header .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+header .logo img {
+    height: 40px;
+    border-radius: 50%;
+    filter: invert(0.8);
+}
+
+header .logo h1 {
+    font-size: 24px;
+    margin: 0;
+    font-weight: 700;
+}
+
+header nav a {
+    color: #cdd6f4;
+    text-decoration: none;
+    margin: 0 15px;
+    transition: color 0.3s ease;
+}
+
+header nav a:hover {
+    color: #89b4fa; /* Blue */
+}
+
+header .auth-buttons button {
+    margin-left: 10px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: transparent;
+    color: #cdd6f4;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+header .auth-buttons button:hover {
+    background-color: #585b70; /* Surface2 */
+    transform: translateY(-2px); /* Lift slightly */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Main Content */
+main {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    position: relative; /* For animation stacking */
+    overflow: hidden; /* Clip animations if needed */
+}
+
+.search-area {
+    display: flex;
+    width: 80%;
+    max-width: 600px;
+    margin-top: 20px;
+    animation: fadeInDown 0.8s ease both; /* Animation for the search area */
+}
+
+.search-area input[type="text"] {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 4px 0 0 4px;
+    background-color: #45475a; /* Surface1 */
+    color: #cdd6f4;
+}
+
+.search-area button {
+    background-color: #89b4fa; /* Blue */
+    color: #cdd6f4;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-area button:hover {
+    background-color: #74c7ec; /* Sapphire */
+    transform: scale(1.05); /* Scale slightly */
+}
+
+.upcoming-concerts {
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    animation: fadeInUp 0.8s ease both; /* Animation for upcoming concerts section */
+}
+
+.upcoming-concerts h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.concert-card {
+    background-color: #45475a;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    animation: scaleUp 0.6s ease both;
+    display: inline-block;
+    width: 100%;
+}
+
+.concert-card:hover {
+    transform: translateY(-5px); /* Subtle lift effect on hover */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* Slightly stronger shadow */
+}
+
+.concert-details {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin-bottom: 15px;
+
+}
+
+.concert-date {
+    font-size: 16px;
+    color: #bac2de;
+    margin-bottom: 5px;
+}
+
+.concert-location {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.concert-artists {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.detail-button {
+    background-color: #a6e3a1;
+    color: #1e1e2e;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background-color 0.3s ease;
+}
+
+
+
+.detail-button:hover {
+    background-color: #94e2d5; /* Teal */
+    transform: scale(1.05)
+  }
+
+.links-area {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    animation: fadeIn 1s ease both; /* Animation for all links section */
+}
+
+.link-button {
+    background-color: #6c7086; /* Overlay0 */
+    color: #cdd6f4;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.link-button:hover {
+    background-color: #585b70; /* Surface2 */
+      transform: translateY(-2px); /* Lift slightly */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Artist Carousel */
+.artist-carousel-section {
+    width: 80%;
+    max-width: 800px;
+    text-align: center;
+    margin-bottom: 30px;
+     animation: fadeIn 1s ease both; /* Animation for the section */
+}
+
+.artist-carousel-section h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.artist-carousel-wrapper {
+    position: relative;
+    overflow: hidden; /* Hide the overflowing artists */
+}
+
+.artist-carousel {
+    display: flex;
+    transition: transform 0.5s ease-in-out; /* Smooth transition */
+}
+
+.artist-card {
+    flex: 0 0 auto;
+    width: 300px;
+    margin: 0 10px;
+    padding: 10px;
+    background-color: #45475a;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    animation: scaleUp 0.6s ease both;
+    /* transition: transform 0.3s ease;  Add this for hover animation */
+}
+
+.artist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.artist-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.artist-card h3 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #6c7086;
+    color: #cdd6f4;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.carousel-button:hover {
+    background-color: #585b70;
+}
+
+.carousel-button.prev {
+    left: 10px;
+}
+
+.carousel-button.next {
+    right: 10px;
+}
+
+/* Recently Added Setlists (iPod Style) */
+.recently-added-setlists {
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    margin-top: 30px;
+    animation: fadeInUp 1s ease both; /* Animation for the section */
+}
+
+.recently-added-setlists h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.setlist-playlist {
+    background-color: #45475a; /* Surface1 */
+    border-radius: 10px;
+    padding: 15px;
+    overflow-y: auto;
+    max-height: 300px; /* Limit the playlist height */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+     transition: background-color 0.3s ease;
+}
+
+.playlist-item:hover {
+   background-color: #585b70; /* Surface2 */
+}
+
+.playlist-item i {
+    margin-right: 10px;
+    font-size: 20px;
+    color: #cdd6f4;
+}
+
+.playlist-details {
+    text-align: left;
+}
+
+.playlist-details h3 {
+    font-size: 16px;
+    margin: 0;
+     white-space: nowrap; /* prevent wrapping text*/
+     overflow: hidden; /* hide overflowing content*/
+     text-overflow: ellipsis; /* add ellipses */
+     max-width: 400px;
+}
+
+.playlist-details p {
+    font-size: 14px;
+    margin: 0;
+     white-space: nowrap; /* prevent wrapping text*/
+     overflow: hidden; /* hide overflowing content*/
+     text-overflow: ellipsis; /* add ellipses */
+     max-width: 400px;
+    color: #bac2de;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #313244; /* Surface0 */
+    color: #bac2de; /* Subtext1 */
+}
+
+footer a {
+    color: #bac2de;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    header nav, header .auth-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    main {
+      padding: 10px;
+    }
+
+    .search-area, .upcoming-concerts, .links-area {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+
+  header nav {
+    flex-direction: column;
+  }
+  header nav a {
+    margin-bottom: 5px;
+  }
+    main {
+        padding: 5px;
+    }
+}

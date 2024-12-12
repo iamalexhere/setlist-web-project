@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SetList - Your Concert Companion</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header th:replace="fragments/header :: header"></header>
+
+    <main>
+        <section class="search-area">
+            <input type="text" placeholder="Search for artists, shows, or setlists" id="search-input">
+            <button id="search-button">Search</button>
+        </section>
+
+        <section class="upcoming-concerts">
+            <h2 th:text="#{upcoming.concerts.title}">Upcoming Concerts</h2>
+             <div class="concert-card">
+                <div class="concert-details">
+                <p class="concert-date">Sat, March 12, 2023</p>
+                <p class="concert-location">Jakarta Convention Center</p>
+                <p class="concert-artists">Coldplay, The 1975, and more</p>
+                <button class="detail-button">See Details</button>
+                </div>
+            </div>
+        </section>
+
+         <section class="artist-carousel-section">
+            <h2 th:text="#{popular.artists.title}">Popular Artists</h2>
+            <div class="artist-carousel-wrapper">
+                <div class="artist-carousel">
+                    <div class="artist-card">
+                        <img src="https://placekitten.com/300/200" alt="Artist 1">
+                        <h3 th:text="#{artist.name.1}">Artist 1</h3>
+                    </div>
+                     <!-- ... other artist cards ... -->
+                </div>
+                <button class="carousel-button prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-button next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+
+        <section class="recently-added-setlists">
+           <h2 th:text="#{recent.setlists.title}">Recently Added Setlists</h2>
+            <div class="setlist-playlist">
+            <!-- ... setlist items ... -->
+            </div>
+        </section>
+
+        <section class="links-area">
+            <a href="#" th:href="@{/artists}" class="link-button" th:text="#{all.artists}">All Artists</a>
+            <a href="#" th:href="@{/shows}" class="link-button" th:text="#{all.shows}">All Shows</a>
+            <a href="#" th:href="@{/setlists}" class="link-button" th:text="#{all.setlists}">All Setlists</a>
+        </section>
+    </main>
+    <footer th:replace="fragments/footer :: footer"></footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

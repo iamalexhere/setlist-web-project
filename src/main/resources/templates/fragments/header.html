@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+    <header th:fragment="header">
+        <div class="logo">
+            <img src="assets/logo.png" alt="SetList Logo">
+            <h1>SetList</h1>
+        </div>
+        <nav>
+            <a href="#" th:href="@{/search}">Search</a>
+            <a href="#" th:href="@{/artists}">Artists</a>
+            <a href="#" th:href="@{/shows}">Shows</a>
+            <a href="#" th:href="@{/setlists}">Setlists</a>
+        </nav>
+        <div class="auth-buttons">
+            <button class="register-btn">Register</button>
+            <button class="login-btn">Login</button>
+        </div>
+    </header>
+</body>
+</html>
