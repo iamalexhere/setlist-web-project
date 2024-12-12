@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Events</title>
+</head>
+<body>
+    <h1>List Events</h1>
+    <table>
+        <tr>
+            <th>ID Event</th>
+            <th>ID Venue</th>
+            <th>Nama Event</th>
+            <th>Tanggal Event</th>
+        </tr>
+        <tr th:each="row : ${results}">
+            <td th:text="${row.idEvent}"></td>
+            <td th:text="${row.idVenue}"></td>
+            <td th:text="${row.eventName}"></td>
+            <td th:text="${row.eventDate}"></td>
+        </tr>
+    </table>
+</body>
+</html>
