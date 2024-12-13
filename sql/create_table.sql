@@ -16,8 +16,9 @@ CREATE TABLE roles(
 
 CREATE TABLE users(
 	id_user SERIAL PRIMARY KEY,
-	id_role INT,
+	id_role INT NOT NULL,
 	username VARCHAR(60) UNIQUE NOT NULL,
+	hashed_password VARCHAR(255) NOT NULL,
 	FOREIGN KEY (id_role) REFERENCES roles(id_role)
 );
 
@@ -29,7 +30,7 @@ CREATE TABLE venues(
 
 CREATE TABLE events(
 	id_event SERIAL PRIMARY KEY,
-	id_venue INT,
+	id_venue INT NOT NULL,
 	event_name VARCHAR(60) NOT NULL,
 	event_date DATE NOT NULL,
 	FOREIGN KEY (id_venue) REFERENCES venues(id_venue)
@@ -42,31 +43,32 @@ CREATE TABLE artists(
 
 CREATE TABLE songs(
 	id_song SERIAL PRIMARY KEY,
-	id_artist INT,
+	id_artist INT NOT NULL,
 	song_name VARCHAR(60) NOT NULL,
 	FOREIGN KEY (id_artist) REFERENCES artists(id_artist)
 );
 
 CREATE TABLE setlists(
 	id_setlist SERIAL PRIMARY KEY,
-	id_artist INT,
-	id_event INT,
+	id_artist INT NOT NULL,
+	id_event INT NOT NULL,
+	setlist_name VARCHAR(60) NOT NULL,
 	FOREIGN KEY (id_artist) REFERENCES artists(id_artist),
 	FOREIGN KEY (id_event) REFERENCES events(id_event)
 );
 
 CREATE TABLE edits(
-	id_setlist INT,
-    date_added DATE,
-	id_user INT,
+	id_setlist INT NOT NULL,
+    date_added DATE NOT NULL,
+	id_user INT NOT NULL,
     PRIMARY KEY (id_setlist, date_added),
     FOREIGN KEY (id_setlist) REFERENCES setlists(id_setlist),
 	FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
 
 CREATE TABLE setlists_songs(
-	id_setlist INT,
-	id_song INT,
+	id_setlist INT NOT NULL,
+	id_song INT NOT NULL,
 	PRIMARY KEY (id_setlist, id_song),
 	FOREIGN KEY (id_setlist) REFERENCES setlists(id_setlist),
 	FOREIGN KEY (id_song) REFERENCES songs(id_song)
