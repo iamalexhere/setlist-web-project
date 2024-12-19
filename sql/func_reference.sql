@@ -9,8 +9,10 @@ FROM
 
 -- show setlist's edit history
 SELECT
+	setlists.id_setlist,
 	setlist_name,
 	edits.date_added,
+	users.id_user,
 	users.username
 FROM
 	setlists
@@ -70,5 +72,37 @@ WHERE
 	venues.venue_name = 'Madison Square Garden';
 	-- ubah venue_name, bisa menggunakan id_event juga
 
+-- show setlist
+SELECT
+	id_setlist,
+	setlist_name,
+	artists.id_artist,
+	artists.artist_name,
+	events.id_event,
+	events.event_name
+FROM
+	setlists
+	INNER JOIN artists
+	ON setlists.id_artist = artists.id_artist
+	INNER JOIN events
+	ON setlists.id_event = events.id_event;
 
+-- show song playlist per setlist
+SELECT 
+	setlists.id_setlist,
+	setlist_name,
+	songs.id_song,
+	song_name,
+	artist_name
+FROM
+	setlists_songs
+	INNER JOIN setlists
+	ON setlists_songs.id_setlist = setlists.id_setlist
+	INNER JOIN songs
+	ON setlists_songs.id_song = songs.id_song
+	INNER JOIN artists
+	ON songs.id_artist = artists.id_artist
+WHERE
+	-- change id based on param
+	setlists.id_setlist = 4;
 	
