@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setlist - Your Concert Companion</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    <div class="hero">
+        <h1>Find Your Concert Setlists</h1>
+        <p>Discover what your favorite artists play live</p>
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Search by artist, venue, or tour...">
+        </div>
+    </div>
+
+    <section class="stats">
+        <div class="stat-card">
+            <h3>Setlists</h3>
+            <p class="stat-value" data-value="8590000">8.59M</p>
+        </div>
+        <div class="stat-card">
+            <h3>Artists</h3>
+            <p class="stat-value" data-value="385000">385K</p>
+        </div>
+        <div class="stat-card">
+            <h3>Venues</h3>
+            <p class="stat-value" data-value="390000">390K</p>
+        </div>
+        <div class="stat-card">
+            <h3>Events</h3>
+            <p class="stat-value" data-value="189000">189K</p>
+        </div>
+    </section>
+
+    <section class="popular-setlists">
+        <h2 class="section-title">Popular Setlists</h2>
+        <div class="card-grid">
+            <div class="event-card">
+                <h3>Paul McCartney</h3>
+                <p>Got Back Tour</p>
+                <p>June 16, 2024</p>
+            </div>
+            <div class="event-card">
+                <h3>Slipknot</h3>
+                <p>World Tour 2024</p>
+                <p>July 20, 2024</p>
+            </div>
+            <div class="event-card">
+                <h3>Metallica</h3>
+                <p>M72 World Tour</p>
+                <p>August 2, 2024</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="upcoming-events">
+        <h2 class="section-title">Upcoming Events</h2>
+        <div class="card-grid">
+            <div class="event-card">
+                <h3>Bryan Adams</h3>
+                <p>So Happy It Hurts Tour</p>
+                <p>July 5, 2024</p>
+            </div>
+            <div class="event-card">
+                <h3>Patti LaBelle</h3>
+                <p>Summer Concert Series</p>
+                <p>July 15, 2024</p>
+            </div>
+            <div class="event-card">
+                <h3>Dream Theater</h3>
+                <p>Top of the World Tour</p>
+                <p>August 10, 2024</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="recent-edits">
+        <h2 class="section-title">Recent Updates</h2>
+        <div class="card-grid">
+            <div class="event-card">
+                <p>Updated setlist for Taylor Swift - The Eras Tour</p>
+                <small>2 minutes ago</small>
+            </div>
+            <div class="event-card">
+                <p>New venue added: MSG Sphere, Las Vegas</p>
+                <small>15 minutes ago</small>
+            </div>
+            <div class="event-card">
+                <p>Setlist correction for The Weeknd</p>
+                <small>1 hour ago</small>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artists - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="hero artist-hero">
+        <h1>Discover Artists</h1>
+        <p>Find setlists from your favorite performers</p>
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Search for artists...">
+        </div>
+    </div>
+
+    <section class="featured-artists">
+        <h2 class="section-title">Featured Artists</h2>
+        <div class="artist-grid">
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="https://placehold.co/200x200" alt="Taylor Swift">
+                </div>
+                <h3>Taylor Swift</h3>
+                <p>The Eras Tour</p>
+                <p class="stats">145 setlists</p>
+            </div>
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="https://placehold.co/200x200" alt="Ed Sheeran">
+                </div>
+                <h3>Ed Sheeran</h3>
+                <p>Mathematics Tour</p>
+                <p class="stats">98 setlists</p>
+            </div>
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="https://placehold.co/200x200" alt="Coldplay">
+                </div>
+                <h3>Coldplay</h3>
+                <p>Music of the Spheres World Tour</p>
+                <p class="stats">120 setlists</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="artist-categories">
+        <h2 class="section-title">Browse by Genre</h2>
+        <div class="category-grid">
+            <a href="#" class="category-card" style="background-color: var(--pink)">
+                <h3>Pop</h3>
+                <p>1,234 artists</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--mauve)">
+                <h3>Rock</h3>
+                <p>890 artists</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--blue)">
+                <h3>Hip Hop</h3>
+                <p>567 artists</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--teal)">
+                <h3>Electronic</h3>
+                <p>432 artists</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--peach)">
+                <h3>Jazz</h3>
+                <p>234 artists</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--rosewater)">
+                <h3>Classical</h3>
+                <p>123 artists</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="recent-artists">
+        <h2 class="section-title">Recently Added Artists</h2>
+        <div class="artist-list">
+            <div class="artist-row">
+                <div class="artist-info">
+                    <h3>Olivia Rodrigo</h3>
+                    <p>GUTS World Tour</p>
+                </div>
+                <p class="date">Added 2 days ago</p>
+            </div>
+            <div class="artist-row">
+                <div class="artist-info">
+                    <h3>The Weeknd</h3>
+                    <p>After Hours til Dawn Tour</p>
+                </div>
+                <p class="date">Added 3 days ago</p>
+            </div>
+            <div class="artist-row">
+                <div class="artist-info">
+                    <h3>Arctic Monkeys</h3>
+                    <p>The Car Tour</p>
+                </div>
+                <p class="date">Added 5 days ago</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

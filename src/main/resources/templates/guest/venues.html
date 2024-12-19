@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venues - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="hero venue-hero">
+        <h1>Discover Venues</h1>
+        <p>Find setlists from iconic concert venues worldwide</p>
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Search for venues...">
+        </div>
+    </div>
+
+    <section class="featured-venues">
+        <h2 class="section-title">Featured Venues</h2>
+        <div class="venue-grid">
+            <div class="venue-card">
+                <div class="venue-image">
+                    <img src="https://placehold.co/400x250" alt="Madison Square Garden">
+                    <div class="venue-badge">Iconic</div>
+                </div>
+                <div class="venue-content">
+                    <h3>Madison Square Garden</h3>
+                    <p class="venue-location">New York City, USA</p>
+                    <div class="venue-stats">
+                        <span>20,000 capacity</span>
+                        <span>•</span>
+                        <span>1,234 shows</span>
+                    </div>
+                </div>
+            </div>
+            <div class="venue-card">
+                <div class="venue-image">
+                    <img src="https://placehold.co/400x250" alt="O2 Arena">
+                    <div class="venue-badge">Popular</div>
+                </div>
+                <div class="venue-content">
+                    <h3>O2 Arena</h3>
+                    <p class="venue-location">London, UK</p>
+                    <div class="venue-stats">
+                        <span>20,000 capacity</span>
+                        <span>•</span>
+                        <span>987 shows</span>
+                    </div>
+                </div>
+            </div>
+            <div class="venue-card">
+                <div class="venue-image">
+                    <img src="https://placehold.co/400x250" alt="Red Rocks Amphitheatre">
+                    <div class="venue-badge">Historic</div>
+                </div>
+                <div class="venue-content">
+                    <h3>Red Rocks Amphitheatre</h3>
+                    <p class="venue-location">Morrison, Colorado</p>
+                    <div class="venue-stats">
+                        <span>9,525 capacity</span>
+                        <span>•</span>
+                        <span>756 shows</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="venue-categories">
+        <h2 class="section-title">Browse by Type</h2>
+        <div class="category-grid">
+            <a href="#" class="category-card" style="background-color: var(--mauve)">
+                <h3>Arenas</h3>
+                <p>156 venues</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--blue)">
+                <h3>Stadiums</h3>
+                <p>89 venues</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--teal)">
+                <h3>Theaters</h3>
+                <p>234 venues</p>
+            </a>
+            <a href="#" class="category-card" style="background-color: var(--pink)">
+                <h3>Clubs</h3>
+                <p>312 venues</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="popular-cities">
+        <h2 class="section-title">Popular Cities</h2>
+        <div class="city-grid">
+            <div class="city-card" style="background-image: url('https://placehold.co/400x200')">
+                <div class="city-overlay"></div>
+                <div class="city-content">
+                    <h3>New York</h3>
+                    <p>45 venues</p>
+                </div>
+            </div>
+            <div class="city-card" style="background-image: url('https://placehold.co/400x200')">
+                <div class="city-overlay"></div>
+                <div class="city-content">
+                    <h3>London</h3>
+                    <p>38 venues</p>
+                </div>
+            </div>
+            <div class="city-card" style="background-image: url('https://placehold.co/400x200')">
+                <div class="city-overlay"></div>
+                <div class="city-content">
+                    <h3>Los Angeles</h3>
+                    <p>42 venues</p>
+                </div>
+            </div>
+            <div class="city-card" style="background-image: url('https://placehold.co/400x200')">
+                <div class="city-overlay"></div>
+                <div class="city-content">
+                    <h3>Tokyo</h3>
+                    <p>29 venues</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>
