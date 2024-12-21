@@ -1,3 +1,99 @@
+DROP TABLE IF EXISTS edits;
+DROP TABLE IF EXISTS setlists_songs;
+DROP TABLE IF EXISTS setlists;
+DROP TABLE IF EXISTS songs;
+DROP TABLE IF EXISTS artists_categories;
+DROP TABLE IF EXISTS artists;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS venues;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS roles;
+
+
+CREATE TABLE roles(
+	id_role SERIAL PRIMARY KEY,
+	role_name VARCHAR(6) NOT NULL
+);
+
+CREATE TABLE users(
+	id_user SERIAL PRIMARY KEY,
+	id_role INT NOT NULL,
+	username VARCHAR(60) UNIQUE NOT NULL,
+	hashed_password VARCHAR(255) NOT NULL,
+	FOREIGN KEY (id_role) REFERENCES roles(id_role)
+);
+
+CREATE TABLE venues(
+	id_venue SERIAL PRIMARY KEY,
+	venue_name VARCHAR(60) NOT NULL,
+	city_name VARCHAR(60) NOT NULL
+);
+
+CREATE TABLE events(
+	id_event SERIAL PRIMARY KEY,
+	id_venue INT NOT NULL,
+	event_name VARCHAR(60) NOT NULL,
+	event_date DATE NOT NULL,
+	FOREIGN KEY (id_venue) REFERENCES venues(id_venue)
+);
+
+CREATE TABLE categories(
+	id_category SERIAL PRIMARY KEY,
+	category_name VARCHAR(15) NOT NULL
+);
+
+CREATE TABLE artists(
+	id_artist SERIAL PRIMARY KEY,
+	artist_name VARCHAR(60) NOT NULL
+);
+
+CREATE TABLE artists_categories(
+	id_artist INT,
+	id_category INT,
+	PRIMARY KEY (id_artist, id_category),
+	FOREIGN KEY (id_artist) REFERENCES artists(id_artist),
+	FOREIGN KEY (id_category) REFERENCES categories(id_category)
+);
+
+CREATE TABLE songs(
+	id_song SERIAL PRIMARY KEY,
+	id_artist INT NOT NULL,
+	song_name VARCHAR(60) NOT NULL,
+	FOREIGN KEY (id_artist) REFERENCES artists(id_artist)
+);
+
+CREATE TABLE setlists(
+	id_setlist SERIAL PRIMARY KEY,
+	id_artist INT NOT NULL,
+	id_event INT NOT NULL,
+	setlist_name VARCHAR(60) NOT NULL,
+	FOREIGN KEY (id_artist) REFERENCES artists(id_artist),
+	FOREIGN KEY (id_event) REFERENCES events(id_event)
+);
+
+CREATE TABLE edits(
+	id_setlist INT NOT NULL,
+    date_added DATE NOT NULL,
+	id_user INT NOT NULL,
+    PRIMARY KEY (id_setlist, date_added),
+    FOREIGN KEY (id_setlist) REFERENCES setlists(id_setlist),
+	FOREIGN KEY (id_user) REFERENCES users(id_user)
+);
+
+CREATE TABLE setlists_songs(
+	id_setlist INT NOT NULL,
+	id_song INT NOT NULL,
+	PRIMARY KEY (id_setlist, id_song),
+	FOREIGN KEY (id_setlist) REFERENCES setlists(id_setlist),
+	FOREIGN KEY (id_song) REFERENCES songs(id_song)
+);
+
+INSERT INTO roles (role_name) 
+VALUES
+	('Member'),
+	('Admin');
+
 -- Insert users (adding more users)
 INSERT INTO users (id_role, username, hashed_password)
 VALUES
@@ -36,6 +132,15 @@ VALUES
     (6, 'Classical Showcase', '2024-10-10'),           -- Multiple classical artists at Royal Albert Hall
     (7, 'Techno Revolution', '2024-11-05');            -- Multiple electronic artists at Staples Center
 
+INSERT INTO categories (category_name)
+VALUES
+    ('Rock'),        -- Rock artists
+    ('Pop'),         -- Pop artists
+    ('Classical'),   -- Classical music artists
+    ('Indie'),       -- Indie artists
+    ('Jazz'),        -- Jazz artists
+    ('Electronic');  -- Electronic artists
+
 -- Insert artists (adding more artists)
 INSERT INTO artists (artist_name)
 VALUES
@@ -46,6 +151,20 @@ VALUES
     ('Taylor Swift'),
     ('Beyoncé'),
     ('Ed Sheeran');
+
+INSERT INTO artists_categories(id_artist, id_category)
+VALUES
+    (1, 1),
+    (3, 1),
+    (4, 1),
+    (2, 2),
+    (5, 2),
+    (6, 2),
+    (7, 2),
+    (3, 3),
+    (4, 4),
+    (3, 5),
+    (7, 6);
 
 -- Insert songs (adding more songs)
 INSERT INTO songs (id_artist, song_name)

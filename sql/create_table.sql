@@ -2,7 +2,9 @@ DROP TABLE IF EXISTS edits;
 DROP TABLE IF EXISTS setlists_songs;
 DROP TABLE IF EXISTS setlists;
 DROP TABLE IF EXISTS songs;
+DROP TABLE IF EXISTS artists_categories;
 DROP TABLE IF EXISTS artists;
+DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS venues;
 DROP TABLE IF EXISTS users;
@@ -36,9 +38,22 @@ CREATE TABLE events(
 	FOREIGN KEY (id_venue) REFERENCES venues(id_venue)
 );
 
+CREATE TABLE categories(
+	id_category SERIAL PRIMARY KEY,
+	category_name VARCHAR(15) NOT NULL
+);
+
 CREATE TABLE artists(
 	id_artist SERIAL PRIMARY KEY,
 	artist_name VARCHAR(60) NOT NULL
+);
+
+CREATE TABLE artists_categories(
+	id_artist INT,
+	id_category INT,
+	PRIMARY KEY (id_artist, id_category),
+	FOREIGN KEY (id_artist) REFERENCES artists(id_artist),
+	FOREIGN KEY (id_category) REFERENCES categories(id_category)
 );
 
 CREATE TABLE songs(
@@ -74,7 +89,7 @@ CREATE TABLE setlists_songs(
 	FOREIGN KEY (id_song) REFERENCES songs(id_song)
 );
 
-INSERT INTO roles (role_name) VALUES
-('Member'),
-('Admin')
-
+INSERT INTO roles (role_name) 
+VALUES
+	('Member'),
+	('Admin');
