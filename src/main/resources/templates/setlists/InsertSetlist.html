@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Setlists</title>
+</head>
+<body>
+    <h1>Setlists</h1>
+    <form method="post" action="insertSetlist" th:object="${user}">
+        <label>
+            <span class="form-label">Setlist Name</span>:
+            <input type="text" name="setlist_name" class="form-control" />
+        </label>
+        <br>
+        
+        <label>
+            <span class="form-label">Username</span>:
+            <input type="text" name="username" class="form-control" />
+        </label>
+        <br>
+
+        <label>
+            <span class="form-label">Artist</span>:
+            <select name="artist" class="form-control" >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+        </label>
+        <br>
+
+        <label>
+            <span class="form-label">Event</span>:
+            <select name="event" class="form-control" >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+        </label>
+        <br>
+        
+        <input type="submit" value="Register" />
+    </form>
+</body>
+
+{% comment %} <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div> {% endcomment %}

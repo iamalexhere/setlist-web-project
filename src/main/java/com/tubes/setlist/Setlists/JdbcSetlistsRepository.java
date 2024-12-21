@@ -10,16 +10,17 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class JdbcSetlistsRepository implements SetlistsRepository{
-     @Autowired
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Setlists> showAllSetlists() {
         String sql = 
-                "SELECT id_setlist, setlist_name, artists.id_artist, artists.artist_name, events.id_event, events.event_name " + 
+                "SELECT id_setlist, setlist_name, artists.id_artist, artists.artist_name, events.id_event, events.event_name, venue_name, city_name " + 
                 "FROM setlists " +
                 "INNER JOIN artists ON setlists.id_artist = artists.id_artist " +
-                "INNER JOIN events ON setlists.id_event = events.id_event;";
+                "INNER JOIN events ON setlists.id_event = events.id_event " +
+                "INNER JOIN venues ON events.id_venue = venues.id_venue;";
         List<Setlists> setlists = jdbcTemplate.query(sql, this::mapRowToSetlists);
         return setlists;
     }
@@ -31,7 +32,9 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
             resultSet.getInt("id_artist"),
             resultSet.getString("artist_name"),
             resultSet.getInt("id_event"),
-            resultSet.getString("event_name")
+            resultSet.getString("event_name"),
+            resultSet.getString("venue_name"),
+            resultSet.getString("city_name")
         );
     }
 

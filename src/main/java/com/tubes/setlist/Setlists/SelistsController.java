@@ -19,30 +19,23 @@ public class SelistsController {
 
     @GetMapping ("/setlists")
     public String showAll (Model model){
-        // lihat semua setlist 
-        List<Setlists> setlists = repo.showAllSetlists();
-        model.addAttribute("setlists", setlists);
+        //set model attribute
+        model = setSetlistModel(model);
 
-        // lihat edits dari setlist specific (param = id setlist)
-        // id = 0 -> semua edit
-        // id = n -> edit setlist id-n
-        List<SetlistEdit> edits = repo.showSetlistEdits(this.idSetlist);
-        model.addAttribute("edits", edits);
-
-        // lihat playlist dati setlist specific (param = id setlist)
-        // id = 0 -> semua playlist
-        // id = n -> playlist setlist id-n
-        List<SetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
-        model.addAttribute("songs", songs);
-
-        return "TempSetlists.html";
+        return "setlists/ShowSetlists.html";
     }
 
     @PostMapping("/setlists")
     public String searchSetlist (@RequestParam(value = "idSetlist", required = false) Integer idSetlist, Model model){
         if (idSetlist == null) this.idSetlist = 0;
         else this.idSetlist = idSetlist;
+        //set model attribute
+        model = setSetlistModel(model);
 
+        return "setlists/ShowSetlists.html";
+    }
+
+    private Model setSetlistModel (Model model){
         // lihat semua setlist 
         List<Setlists> setlists = repo.showAllSetlists();
         model.addAttribute("setlists", setlists);
@@ -59,7 +52,11 @@ public class SelistsController {
         List<SetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
         model.addAttribute("songs", songs);
 
-        return "TempSetlists.html";
+        return model;
     }
 
+    @GetMapping ("/insertSetlist")
+    public String insertSetlist (Model model){
+        return "setlists/InsertSetlist.html";
+    }
 }
