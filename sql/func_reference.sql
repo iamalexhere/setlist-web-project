@@ -105,4 +105,19 @@ FROM
 WHERE
 	-- change id based on param
 	setlists.id_setlist = 4;
+
+-- func show all artist based on category
+SELECT
+	category_name,
+	artist_name
+FROM
+	artists
+	LEFT JOIN artists_categories
+	ON artists.id_artist = artists_categories.id_artist
+	LEFT JOIN categories
+	ON artists_categories.id_category = categories.id_category
+-- delete "WHERE" for showAll
+-- change the id value for a specific category
+WHERE
+	categories.id_category = 1;
 	
