@@ -121,3 +121,5 @@ FROM
 WHERE
 	categories.id_category = 1;
 	
+
+-- <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>

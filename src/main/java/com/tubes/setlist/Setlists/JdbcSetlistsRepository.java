@@ -14,19 +14,19 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
     JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<Setlists> showAllSetlists() {
+    public List<DataSetlists> showAllSetlists() {
         String sql = 
                 "SELECT id_setlist, setlist_name, artists.id_artist, artists.artist_name, events.id_event, events.event_name, venue_name, city_name " + 
                 "FROM setlists " +
                 "INNER JOIN artists ON setlists.id_artist = artists.id_artist " +
                 "INNER JOIN events ON setlists.id_event = events.id_event " +
                 "INNER JOIN venues ON events.id_venue = venues.id_venue;";
-        List<Setlists> setlists = jdbcTemplate.query(sql, this::mapRowToSetlists);
+        List<DataSetlists> setlists = jdbcTemplate.query(sql, this::mapRowToSetlists);
         return setlists;
     }
 
-    private Setlists mapRowToSetlists(ResultSet resultSet, int rowNum) throws SQLException {
-        return new Setlists (
+    private DataSetlists mapRowToSetlists(ResultSet resultSet, int rowNum) throws SQLException {
+        return new DataSetlists (
             resultSet.getInt("id_setlist"),
             resultSet.getString("setlist_name"),
             resultSet.getInt("id_artist"),
@@ -39,7 +39,7 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
     }
 
     @Override
-    public List<SetlistEdit> showSetlistEdits(int idSetlist){
+    public List<DataSetlistEdit> showSetlistEdits(int idSetlist){
         String sql = 
                 "SELECT setlists.id_setlist, setlist_name, edits.date_added, users.id_user, users.username " +
                 "FROM setlists " +
@@ -49,12 +49,12 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
             sql = sql + "WHERE setlists.id_setlist = " + idSetlist + " ";
         }
         sql = sql + "ORDER BY edits.date_added DESC;";
-        List<SetlistEdit> edits = jdbcTemplate.query(sql, this::mapRowToEdits);
+        List<DataSetlistEdit> edits = jdbcTemplate.query(sql, this::mapRowToEdits);
         return edits;
     }
 
-    private SetlistEdit mapRowToEdits(ResultSet resultSet, int rowNum) throws SQLException {
-        return new SetlistEdit (
+    private DataSetlistEdit mapRowToEdits(ResultSet resultSet, int rowNum) throws SQLException {
+        return new DataSetlistEdit (
             resultSet.getInt("id_setlist"),
             resultSet.getString("setlist_name"),
             resultSet.getString("date_added"),
@@ -64,7 +64,7 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
     }
 
     @Override
-    public List<SetlistSong> showSetlistSongs(int idSetlist){
+    public List<DataSetlistSong> showSetlistSongs(int idSetlist){
         String sql = 
                 "SELECT setlists.id_setlist, setlist_name, songs.id_song, song_name, artist_name " +
                 "FROM setlists_songs " +
@@ -77,12 +77,12 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
         else{
             sql = sql + " ;";
         }
-        List<SetlistSong> songs = jdbcTemplate.query(sql, this::mapRowToSongs);
+        List<DataSetlistSong> songs = jdbcTemplate.query(sql, this::mapRowToSongs);
         return songs;
     }
 
-    private SetlistSong mapRowToSongs(ResultSet resultSet, int rowNum) throws SQLException {
-        return new SetlistSong(
+    private DataSetlistSong mapRowToSongs(ResultSet resultSet, int rowNum) throws SQLException {
+        return new DataSetlistSong(
             resultSet.getInt("id_setlist"),
             resultSet.getString("setlist_name"),
             resultSet.getInt("id_song"),
@@ -90,5 +90,38 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
             resultSet.getString("artist_name")
         );
     }
+
+    @Override
+    public List<DataArtists> showAllArtists() {
+        String sql = 
+                "SELECT id_artist, artist_name " + 
+                "FROM artists;";
+        List<DataArtists> artists = jdbcTemplate.query(sql, this::mapRowToArtists);
+        return artists;
+    }
+
+    private DataArtists mapRowToArtists(ResultSet resultSet, int rowNum) throws SQLException {
+        return new DataArtists (
+            resultSet.getInt("id_artist"),
+            resultSet.getString("artist_name")
+        );
+    }
+
+    @Override
+    public List<DataEvents> showAllEvents() {
+        String sql = 
+                "SELECT id_event, event_name " + 
+                "FROM events;";
+        List<DataEvents> events = jdbcTemplate.query(sql, this::mapRowToEvents);
+        return events;
+    }
+
+    private DataEvents mapRowToEvents(ResultSet resultSet, int rowNum) throws SQLException {
+        return new DataEvents (
+            resultSet.getInt("id_event"),
+            resultSet.getString("event_name")
+        );
+    }
+
 
 }

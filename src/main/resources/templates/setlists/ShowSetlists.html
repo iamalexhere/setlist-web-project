@@ -30,11 +30,16 @@
         </table>
     </div>
 
-    <form action="setlists" method="post">
+    <div>
+        <form action="setlists" method="post">
+            </br>
+            <input type="number" name="idSetlist" placeholder="Enter a setlist id..."/>
+            <input type="submit" value="Search">
+        </form>
         </br>
-        <input type="number" name="idSetlist" placeholder="enter a setlist id..."/>
-        <input type="submit" value="search">
-    </form>
+        <button onclick="location.href='insertSetlist'" type="button">Insert New Setlist</button>
+        <button onclick="location.href='editSetlist'" type="button">Edit Setlist</button>
+    </div>
 
     <div> 
         <h1>List Lagu</h1>
@@ -74,10 +79,6 @@
                 <td th:text="${row.username}"></td>
             </tr>
         </table>
-    </div>
-
-    <div>
-        
     </div>
 </body>
 </html>

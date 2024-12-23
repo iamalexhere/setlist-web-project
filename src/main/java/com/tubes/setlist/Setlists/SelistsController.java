@@ -37,19 +37,19 @@ public class SelistsController {
 
     private Model setSetlistModel (Model model){
         // lihat semua setlist 
-        List<Setlists> setlists = repo.showAllSetlists();
+        List<DataSetlists> setlists = repo.showAllSetlists();
         model.addAttribute("setlists", setlists);
 
         // lihat edits dari setlist specific (param = id setlist)
         // id = 0 -> semua edit
         // id = n -> edit setlist id-n
-        List<SetlistEdit> edits = repo.showSetlistEdits(this.idSetlist);
+        List<DataSetlistEdit> edits = repo.showSetlistEdits(this.idSetlist);
         model.addAttribute("edits", edits);
 
         // lihat playlist dati setlist specific (param = id setlist)
         // id = 0 -> semua playlist
         // id = n -> playlist setlist id-n
-        List<SetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
+        List<DataSetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
         model.addAttribute("songs", songs);
 
         return model;
@@ -57,6 +57,18 @@ public class SelistsController {
 
     @GetMapping ("/insertSetlist")
     public String insertSetlist (Model model){
+        List<DataArtists> artists = repo.showAllArtists();
+        model.addAttribute("artists", artists);
+
+        List<DataEvents> events = repo.showAllEvents();
+        model.addAttribute("events", events);
         return "setlists/InsertSetlist.html";
+    }
+
+    @GetMapping ("/editSetlist")
+    public String editSetlist (Model model){
+        List<DataSetlists> setlists = repo.showAllSetlists();
+        model.addAttribute("setlists", setlists);
+        return "setlists/EditSetlist.html";
     }
 }

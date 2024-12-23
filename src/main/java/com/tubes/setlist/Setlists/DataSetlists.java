@@ -3,7 +3,7 @@ package com.tubes.setlist.Setlists;
 import lombok.Data;
 
 @Data
-public class Setlists {
+public class DataSetlists {
     private int idSetlist;
     private String setlistName;
     private int idArtist;
@@ -13,7 +13,7 @@ public class Setlists {
     private String venueName;
     private String cityName;
     
-    public Setlists(int idSetlist, String setlistName, int idArtist, String artistName, int idEvent, String eventName, String venueName, String cityName) {
+    public DataSetlists(int idSetlist, String setlistName, int idArtist, String artistName, int idEvent, String eventName, String venueName, String cityName) {
         this.idSetlist = idSetlist;
         this.setlistName = setlistName;
         this.idArtist = idArtist;
