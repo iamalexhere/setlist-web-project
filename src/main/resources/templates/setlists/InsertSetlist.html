@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Setlists</title>
+        <!-- temporary css-->
+        <style>
+            .form-label{
+                width: 150px;
+                display: inline-block;
+                margin-bottom: 10px;
+            }
+    
+            .form-control{
+                width: 150px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Insert Setlist</h1>
+        <form method="post" action="insertSetlist" th:object="${data}">
+            <label>
+                <span class="form-label">Setlist Name</span>:
+                <input type="text" name="setlistName" class="form-control" />
+            </label>
+            <br>
+            
+            <!--temporary username text fill, will be handled with html session-->
+            <label>
+                <span class="form-label">Username</span>:
+                <input type="text" name="username" class="form-control" />
+            </label>
+            <br>
+
+            <!--use of dropdown to prevent inconsistent input-->
+            <label>
+                <span class="form-label">Artist</span>:
+                <select name="idArtist" class="form-control" >
+                    <option th:each="row : ${artists}" 
+                            th:value="${row.idArtist}" 
+                            th:text="${row.artistName}">
+                    </option>
+                </select>
+            </label>
+            <br>
+
+            <label>
+                <span class="form-label">Event</span>:
+                <select name="idEvent" class="form-control" >
+                    <option th:each="row : ${events}" 
+                            th:value="${row.idEvent}" 
+                            th:text="${row.eventName}">
+                    </option>
+                </select>
+            </label>
+            <br>
+            
+            <input type="submit" value="Insert" />
+        </form>
+
+        <p th:if="${error}==null">Please fill in the username (sementara username isi manual)</p>
+        <p th:if="${error}==failed">An error occured (sementara username isi manual, cek apakah username sudah benar)</p>
+    </body>
+</html>

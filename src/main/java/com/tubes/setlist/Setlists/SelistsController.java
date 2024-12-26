@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class SelistsController {
+    //temporary error message handler
+    private String error = "";
 
     @Autowired
     private SetlistsRepository repo;
@@ -19,47 +22,79 @@ public class SelistsController {
 
     @GetMapping ("/setlists")
     public String showAll (Model model){
-        // lihat semua setlist 
-        List<Setlists> setlists = repo.showAllSetlists();
-        model.addAttribute("setlists", setlists);
+        //set model attribute
+        model = setSetlistModel(model);
 
-        // lihat edits dari setlist specific (param = id setlist)
-        // id = 0 -> semua edit
-        // id = n -> edit setlist id-n
-        List<SetlistEdit> edits = repo.showSetlistEdits(this.idSetlist);
-        model.addAttribute("edits", edits);
-
-        // lihat playlist dati setlist specific (param = id setlist)
-        // id = 0 -> semua playlist
-        // id = n -> playlist setlist id-n
-        List<SetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
-        model.addAttribute("songs", songs);
-
-        return "TempSetlists.html";
+        return "setlists/ShowSetlists.html";
     }
 
     @PostMapping("/setlists")
     public String searchSetlist (@RequestParam(value = "idSetlist", required = false) Integer idSetlist, Model model){
         if (idSetlist == null) this.idSetlist = 0;
         else this.idSetlist = idSetlist;
+        //set model attribute
+        model = setSetlistModel(model);
 
+        return "setlists/ShowSetlists.html";
+    }
+
+    private Model setSetlistModel (Model model){
         // lihat semua setlist 
-        List<Setlists> setlists = repo.showAllSetlists();
+        List<DataSetlists> setlists = repo.showAllSetlists();
         model.addAttribute("setlists", setlists);
 
         // lihat edits dari setlist specific (param = id setlist)
         // id = 0 -> semua edit
         // id = n -> edit setlist id-n
-        List<SetlistEdit> edits = repo.showSetlistEdits(this.idSetlist);
+        List<DataSetlistEdit> edits = repo.showSetlistEdits(this.idSetlist);
         model.addAttribute("edits", edits);
 
         // lihat playlist dati setlist specific (param = id setlist)
         // id = 0 -> semua playlist
         // id = n -> playlist setlist id-n
-        List<SetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
+        List<DataSetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
         model.addAttribute("songs", songs);
 
-        return "TempSetlists.html";
+        return model;
     }
 
+    @GetMapping ("/insertSetlist")
+    public String insertSetlist (Model model){
+        List<DataArtists> artists = repo.showAllArtists();
+        model.addAttribute("artists", artists);
+
+        List<DataEvents> events = repo.showAllEvents();
+        model.addAttribute("events", events);
+
+        if(!error.equals("")){
+            model.addAttribute("error", error);
+        }
+        return "setlists/InsertSetlist.html";
+    }
+
+    @PostMapping ("/insertSetlist")
+    public String getInsertSetlist (@ModelAttribute DataInsertSetlist data, Model model){
+        try{
+            boolean res = repo.insertSetlist(data);
+            if (res) return "redirect:setlists";
+            else{
+                error = "null";
+                return "redirect:insertSetlist";
+            }
+        }
+        catch (Exception e){
+            System.out.println("Exception message: " + e.getMessage());
+            error = "failed";
+            return "redirect:insertSetlist";
+        }
+    }
+
+    @GetMapping ("/editSetlist")
+    public String editSetlist (Model model){
+        List<DataSetlists> setlists = repo.showAllSetlists();
+        model.addAttribute("setlists", setlists);
+        return "setlists/EditSetlist.html";
+    }
+
+    
 }

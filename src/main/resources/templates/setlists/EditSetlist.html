@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Setlists</title>
+        <style>
+            .form-label{
+                width: 150px;
+                display: inline-block;
+                margin-bottom: 10px;
+            }
+    
+            .form-control{
+                width: 150px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Edit Setlist</h1>
+        <table border=1>
+            <tr>
+                <th> ID Setlist </th>
+                <th> Nama Setlist </th>
+                <th> ID Artist </th>
+                <th> Nama Artist </th>
+                <th> ID Event </th>
+                <th> Nama Event </th>
+                <th> Nama Venue </th>
+                <th> Nama Kota </th>
+            </tr>
+            <tr th:each="row : ${setlists}">
+                <td th:text="${row.idSetlist}"></td>
+                <td th:text="${row.setlistName}"></td>
+                <td th:text="${row.idArtist}"></td>
+                <td th:text="${row.artistName}"></td>
+                <td th:text="${row.idEvent}"></td>
+                <td th:text="${row.eventName}"></td>
+                <td th:text="${row.venueName}"></td>
+                <td th:text="${row.cityName}"></td>
+            </tr>
+        </table>
+        
+        </br>
+
+        <form method="post" action="insertSetlist" th:object="${user}">
+            <label>
+                <span class="form-label">Setlist Name</span>:
+                <input type="text" name="setlist_name" class="form-control" />
+            </label>
+            <br>
+            
+            <label>
+                <span class="form-label">Username</span>:
+                <input type="text" name="username" class="form-control" />
+            </label>
+            <br>
+
+            <label>
+                <span class="form-label">Artist</span>:
+                <select name="artist" class="form-control" >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </label>
+            <br>
+
+            <label>
+                <span class="form-label">Event</span>:
+                <select name="event" class="form-control" >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </label>
+            <br>
+            
+            <input type="submit" value="Register" />
+        </form>
+    </body>
+</html>
