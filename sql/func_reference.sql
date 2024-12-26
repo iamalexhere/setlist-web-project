@@ -123,3 +123,16 @@ WHERE
 	
 
 -- <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+
+-- Fung insert setlist + edit
+WITH inserted_setlist AS (
+    INSERT INTO setlists (id_artist, id_event, setlist_name)
+    VALUES (1, 2, 'Rock Fest Setlist') -- Example values
+    RETURNING id_setlist
+)
+INSERT INTO edits (id_setlist, date_added, id_user)
+SELECT id_setlist, '2024-12-26',
+	(
+		SELECT id_user FROM users WHERE username = 'john_doe'
+	)
+FROM inserted_setlist;

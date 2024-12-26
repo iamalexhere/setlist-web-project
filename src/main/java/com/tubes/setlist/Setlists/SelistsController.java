@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class SelistsController {
+    //temporary error message handler
+    private String error = "";
 
     @Autowired
     private SetlistsRepository repo;
@@ -63,12 +65,28 @@ public class SelistsController {
 
         List<DataEvents> events = repo.showAllEvents();
         model.addAttribute("events", events);
+
+        if(!error.equals("")){
+            model.addAttribute("error", error);
+        }
         return "setlists/InsertSetlist.html";
     }
 
     @PostMapping ("/insertSetlist")
     public String getInsertSetlist (@ModelAttribute DataInsertSetlist data, Model model){
-        return "redirect:setlists";
+        try{
+            boolean res = repo.insertSetlist(data);
+            if (res) return "redirect:setlists";
+            else{
+                error = "null";
+                return "redirect:insertSetlist";
+            }
+        }
+        catch (Exception e){
+            System.out.println("Exception message: " + e.getMessage());
+            error = "failed";
+            return "redirect:insertSetlist";
+        }
     }
 
     @GetMapping ("/editSetlist")
