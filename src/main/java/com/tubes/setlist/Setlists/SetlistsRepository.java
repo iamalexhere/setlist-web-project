@@ -8,4 +8,5 @@ public interface SetlistsRepository {
     List<DataSetlistSong> showSetlistSongs(int idSetlist);
     List<DataArtists> showAllArtists();
     List<DataEvents> showAllEvents();
+    void insertSetlist(DataInsertSetlist data) throws Exception;
 }

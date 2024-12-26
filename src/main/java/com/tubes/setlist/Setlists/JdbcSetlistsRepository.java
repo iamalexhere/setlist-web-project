@@ -123,5 +123,14 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
         );
     }
 
+    @Override
+    public void insertSetlist(DataInsertSetlist data) throws Exception{
+        String sql ="WITH inserted_setlist AS ( " +
+                    "INSERT INTO setlists (id_artist, id_event, setlist_name) VALUES (?, ?, ?) "+
+                    "RETURNING id_setlist ) " +
+                    "INSERT INTO edits (id_setlist, date_added, id_user) " +
+                    "SELECT id_setlist, '2024-12-26' ";
+        jdbcTemplate.update(sql, data.getIdArtist(), data.getIdEvent(), data.getSetlistName(), data.getUsername());
+    }
 
 }

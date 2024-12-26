@@ -20,7 +20,7 @@
         <form method="post" action="insertSetlist" th:object="${data}">
             <label>
                 <span class="form-label">Setlist Name</span>:
-                <input type="text" name="setlist_name" class="form-control" />
+                <input type="text" name="setlistName" class="form-control" />
             </label>
             <br>
             
@@ -34,7 +34,7 @@
             <!--use of dropdown to prevent inconsistent input-->
             <label>
                 <span class="form-label">Artist</span>:
-                <select name="artist" class="form-control" >
+                <select name="idArtist" class="form-control" >
                     <option th:each="row : ${artists}" 
                             th:value="${row.idArtist}" 
                             th:text="${row.artistName}">
@@ -45,7 +45,7 @@
 
             <label>
                 <span class="form-label">Event</span>:
-                <select name="event" class="form-control" >
+                <select name="idEvent" class="form-control" >
                     <option th:each="row : ${events}" 
                             th:value="${row.idEvent}" 
                             th:text="${row.eventName}">
