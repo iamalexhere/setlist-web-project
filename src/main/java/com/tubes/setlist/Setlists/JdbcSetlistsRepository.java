@@ -16,13 +16,25 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
     @Override
     public List<DataSetlists> showAllSetlists() {
         String sql = 
-                "SELECT id_setlist, setlist_name, artists.id_artist, artists.artist_name, events.id_event, events.event_name, venue_name, city_name " + 
+                "SELECT id_setlist, setlist_name, artists.id_artist, artists.artist_name, events.id_event, events.event_name, events.event_date, venue_name, city_name " + 
                 "FROM setlists " +
                 "INNER JOIN artists ON setlists.id_artist = artists.id_artist " +
                 "INNER JOIN events ON setlists.id_event = events.id_event " +
                 "INNER JOIN venues ON events.id_venue = venues.id_venue;";
         List<DataSetlists> setlists = jdbcTemplate.query(sql, this::mapRowToSetlists);
         return setlists;
+    }
+
+    @Override
+    public DataSetlists showSetlist(int idSetlist) {
+        String sql = 
+                "SELECT id_setlist, setlist_name, artists.id_artist, artists.artist_name, events.id_event, events.event_name, events.event_date, venue_name, city_name " + 
+                "FROM setlists " +
+                "INNER JOIN artists ON setlists.id_artist = artists.id_artist " +
+                "INNER JOIN events ON setlists.id_event = events.id_event " +
+                "INNER JOIN venues ON events.id_venue = venues.id_venue " +
+                "WHERE id_setlist = " + idSetlist + ";";
+        return jdbcTemplate.queryForObject(sql, this::mapRowToSetlists);
     }
 
     private DataSetlists mapRowToSetlists(ResultSet resultSet, int rowNum) throws SQLException {
@@ -33,6 +45,7 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
             resultSet.getString("artist_name"),
             resultSet.getInt("id_event"),
             resultSet.getString("event_name"),
+            resultSet.getString("event_date"),
             resultSet.getString("venue_name"),
             resultSet.getString("city_name")
         );
@@ -130,7 +143,7 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
                         "INSERT INTO setlists (id_artist, id_event, setlist_name) VALUES (?, ?, ?) "+
                         "RETURNING id_setlist ) " +
                         "INSERT INTO edits (id_setlist, date_added, id_user) " +
-                        "SELECT id_setlist, '2024-12-26', (SELECT id_user FROM users WHERE username = ?) "+
+                        "SELECT id_setlist, CURRENT_DATE, (SELECT id_user FROM users WHERE username = ?) "+
                         "FROM inserted_setlist;";
             jdbcTemplate.update(sql, data.getIdArtist(), data.getIdEvent(), data.getSetlistName(), data.getUsername());
             return true;

@@ -10,20 +10,18 @@
             <tr>
                 <th> ID Setlist </th>
                 <th> Nama Setlist </th>
-                <th> ID Artist </th>
                 <th> Nama Artist </th>
-                <th> ID Event </th>
                 <th> Nama Event </th>
+                <th> Tanggal Event </th>
                 <th> Nama Venue </th>
                 <th> Nama Kota </th>
             </tr>
             <tr th:each="row : ${setlists}">
                 <td th:text="${row.idSetlist}"></td>
-                <td th:text="${row.setlistName}"></td>
-                <td th:text="${row.idArtist}"></td>
+                <td> <a th:href="'detailSetlist/'+ ${row.idSetlist}" th:text="${row.setlistName}"></a></td>
                 <td th:text="${row.artistName}"></td>
-                <td th:text="${row.idEvent}"></td>
                 <td th:text="${row.eventName}"></td>
+                <td th:text="${row.eventDate}"></td>
                 <td th:text="${row.venueName}"></td>
                 <td th:text="${row.cityName}"></td>
             </tr>
@@ -31,54 +29,8 @@
     </div>
 
     <div>
-        <form action="setlists" method="post">
-            </br>
-            <input type="number" name="idSetlist" placeholder="Enter a setlist id..."/>
-            <input type="submit" value="Search">
-        </form>
         </br>
         <button onclick="location.href='insertSetlist'" type="button">Insert New Setlist</button>
-        <button onclick="location.href='editSetlist'" type="button">Edit Setlist</button>
-    </div>
-
-    <div> 
-        <h1>List Lagu</h1>
-        <table border=1>
-            <tr>
-                <th> ID Setlist </th>
-                <th> Nama Setlist </th>
-                <th> ID Lagu </th>
-                <th> Nama Lagu </th>
-                <th> Nama Artist </th>
-            </tr>
-            <tr th:each="row : ${songs}">
-                <td th:text="${row.idSetlist}"></td>
-                <td th:text="${row.setlistName}"></td>
-                <td th:text="${row.idSong}"></td>
-                <td th:text="${row.songName}"></td>
-                <td th:text="${row.artistName}"></td>
-            </tr>
-        </table>
-    </div>
-    
-    <div> 
-        <h1>List Edit</h1>
-        <table border=1>
-            <tr>
-                <th> ID Setlist </th>
-                <th> Nama Setlist </th>
-                <th> Tanggal Edit </th>
-                <th> ID User </th>
-                <th> Username </th>
-            </tr>
-            <tr th:each="row : ${edits}">
-                <td th:text="${row.idSetlist}"></td>
-                <td th:text="${row.setlistName}"></td>
-                <td th:text="${row.editDate}"></td>
-                <td th:text="${row.idUser}"></td>
-                <td th:text="${row.username}"></td>
-            </tr>
-        </table>
     </div>
 </body>
 </html>

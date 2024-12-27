@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -18,45 +19,29 @@ public class SelistsController {
     @Autowired
     private SetlistsRepository repo;
 
-    private int idSetlist = 0;
-
     @GetMapping ("/setlists")
     public String showAll (Model model){
         //set model attribute
-        model = setSetlistModel(model);
-
-        return "setlists/ShowSetlists.html";
-    }
-
-    @PostMapping("/setlists")
-    public String searchSetlist (@RequestParam(value = "idSetlist", required = false) Integer idSetlist, Model model){
-        if (idSetlist == null) this.idSetlist = 0;
-        else this.idSetlist = idSetlist;
-        //set model attribute
-        model = setSetlistModel(model);
-
-        return "setlists/ShowSetlists.html";
-    }
-
-    private Model setSetlistModel (Model model){
-        // lihat semua setlist 
         List<DataSetlists> setlists = repo.showAllSetlists();
         model.addAttribute("setlists", setlists);
 
-        // lihat edits dari setlist specific (param = id setlist)
-        // id = 0 -> semua edit
-        // id = n -> edit setlist id-n
-        List<DataSetlistEdit> edits = repo.showSetlistEdits(this.idSetlist);
+        return "setlists/ShowSetlists.html";
+    }
+
+    @GetMapping("/detailSetlist/{idSetlist}")
+    public String detailSetlist (@PathVariable("idSetlist") int idSetlist, Model model){
+        DataSetlists detail = repo.showSetlist(idSetlist);
+        model.addAttribute("detail", detail);
+        
+        List<DataSetlistEdit> edits = repo.showSetlistEdits(idSetlist);
         model.addAttribute("edits", edits);
 
-        // lihat playlist dati setlist specific (param = id setlist)
-        // id = 0 -> semua playlist
-        // id = n -> playlist setlist id-n
-        List<DataSetlistSong> songs = repo.showSetlistSongs(this.idSetlist);
+        List<DataSetlistSong> songs = repo.showSetlistSongs(idSetlist);
         model.addAttribute("songs", songs);
 
-        return model;
+        return "setlists/DetailSetlist.html";
     }
+
 
     @GetMapping ("/insertSetlist")
     public String insertSetlist (Model model){
@@ -89,10 +74,11 @@ public class SelistsController {
         }
     }
 
-    @GetMapping ("/editSetlist")
-    public String editSetlist (Model model){
-        List<DataSetlists> setlists = repo.showAllSetlists();
-        model.addAttribute("setlists", setlists);
+    @GetMapping ("/editSetlist/{idSetlist}")
+    public String editSetlist (@PathVariable("idSetlist") int idSetlist, Model model){
+        List<DataSetlistSong> songs = repo.showSetlistSongs(idSetlist);
+        model.addAttribute("songs", songs);
+        
         return "setlists/EditSetlist.html";
     }
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Setlists</title>
+</head>
+<body>
+    <div>
+        <h1>Detail Setlist</h1>
+        <p th:inline="text">
+            <h2 th:text="${detail.setlistName}">Setlist Name</h2>
+            Performed by <strong><span th:text="${detail.artistName}">artist name</span></strong>
+             on <span th:text="${detail.eventDate}">event date</span>
+             at the "<span th:text="${detail.eventName}">event name</span>"
+             in <span th:text="${detail.venueName}">venue name</span>, <span th:text="${detail.cityName}">city name</span>.
+        </p>
+    </div>
+
+    <div> 
+        <h2>List Lagu</h2>
+        <table border=1>
+            <tr>
+                <th> ID Lagu </th>
+                <th> Nama Lagu </th>
+                <th> Nama Artist </th>
+            </tr>
+            <tr th:each="row : ${songs}">
+                <td th:text="${row.idSong}"></td>
+                <td th:text="${row.songName}"></td>
+                <td th:text="${row.artistName}"></td>
+            </tr>
+        </table>
+        </br>
+        <a th:href="@{/editSetlist/{idSetlist}(idSetlist=${detail.idSetlist})}">
+            <button type="button">Edit Setlist Song</button>
+        </a>
+    </div>
+    
+    <div> 
+        <h2>List Edit</h2>
+        <table border=1>
+            <tr>
+                <th> Tanggal Edit </th>
+                <th> ID User </th>
+                <th> Username </th>
+            </tr>
+            <tr th:each="row : ${edits}">
+                <td th:text="${row.editDate}"></td>
+                <td th:text="${row.idUser}"></td>
+                <td th:text="${row.username}"></td>
+            </tr>
+        </table>
+    </div>
+</body>
