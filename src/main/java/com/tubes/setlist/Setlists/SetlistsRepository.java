@@ -4,6 +4,7 @@ import java.util.List;
 
 public interface SetlistsRepository {
     List<DataSetlists> showAllSetlists();
+    DataSetlists showSetlist(int idSetlist);
     List<DataSetlistEdit> showSetlistEdits(int idSetlist);
     List<DataSetlistSong> showSetlistSongs(int idSetlist);
     List<DataArtists> showAllArtists();
