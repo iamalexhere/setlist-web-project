@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Artist - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <main class="form-container">
+        <div class="form-card">
+            <h1>Add New Artist</h1>
+            
+            <form th:action="@{/member/artists/add}" method="post" enctype="multipart/form-data" class="form">
+                <div class="form-group">
+                    <label for="name">Artist Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Genre</label>
+                    <input type="text" id="genre" name="genre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Artist Image</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <small class="form-help">Maximum file size: 5MB. Supported formats: JPG, PNG</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="socialLinks">Social Media Links</label>
+                    <input type="url" id="socialLinks" name="socialLinks" placeholder="https://...">
+                    <button type="button" class="btn btn-secondary" id="addMoreLinks">Add More Links</button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Artist</button>
+                    <a href="/member/artists" class="btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
