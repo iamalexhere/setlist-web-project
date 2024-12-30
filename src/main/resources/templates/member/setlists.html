@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Setlists - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <main class="content-container">
+        <div class="page-header">
+            <h1>Manage Setlists</h1>
+            <a href="/member/setlists/add" class="btn btn-primary">Add New Setlist</a>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Search setlists by artist, venue, or song..." id="setlistSearch">
+        </div>
+
+        <div class="setlist-grid" th:if="${not #lists.isEmpty(setlists)}">
+            <div class="setlist-card" th:each="setlist : ${setlists}">
+                <div class="setlist-header">
+                    <div class="setlist-info">
+                        <h3 th:text="${setlist.show.artist.name}">Artist Name</h3>
+                        <div class="show-details">
+                            <span class="venue" th:text="${setlist.show.venue.name}">Venue Name</span>
+                            <span class="date" th:text="${#temporals.format(setlist.show.date, 'dd MMM yyyy')}">01 Jan 2024</span>
+                        </div>
+                    </div>
+                    <div class="setlist-status" th:classappend="${setlist.status == 'Verified' ? 'verified' : 'pending'}"
+                         th:text="${setlist.status}">Status</div>
+                </div>
+                
+                <div class="song-list">
+                    <div class="song-item" th:each="song, songStat : ${setlist.songs}">
+                        <span class="song-number" th:text="${songStat.count}">1</span>
+                        <span class="song-title" th:text="${song.title}">Song Title</span>
+                        <span class="song-duration" th:text="${song.duration}">3:45</span>
+                    </div>
+                </div>
+
+                <div class="setlist-footer">
+                    <div class="setlist-stats">
+                        <span class="song-count" th:text="${#lists.size(setlist.songs) + ' songs'}">20 songs</span>
+                        <span class="comment-count" th:text="${setlist.commentCount + ' comments'}">5 comments</span>
+                    </div>
+                    <div class="card-actions">
+                        <a th:href="@{/member/setlists/{id}/edit(id=${setlist.id})}" class="btn">Edit</a>
+                        <a th:href="@{/member/setlists/{id}/comments(id=${setlist.id})}" class="btn">View Comments</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(setlists)}">
+            <p>No setlists found. Add your first setlist!</p>
+            <a href="/member/setlists/add" class="btn btn-primary">Add Setlist</a>
+        </div>
+    </main>
+</body>
+</html>

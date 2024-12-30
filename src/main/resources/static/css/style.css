@@ -1069,3 +1069,413 @@ footer {
     background: var(--crust);
     transform: translateY(-2px);
 }
+
+/* Show Management Styles */
+.show-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.show-card {
+    background: var(--mantle);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.show-card:hover {
+    transform: translateY(-5px);
+}
+
+.show-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    padding: 1rem;
+    background: var(--blue);
+    border-radius: 8px;
+    color: var(--base);
+}
+
+.show-date .day {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.show-date .month {
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 0.2rem 0;
+}
+
+.show-date .year {
+    font-size: 0.9rem;
+}
+
+.show-info {
+    flex: 1;
+}
+
+.show-info h3 {
+    color: var(--text);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.venue-info {
+    color: var(--text-op);
+    margin-bottom: 1rem;
+}
+
+.venue-info .venue {
+    font-weight: 500;
+}
+
+.venue-info .city {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 2px solid var(--surface0);
+}
+
+.show-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-op);
+    font-size: 0.9rem;
+}
+
+.show-stats .setlist-status {
+    padding: 0.2rem 0.5rem;
+    background: var(--green);
+    color: var(--base);
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+/* Form Select Styles */
+.form-control[type="date"],
+.form-control[type="time"] {
+    font-family: inherit;
+}
+
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+/* Setlist Management Styles */
+.setlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.setlist-card {
+    background: var(--mantle);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.setlist-card:hover {
+    transform: translateY(-5px);
+}
+
+.setlist-header {
+    padding: 1.5rem;
+    background: var(--base);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--surface0);
+}
+
+.setlist-info h3 {
+    color: var(--text);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.show-details {
+    color: var(--text-op);
+    font-size: 0.9rem;
+}
+
+.show-details .venue {
+    font-weight: 500;
+}
+
+.show-details .date {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 2px solid var(--surface0);
+}
+
+.setlist-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.setlist-status.verified {
+    background: var(--green);
+    color: var(--base);
+}
+
+.setlist-status.pending {
+    background: var(--yellow);
+    color: var(--base);
+}
+
+.song-list {
+    padding: 1rem;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--surface0);
+}
+
+.song-item:last-child {
+    border-bottom: none;
+}
+
+.song-number {
+    width: 2rem;
+    color: var(--text-op);
+    font-weight: 500;
+}
+
+.song-title {
+    flex: 1;
+    color: var(--text);
+}
+
+.song-duration {
+    color: var(--text-op);
+    font-family: monospace;
+}
+
+.setlist-footer {
+    padding: 1rem 1.5rem;
+    background: var(--base);
+    border-top: 1px solid var(--surface0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.setlist-stats {
+    color: var(--text-op);
+    font-size: 0.9rem;
+}
+
+.setlist-stats span:not(:last-child) {
+    margin-right: 1rem;
+}
+
+/* Add Setlist Form Styles */
+.song-list-container {
+    margin: 2rem 0;
+}
+
+.song-list-container h2 {
+    color: var(--text);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.song-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.song-inputs {
+    flex: 1;
+    display: flex;
+    gap: 1rem;
+}
+
+.duration-input {
+    width: 100px !important;
+}
+
+.btn-icon {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    background: var(--surface0);
+    color: var(--text);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    background: var(--red);
+    color: var(--base);
+}
+
+/* Duration Input Styles */
+.duration-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 150px;
+}
+
+.duration-input {
+    width: 60px !important;
+    text-align: center;
+    padding: 0.8rem 0.5rem !important;
+}
+
+.duration-separator {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 1.2rem;
+    line-height: 1;
+    margin: 0 -0.2rem;
+}
+
+/* Prevent spinner buttons on number inputs */
+.duration-input::-webkit-outer-spin-button,
+.duration-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.duration-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Song Search Styles */
+.search-container {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--base);
+    border: 1px solid var(--surface0);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-result-item {
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.search-result-item:hover {
+    background-color: var(--surface0);
+}
+
+.search-result-item .song-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.search-result-item .song-title {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.search-result-item .song-duration {
+    color: var(--text-op);
+    font-family: monospace;
+}
+
+.no-results {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-op);
+}
+
+/* Selected Songs Styles */
+.selected-songs {
+    margin-top: 1rem;
+}
+
+.selected-song-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    background: var(--mantle);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.selected-song-item:hover {
+    transform: translateX(4px);
+}
+
+.selected-song-item .song-number {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--blue);
+    color: var(--base);
+    border-radius: 50%;
+    font-weight: 600;
+    margin-right: 1rem;
+}
+
+.selected-song-item .song-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.selected-song-item .song-title {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.selected-song-item .song-duration {
+    color: var(--text-op);
+    font-family: monospace;
+}
