@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Members - Admin - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                <h1>Admin Panel</h1>
+            </div>
+            <nav class="admin-nav">
+                <a href="/admin" class="admin-nav-item">
+                    <span class="icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/admin/members" class="admin-nav-item active">
+                    <span class="icon">👥</span>
+                    Members
+                </a>
+                <a href="/admin/setlists" class="admin-nav-item">
+                    <span class="icon">📝</span>
+                    Setlists
+                </a>
+                <a href="/admin/corrections" class="admin-nav-item">
+                    <span class="icon">✏️</span>
+                    Corrections
+                </a>
+                <a href="/admin/reports" class="admin-nav-item">
+                    <span class="icon">📈</span>
+                    Reports
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2>Manage Members</h2>
+                <div class="admin-header-actions">
+                    <div class="search-box">
+                        <input type="text" id="memberSearch" placeholder="Search members..." class="form-control">
+                    </div>
+                    <div class="admin-profile">
+                        <span class="admin-name">Admin</span>
+                        <a href="/logout" class="btn btn-secondary">Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Filters -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Status:</label>
+                    <select class="form-control" id="statusFilter">
+                        <option value="">All</option>
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Sort by:</label>
+                    <select class="form-control" id="sortBy">
+                        <option value="joined">Join Date</option>
+                        <option value="contributions">Contributions</option>
+                        <option value="username">Username</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Members Table -->
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Join Date</th>
+                            <th>Contributions</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="member : ${members}">
+                            <td>
+                                <div class="member-info">
+                                    <img th:src="${member.avatar}" alt="Avatar" class="member-avatar">
+                                    <span th:text="${member.username}">johndoe</span>
+                                </div>
+                            </td>
+                            <td th:text="${member.email}">john@example.com</td>
+                            <td th:text="${#temporals.format(member.joinDate, 'dd MMM yyyy')}">01 Jan 2024</td>
+                            <td>
+                                <div class="contribution-stats">
+                                    <span class="stat" th:text="${member.setlistCount} + ' setlists'">5 setlists</span>
+                                    <span class="stat" th:text="${member.correctionCount} + ' corrections'">2 corrections</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:class="'status-badge ' + ${member.status}" th:text="${member.status}">Active</span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a th:href="@{/admin/members/{id}(id=${member.id})}" class="btn btn-icon" title="View Details">👁️</a>
+                                    <button class="btn btn-icon" th:if="${member.status == 'active'}" 
+                                            th:onclick="'suspendMember(' + ${member.id} + ')'" title="Suspend Member">🚫</button>
+                                    <button class="btn btn-icon" th:if="${member.status == 'suspended'}" 
+                                            th:onclick="'activateMember(' + ${member.id} + ')'" title="Activate Member">✅</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="btn btn-secondary" th:disabled="${currentPage == 1}">Previous</button>
+                <span class="pagination-info" th:text="${currentPage + ' of ' + totalPages}">1 of 5</span>
+                <button class="btn btn-secondary" th:disabled="${currentPage == totalPages}">Next</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Member Action Modal -->
+    <div id="actionModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Action</h3>
+            <p id="modalMessage">Are you sure you want to suspend this member?</p>
+            <div class="form-group">
+                <label for="actionReason">Reason:</label>
+                <textarea id="actionReason" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Member management functions
+        function suspendMember(memberId) {
+            showModal('suspend', memberId);
+        }
+
+        function activateMember(memberId) {
+            showModal('activate', memberId);
+        }
+
+        function showModal(action, memberId) {
+            const modal = document.getElementById('actionModal');
+            const message = document.getElementById('modalMessage');
+            
+            modal.dataset.action = action;
+            modal.dataset.memberId = memberId;
+            
+            message.textContent = action === 'suspend' 
+                ? 'Are you sure you want to suspend this member?' 
+                : 'Are you sure you want to activate this member?';
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('actionModal');
+            modal.style.display = 'none';
+            document.getElementById('actionReason').value = '';
+        }
+
+        function confirmAction() {
+            const modal = document.getElementById('actionModal');
+            const action = modal.dataset.action;
+            const memberId = modal.dataset.memberId;
+            const reason = document.getElementById('actionReason').value;
+
+            fetch(`/admin/members/${memberId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: action === 'suspend' ? 'suspended' : 'active',
+                    reason: reason
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+
+            closeModal();
+        }
+
+        // Search and filter functionality
+        document.getElementById('memberSearch').addEventListener('input', function(e) {
+            // Implement search functionality
+        });
+
+        document.getElementById('statusFilter').addEventListener('change', function(e) {
+            // Implement status filtering
+        });
+
+        document.getElementById('sortBy').addEventListener('change', function(e) {
+            // Implement sorting
+        });
+    </script>
+</body>
+</html>
