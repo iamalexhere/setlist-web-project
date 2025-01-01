@@ -21,11 +21,15 @@
         <h1>Discover Artists</h1>
         <p>Find setlists from your favorite performers</p>
         <div class="search-container">
-            <form th:action="@{/guest/artists}" method="get">
-                <input type="text" name="name" class="search-box" 
-                       th:value="${searchQuery}" 
-                       placeholder="Search for artists...">
-                <input type="hidden" name="genre" th:value="${selectedGenre}">
+            <form th:action="@{/guest/artists}" method="get" class="search-form">
+                <div class="search-input-group">
+                    <input type="text" name="name" class="search-box" 
+                           th:value="${searchQuery}" 
+                           placeholder="Search for artists...">
+                    <input type="hidden" name="genre" th:value="${selectedGenre}">
+                    <button type="submit" class="search-button">Search</button>
+                    <a th:if="${hasSearch}" th:href="@{/guest/artists}" class="clear-button">Clear</a>
+                </div>
             </form>
         </div>
     </div>
@@ -48,7 +52,12 @@
     </section> -->
 
     <section class="artist-categories">
-        <h2 class="section-title">Browse by Genre</h2>
+        <div class="section-header">
+            <h2 class="section-title">Browse by Genre</h2>
+            <a th:if="${!#strings.isEmpty(selectedGenre)}" 
+               th:href="@{/guest/artists(name=${searchQuery})}" 
+               class="clear-genre">Clear Genre Filter</a>
+        </div>
         <div class="category-grid">
             <a th:href="@{/guest/artists(genre=${entry.key}, name=${searchQuery})}" 
                th:each="entry : ${genreCounts}"
