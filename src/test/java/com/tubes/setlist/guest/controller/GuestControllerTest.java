@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +35,30 @@ public class GuestControllerTest {
         // Given
         List<String> coldplayCategories = Arrays.asList("Pop", "Rock");
         ArtistView artist = new ArtistView(1L, "Coldplay", coldplayCategories, false);
+        
         when(guestRepository.findArtistsByName(anyString()))
             .thenReturn(Arrays.asList(artist));
+        
+        when(guestRepository.findArtistsByNameAndGenre(anyString(), any()))
+            .thenReturn(Arrays.asList(artist));
+        
+        when(guestRepository.getGenreCounts())
+            .thenReturn(Map.of(
+                "Pop", 5,
+                "Rock", 3
+            ));
 
         // When & Then
         mockMvc.perform(get("/guest/artists"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/artists"))
                 .andExpect(model().attributeExists("featuredArtists"))
-                .andExpect(model().attributeExists("searchedArtists"));
+                .andExpect(model().attributeExists("searchedArtists"))
+                .andExpect(model().attributeExists("genreCounts"))
+                .andExpect(model().attributeExists("selectedGenre"))
+                .andExpect(model().attributeExists("hasSearch"))
+                .andExpect(model().attributeExists("currentPage"))
+                .andExpect(model().attributeExists("totalPages"));
     }
 
     @Test
@@ -58,13 +74,16 @@ public class GuestControllerTest {
             .thenReturn(artist);
         when(guestRepository.findEventsByArtist(artistId))
             .thenReturn(Arrays.asList(event));
+        when(guestRepository.findSetlistsByArtist(artistId))
+            .thenReturn(Arrays.asList());
 
         // When & Then
         mockMvc.perform(get("/guest/artists/{id}", artistId))
                 .andExpect(status().isOk())
-                .andExpect(view().name("guest/artists"))
+                .andExpect(view().name("guest/artist-detail"))
                 .andExpect(model().attributeExists("artist"))
-                .andExpect(model().attributeExists("events"));
+                .andExpect(model().attributeExists("events"))
+                .andExpect(model().attributeExists("setlists"));
     }
 
     @Test

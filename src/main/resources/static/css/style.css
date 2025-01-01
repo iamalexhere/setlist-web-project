@@ -35,6 +35,9 @@ body {
     background-color: var(--crust);
     padding: 1rem 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .navbar .container {
@@ -54,63 +57,66 @@ body {
 }
 
 .navbar .nav-links {
-    list-style: none;
     display: flex;
     gap: 2rem;
 }
 
 .navbar .nav-links a {
-    text-decoration: none;
     color: var(--text);
-    transition: color 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 .navbar .nav-links a:hover {
-    color: var(--blue);
+    background-color: var(--mantle);
+}
+
+.navbar .nav-links a.active {
+    background-color: var(--lavender);
+    color: white;
 }
 
 .hero {
-    min-height: 60vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, var(--blue) 0%, var(--sky) 100%);
-    color: white;
-    padding: 2rem;
     text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(to bottom, var(--crust), var(--base));
+    margin-bottom: 3rem;
 }
 
 .hero h1 {
     font-size: 2.5rem;
-    font-weight: 700;
     margin-bottom: 1rem;
+    color: var(--text);
 }
 
 .hero p {
     font-size: 1.2rem;
+    color: var(--text);
     margin-bottom: 2rem;
 }
 
-
 .search-container {
-    margin: 2rem auto;
     max-width: 600px;
-    width: 90%;
+    margin: 0 auto;
 }
 
 .search-box {
     width: 100%;
-    padding: 1rem;
-    border: 2px solid var(--lavender);
-    border-radius: 8px;
+    padding: 1rem 1.5rem;
     font-size: 1.1rem;
-    transition: border-color 0.3s ease;
+    border: 2px solid var(--mantle);
+    border-radius: 999px;
+    background: white;
+    transition: all 0.2s ease;
 }
 
 .search-box:focus {
-    border-color: var(--pink);
     outline: none;
+    border-color: var(--lavender);
+    box-shadow: 0 0 0 3px rgba(114, 135, 253, 0.2);
 }
 
 .stats {
@@ -2043,15 +2049,61 @@ select.form-control {
 /* Pagination */
 .pagination {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 1rem;
-    margin-top: 2rem;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 3rem 0;
 }
 
-.pagination-info {
+.pagination a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
     color: var(--text);
-    font-weight: 500;
+    background: white;
+    border: 1px solid var(--mantle);
+    transition: all 0.2s ease;
+}
+
+.pagination a:hover:not(.disabled) {
+    background: var(--lavender);
+    color: white;
+    border-color: var(--lavender);
+}
+
+.pagination a.active {
+    background: var(--lavender);
+    color: white;
+    border-color: var(--lavender);
+}
+
+.pagination a.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    padding: 1rem 2rem;
+    background: var(--mantle);
+}
+
+.breadcrumb ol {
+    list-style: none;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.breadcrumb li {
+    color: var(--text);
+}
+
+.breadcrumb li:not(:last-child)::after {
+    content: "/";
+    margin-left: 0.5rem;
+    color: var(--text);
+    opacity: 0.5;
 }
 
 /* Reports Page */
@@ -2173,4 +2225,178 @@ select.form-control {
     .report-card.wide {
         grid-column: span 1;
     }
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+    padding: 1rem 2rem;
+    background: var(--background-light);
+    border-bottom: 1px solid var(--border);
+}
+
+.breadcrumb ol {
+    list-style: none;
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumb li:not(:last-child)::after {
+    content: "/";
+    margin-left: 0.5rem;
+    color: var(--text-muted);
+}
+
+.breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    color: var(--primary);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+}
+
+.pagination a {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.pagination a:hover:not(.disabled) {
+    background: var(--background-light);
+}
+
+.pagination a.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination a.disabled {
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+/* Artist Detail Page */
+.artist-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.artist-header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.artist-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.category-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--background-light);
+    border-radius: 999px;
+    margin: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.event-list, .setlist-list {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.event-card, .setlist-card {
+    background: var(--background-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.event-date {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.event-details h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.setlist-header {
+    margin-bottom: 1rem;
+}
+
+.song-list {
+    padding-left: 1.5rem;
+}
+
+.song-list li {
+    margin-bottom: 0.5rem;
+}
+
+/* Category Grid Enhancements */
+.category-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card .count {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.category-card.active {
+    outline: 3px solid var(--primary);
+}
+
+/* Color Variables for Genres */
+:root {
+    --pop: #FF69B4;
+    --rock: #8A2BE2;
+    --jazz: #4169E1;
+    --classical: #20B2AA;
+    --electronic: #FF4500;
+    --hiphop: #FFD700;
+    --folk: #8B4513;
+    --metal: #696969;
+    --indie: #48D1CC;
+    --alternative: #9370DB;
+}
+
+.proof-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+}
+
+.proof-link:hover {
+    background-color: var(--primary-dark);
+}
+
+.setlist-proof {
+    text-align: right;
 }
