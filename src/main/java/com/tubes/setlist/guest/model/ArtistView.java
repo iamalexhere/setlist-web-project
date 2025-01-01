@@ -1,5 +1,6 @@
 package com.tubes.setlist.guest.model;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,6 +9,6 @@ import lombok.Data;
 public class ArtistView {
     private Long idArtist;
     private String artistName;
-    private String categoryName;
-    private boolean isDeleted;
+    private List<String> categories;
+    private Boolean isDeleted;
 }

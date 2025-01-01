@@ -14,36 +14,27 @@
         <h1>Discover Artists</h1>
         <p>Find setlists from your favorite performers</p>
         <div class="search-container">
-            <input type="text" class="search-box" placeholder="Search for artists...">
+            <form th:action="@{/guest/artists}" method="get">
+                <input type="text" name="name" class="search-box" 
+                       th:value="${searchQuery}" 
+                       placeholder="Search for artists...">
+            </form>
         </div>
     </div>
 
     <section class="featured-artists">
         <h2 class="section-title">Featured Artists</h2>
         <div class="artist-grid">
-            <div class="artist-card">
+            <div class="artist-card" th:each="artist : ${featuredArtists}">
                 <div class="artist-image">
-                    <img src="https://placehold.co/200x200" alt="Taylor Swift">
+                    <img src="https://placehold.co/200x200" th:alt="${artist.artistName}">
                 </div>
-                <h3>Taylor Swift</h3>
-                <p>The Eras Tour</p>
-                <p class="stats">145 setlists</p>
-            </div>
-            <div class="artist-card">
-                <div class="artist-image">
-                    <img src="https://placehold.co/200x200" alt="Ed Sheeran">
-                </div>
-                <h3>Ed Sheeran</h3>
-                <p>Mathematics Tour</p>
-                <p class="stats">98 setlists</p>
-            </div>
-            <div class="artist-card">
-                <div class="artist-image">
-                    <img src="https://placehold.co/200x200" alt="Coldplay">
-                </div>
-                <h3>Coldplay</h3>
-                <p>Music of the Spheres World Tour</p>
-                <p class="stats">120 setlists</p>
+                <h3 th:text="${artist.artistName}">Artist Name</h3>
+                <p class="artist-categories">
+                    <span th:each="category, iterStat : ${artist.categories}" 
+                          th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
+                </p>
+                <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="view-artist">View Setlists</a>
             </div>
         </div>
     </section>
@@ -53,62 +44,57 @@
         <div class="category-grid">
             <a href="#" class="category-card" style="background-color: var(--pink)">
                 <h3>Pop</h3>
-                <p>1,234 artists</p>
             </a>
             <a href="#" class="category-card" style="background-color: var(--mauve)">
                 <h3>Rock</h3>
-                <p>890 artists</p>
             </a>
             <a href="#" class="category-card" style="background-color: var(--blue)">
-                <h3>Hip Hop</h3>
-                <p>567 artists</p>
+                <h3>Jazz</h3>
             </a>
             <a href="#" class="category-card" style="background-color: var(--teal)">
-                <h3>Electronic</h3>
-                <p>432 artists</p>
+                <h3>Metal</h3>
             </a>
             <a href="#" class="category-card" style="background-color: var(--peach)">
-                <h3>Jazz</h3>
-                <p>234 artists</p>
+                <h3>Indie</h3>
             </a>
             <a href="#" class="category-card" style="background-color: var(--rosewater)">
-                <h3>Classical</h3>
-                <p>123 artists</p>
+                <h3>Electronic</h3>
             </a>
         </div>
     </section>
 
-    <section class="recent-artists">
-        <h2 class="section-title">Recently Added Artists</h2>
+    <!-- Show searched results if search query exists -->
+    <section class="search-results" th:if="${searchQuery != null}">
+        <h2 class="section-title">Search Results</h2>
         <div class="artist-list">
-            <div class="artist-row">
+            <div class="artist-row" th:each="artist : ${searchedArtists}">
                 <div class="artist-info">
-                    <h3>Olivia Rodrigo</h3>
-                    <p>GUTS World Tour</p>
+                    <h3 th:text="${artist.artistName}">Artist Name</h3>
+                    <p class="artist-categories">
+                        <span th:each="category, iterStat : ${artist.categories}" 
+                              th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
+                    </p>
                 </div>
-                <p class="date">Added 2 days ago</p>
-            </div>
-            <div class="artist-row">
-                <div class="artist-info">
-                    <h3>The Weeknd</h3>
-                    <p>After Hours til Dawn Tour</p>
-                </div>
-                <p class="date">Added 3 days ago</p>
-            </div>
-            <div class="artist-row">
-                <div class="artist-info">
-                    <h3>Arctic Monkeys</h3>
-                    <p>The Car Tour</p>
-                </div>
-                <p class="date">Added 5 days ago</p>
+                <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="view-artist">View Setlists</a>
             </div>
         </div>
     </section>
 
-    <footer>
-        <p>&copy; 2024 Setlist. All rights reserved.</p>
-    </footer>
-
-    <script th:src="@{/js/main.js}"></script>
+    <!-- Show all artists if no search query -->
+    <section class="all-artists" th:if="${searchQuery == null}">
+        <h2 class="section-title">All Artists</h2>
+        <div class="artist-list">
+            <div class="artist-row" th:each="artist : ${searchedArtists}">
+                <div class="artist-info">
+                    <h3 th:text="${artist.artistName}">Artist Name</h3>
+                    <p class="artist-categories">
+                        <span th:each="category, iterStat : ${artist.categories}" 
+                              th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
+                    </p>
+                </div>
+                <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="view-artist">View Setlists</a>
+            </div>
+        </div>
+    </section>
 </body>
 </html>

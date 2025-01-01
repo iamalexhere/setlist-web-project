@@ -1,16 +1,22 @@
 package com.tubes.setlist.guest.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 import com.tubes.setlist.guest.model.*;
 import com.tubes.setlist.guest.repository.GuestRepository;
 
@@ -24,58 +30,75 @@ public class GuestControllerTest {
     private GuestRepository guestRepository;
 
     @Test
-    void searchArtists_ShouldReturnArtistsView() throws Exception {
+    void listArtists_ShouldReturnArtistsView() throws Exception {
         // Given
-        ArtistView artist = new ArtistView(1L, "Coldplay", "Rock", false);
-        when(guestRepository.findArtistsByName("Coldplay"))
+        List<String> coldplayCategories = Arrays.asList("Pop", "Rock");
+        ArtistView artist = new ArtistView(1L, "Coldplay", coldplayCategories, false);
+        when(guestRepository.findArtistsByName(anyString()))
             .thenReturn(Arrays.asList(artist));
 
         // When & Then
-        mockMvc.perform(get("/guest/artists")
-                .param("name", "Coldplay"))
+        mockMvc.perform(get("/guest/artists"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/artists"))
-                .andExpect(model().attributeExists("artists"));
+                .andExpect(model().attributeExists("featuredArtists"))
+                .andExpect(model().attributeExists("searchedArtists"));
     }
 
     @Test
     void viewArtist_ShouldReturnArtistView() throws Exception {
         // Given
         Long artistId = 1L;
-        ArtistView artist = new ArtistView(artistId, "Coldplay", "Rock", false);
-        when(guestRepository.findArtistById(artistId)).thenReturn(artist);
+        List<String> coldplayCategories = Arrays.asList("Pop", "Rock");
+        ArtistView artist = new ArtistView(artistId, "Coldplay", coldplayCategories, false);
+        EventView event = new EventView(1L, "Rock Concert 2024", 
+            LocalDate.of(2024, 8, 15), "MSG", "New York", false);
+
+        when(guestRepository.findArtistById(artistId))
+            .thenReturn(artist);
+        when(guestRepository.findEventsByArtist(artistId))
+            .thenReturn(Arrays.asList(event));
 
         // When & Then
         mockMvc.perform(get("/guest/artists/{id}", artistId))
                 .andExpect(status().isOk())
-                .andExpect(view().name("guest/artist"))
+                .andExpect(view().name("guest/artists"))
                 .andExpect(model().attributeExists("artist"))
                 .andExpect(model().attributeExists("events"));
     }
 
     @Test
-    void searchEvents_ShouldReturnEventsView() throws Exception {
+    void listEvents_ShouldReturnEventsView() throws Exception {
         // Given
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = LocalDate.now().plusDays(7);
-        String location = "Jakarta";
+        EventView event = new EventView(1L, "Rock Concert 2024", 
+            LocalDate.of(2024, 8, 15), "MSG", "New York", false);
+        when(guestRepository.findEventsByDateAndLocation(any(), any(), anyString()))
+            .thenReturn(Arrays.asList(event));
 
         // When & Then
         mockMvc.perform(get("/guest/events")
-                .param("startDate", startDate.toString())
-                .param("endDate", endDate.toString())
-                .param("location", location))
+                .param("startDate", "2024-07-01")
+                .param("endDate", "2024-12-31")
+                .param("location", "New York"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("guest/events"));
+                .andExpect(view().name("guest/events"))
+                .andExpect(model().attributeExists("events"));
     }
 
     @Test
     void viewEvent_ShouldReturnEventView() throws Exception {
         // Given
         Long eventId = 1L;
-        EventView event = new EventView(eventId, "Music Festival", 
-            LocalDate.now(), "Stadium", "Jakarta", false);
-        when(guestRepository.findEventById(eventId)).thenReturn(event);
+        EventView event = new EventView(eventId, "Rock Concert 2024", 
+            LocalDate.of(2024, 8, 15), "MSG", "New York", false);
+        SetlistView setlist = new SetlistView(1L, "Coldplay MSG Concert", 
+            "Coldplay", "Rock Concert 2024", "proof.jpg", 
+            LocalDateTime.now(), Arrays.asList("Fix You", "Yellow"), false);
+
+        when(guestRepository.findEventById(eventId))
+            .thenReturn(event);
+        when(guestRepository.findSetlistsByEvent(eventId))
+            .thenReturn(Arrays.asList(setlist));
 
         // When & Then
         mockMvc.perform(get("/guest/events/{id}", eventId))
@@ -89,10 +112,12 @@ public class GuestControllerTest {
     void viewSetlist_ShouldReturnSetlistView() throws Exception {
         // Given
         Long setlistId = 1L;
-        SetlistView setlist = new SetlistView(setlistId, "Concert Setlist", 
-            "Coldplay", "Music Festival", "proof.jpg", null, 
-            Arrays.asList("Song 1", "Song 2"), false);
-        when(guestRepository.findSetlistById(setlistId)).thenReturn(setlist);
+        SetlistView setlist = new SetlistView(setlistId, "Coldplay MSG Concert", 
+            "Coldplay", "Rock Concert 2024", "proof.jpg", 
+            LocalDateTime.now(), Arrays.asList("Fix You", "Yellow"), false);
+
+        when(guestRepository.findSetlistById(setlistId))
+            .thenReturn(setlist);
 
         // When & Then
         mockMvc.perform(get("/guest/setlists/{id}", setlistId))

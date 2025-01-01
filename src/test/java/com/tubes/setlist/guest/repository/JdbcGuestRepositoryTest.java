@@ -19,22 +19,23 @@ public class JdbcGuestRepositoryTest {
     @Test
     void findArtistsByName_ShouldReturnMatchingArtists() {
         // Given
-        String searchName = "Sheila";
+        String searchName = "Coldplay";
 
         // When
         List<ArtistView> artists = guestRepository.findArtistsByName(searchName);
 
         // Then
         assertFalse(artists.isEmpty());
-        assertTrue(artists.stream()
-            .anyMatch(artist -> artist.getArtistName().toLowerCase()
-                .contains(searchName.toLowerCase())));
+        ArtistView coldplay = artists.get(0);
+        assertEquals("Coldplay", coldplay.getArtistName());
+        assertTrue(coldplay.getCategories().contains("Pop"));
+        assertTrue(coldplay.getCategories().contains("Rock"));
     }
 
     @Test
     void findArtistById_ShouldReturnCorrectArtist() {
         // Given
-        Long artistId = 1L; // Sheila On 7
+        Long artistId = 2L; // Coldplay
 
         // When
         ArtistView artist = guestRepository.findArtistById(artistId);
@@ -42,13 +43,15 @@ public class JdbcGuestRepositoryTest {
         // Then
         assertNotNull(artist);
         assertEquals(artistId, artist.getIdArtist());
-        assertEquals("Sheila On 7", artist.getArtistName());
+        assertEquals("Coldplay", artist.getArtistName());
+        assertTrue(artist.getCategories().contains("Pop"));
+        assertTrue(artist.getCategories().contains("Rock"));
     }
 
     @Test
     void findEventsByArtist_ShouldReturnArtistEvents() {
         // Given
-        Long artistId = 1L; // Sheila On 7 has event in Jakarta
+        Long artistId = 2L; // Coldplay
 
         // When
         List<EventView> events = guestRepository.findEventsByArtist(artistId);
@@ -56,7 +59,7 @@ public class JdbcGuestRepositoryTest {
         // Then
         assertFalse(events.isEmpty());
         assertTrue(events.stream()
-            .anyMatch(event -> event.getEventName().contains("Konser")));
+            .anyMatch(event -> event.getEventName().equals("Rock Concert 2024")));
     }
 
     @Test
@@ -64,7 +67,7 @@ public class JdbcGuestRepositoryTest {
         // Given
         LocalDate startDate = LocalDate.of(2024, 7, 1);
         LocalDate endDate = LocalDate.of(2024, 12, 31);
-        String location = "Jakarta";
+        String location = "New York";
 
         // When
         List<EventView> events = guestRepository.findEventsByDateAndLocation(
@@ -72,18 +75,19 @@ public class JdbcGuestRepositoryTest {
 
         // Then
         assertFalse(events.isEmpty());
+        assertTrue(events.stream()
+            .anyMatch(event -> event.getEventName().equals("Rock Concert 2024")));
         events.forEach(event -> {
             assertTrue(event.getEventDate().isAfter(startDate.minusDays(1)));
             assertTrue(event.getEventDate().isBefore(endDate.plusDays(1)));
-            assertTrue(event.getCityName().toLowerCase()
-                .contains(location.toLowerCase()));
+            assertEquals("New York", event.getCityName());
         });
     }
 
     @Test
     void findEventById_ShouldReturnCorrectEvent() {
         // Given
-        Long eventId = 1L; // Konser Musik Indonesia
+        Long eventId = 2L; // Rock Concert 2024
 
         // When
         EventView event = guestRepository.findEventById(eventId);
@@ -91,13 +95,14 @@ public class JdbcGuestRepositoryTest {
         // Then
         assertNotNull(event);
         assertEquals(eventId, event.getIdEvent());
-        assertEquals("Konser Musik Indonesia", event.getEventName());
+        assertEquals("Rock Concert 2024", event.getEventName());
+        assertEquals("New York", event.getCityName());
     }
 
     @Test
     void findSetlistsByEvent_ShouldReturnEventSetlists() {
         // Given
-        Long eventId = 1L; // Konser Musik Indonesia
+        Long eventId = 2L; // Rock Concert 2024
 
         // When
         List<SetlistView> setlists = guestRepository.findSetlistsByEvent(eventId);
@@ -105,13 +110,15 @@ public class JdbcGuestRepositoryTest {
         // Then
         assertFalse(setlists.isEmpty());
         assertTrue(setlists.stream()
-            .anyMatch(setlist -> setlist.getSetlistName().contains("Sheila On 7")));
+            .anyMatch(setlist -> setlist.getArtistName().equals("Coldplay")));
+        assertTrue(setlists.stream()
+            .anyMatch(setlist -> setlist.getArtistName().equals("Metallica")));
     }
 
     @Test
     void findSetlistById_ShouldReturnCorrectSetlist() {
         // Given
-        Long setlistId = 1L; // Konser Sheila On 7 Jakarta
+        Long setlistId = 2L; // Coldplay MSG Concert
 
         // When
         SetlistView setlist = guestRepository.findSetlistById(setlistId);
@@ -119,7 +126,9 @@ public class JdbcGuestRepositoryTest {
         // Then
         assertNotNull(setlist);
         assertEquals(setlistId, setlist.getIdSetlist());
-        assertTrue(setlist.getSetlistName().contains("Sheila On 7"));
-        assertFalse(setlist.getSongs().isEmpty());
+        assertEquals("Coldplay MSG Concert", setlist.getSetlistName());
+        assertEquals("Coldplay", setlist.getArtistName());
+        assertTrue(setlist.getSongs().contains("Fix You"));
+        assertTrue(setlist.getSongs().contains("Yellow"));
     }
 }
