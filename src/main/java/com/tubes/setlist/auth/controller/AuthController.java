@@ -30,6 +30,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public String register(
+        @RequestParam String username,
         @RequestParam String email,
         @RequestParam String password,
         @RequestParam String confirmPassword,
@@ -40,8 +41,8 @@ public class AuthController {
                 throw new RuntimeException("Passwords do not match");
             }
             
-            authService.register(email, password);
-            redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
+            authService.register(username, email, password);
+            redirectAttributes.addFlashAttribute("success", "Registration successful! Please login with your email.");
             return "redirect:/auth/login";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
