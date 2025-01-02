@@ -20,6 +20,7 @@ CREATE TABLE users(
 	id_user SERIAL PRIMARY KEY,
 	id_role INT NOT NULL,
 	username VARCHAR(60) UNIQUE NOT NULL,
+	email VARCHAR(255) UNIQUE NOT NULL,
 	hashed_password VARCHAR(255) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	is_deleted BOOLEAN DEFAULT FALSE,
@@ -119,7 +120,3 @@ CREATE INDEX idx_event_name ON events(event_name);
 CREATE INDEX idx_setlist_name ON setlists(setlist_name);
 CREATE INDEX idx_song_name ON songs(song_name);
 
-INSERT INTO roles (role_name) 
-VALUES
-	('Member'),
-	('Admin');

@@ -9,12 +9,12 @@ VALUES
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Populate Users
-INSERT INTO users (id_role, username, hashed_password) VALUES
-    (1, 'user1', crypt('password123', gen_salt('bf'))),
-    (1, 'user2', crypt('securepass', gen_salt('bf'))),
-    (2, 'admin1', crypt('adminpass', gen_salt('bf'))),
-    (1, 'johndoe', crypt('test123', gen_salt('bf')));
-   
+INSERT INTO users (id_role, username, email, hashed_password) VALUES
+    (1, 'user1', 'user1@example.com', crypt('password123', gen_salt('bf'))),
+    (1, 'user2', 'user2@example.com', crypt('securepass', gen_salt('bf'))),
+    (2, 'admin1', 'admin@example.com', crypt('adminpass', gen_salt('bf'))),
+    (1, 'johndoe', 'john@example.com', crypt('test123', gen_salt('bf')));
+
 -- Populate Venues
 INSERT INTO venues (venue_name, city_name) VALUES
     ('Stadion Utama Gelora Bung Karno', 'Jakarta'),

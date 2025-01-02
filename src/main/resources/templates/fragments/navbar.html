@@ -23,6 +23,12 @@
                     <a class="nav-link" th:href="@{/guest/setlists}" 
                        th:classappend="${activePage == 'setlists' ? 'active' : ''}">Setlists</a>
                 </li>
+                <li class="nav-item" th:if="${session.userId == null}">
+                    <a class="nav-link btn-login" th:href="@{/auth/login}">Login</a>
+                </li>
+                <li class="nav-item" th:if="${session.userId != null}">
+                    <a class="nav-link btn-logout" th:href="@{/auth/logout}">Logout</a>
+                </li>
             </div>
         </div>
     </nav>
