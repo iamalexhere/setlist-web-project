@@ -130,22 +130,22 @@
                     <h3>Quick Actions</h3>
                 </div>
                 <div class="quick-actions">
-                    <a href="/admin/setlists?status=pending" class="action-card">
+                    <a th:href="@{/admin/setlists?status=pending}" class="action-card">
                         <div class="action-icon" style="background: var(--yellow)">⏳</div>
                         <h4>Review Pending Setlists</h4>
                         <p>Review and approve new setlist submissions</p>
                     </a>
-                    <a href="/admin/corrections?status=pending" class="action-card">
+                    <a th:href="@{/admin/corrections}" class="action-card">
                         <div class="action-icon" style="background: var(--red)">✏️</div>
                         <h4>Review Corrections</h4>
                         <p>Review and approve setlist corrections</p>
                     </a>
-                    <a href="/admin/members/new" class="action-card">
+                    <a th:href="@{/admin/members}" class="action-card">
                         <div class="action-icon" style="background: var(--blue)">👥</div>
                         <h4>Manage Members</h4>
                         <p>View and manage member accounts</p>
                     </a>
-                    <a href="/admin/reports" class="action-card">
+                    <a th:href="@{/admin/reports}" class="action-card">
                         <div class="action-icon" style="background: var(--green)">📊</div>
                         <h4>Generate Reports</h4>
                         <p>View site statistics and generate reports</p>
