@@ -131,4 +131,120 @@ public class JdbcGuestRepositoryTest {
         assertTrue(setlist.getSongs().contains("Fix You"));
         assertTrue(setlist.getSongs().contains("Yellow"));
     }
+
+    @Test
+    void findAllEvents_ShouldReturnAllNonDeletedEvents() {
+        // When
+        List<EventListView> events = guestRepository.findAllEvents();
+
+        // Then
+        assertFalse(events.isEmpty());
+        assertTrue(events.size() >= 4); // Based on mockup data
+        
+        // Verify event details
+        events.forEach(event -> {
+            assertNotNull(event.getEventName());
+            assertNotNull(event.getVenueName());
+            assertNotNull(event.getCityName());
+            assertNotNull(event.getEventDate());
+            assertFalse(event.isDeleted());
+        });
+
+        // Verify specific event exists
+        assertTrue(events.stream()
+            .anyMatch(event -> event.getEventName().equals("Rock Concert 2024")));
+    }
+
+    @Test
+    void searchEvents_WithNameQuery_ShouldReturnMatchingEvents() {
+        // Given
+        String query = "Rock";
+        
+        // When
+        List<EventListView> events = guestRepository.searchEvents(
+            query, null, null, null);
+
+        // Then
+        assertTrue(!events.isEmpty(), "Should return at least one event");
+        events.forEach(event -> 
+            assertTrue(event.getEventName().toLowerCase()
+                .contains(query.toLowerCase()),
+                "Event name should contain search query"));
+    }
+
+    @Test
+    void searchEvents_WithDateRange_ShouldReturnEventsInRange() {
+        // Given
+        LocalDate startDate = LocalDate.of(2024, 7, 1);
+        LocalDate endDate = LocalDate.of(2024, 8, 31);
+
+        // When
+        List<EventListView> events = guestRepository.searchEvents(
+            "", startDate, endDate, null);
+
+        // Then
+        assertTrue(!events.isEmpty(), "Should return at least one event");
+        events.forEach(event -> {
+            assertTrue(event.getEventDate().isAfter(startDate.minusDays(1)),
+                "Event date should be after start date");
+            assertTrue(event.getEventDate().isBefore(endDate.plusDays(1)),
+                "Event date should be before end date");
+        });
+    }
+
+    @Test
+    void searchEvents_WithLocation_ShouldReturnEventsInCity() {
+        // Given
+        String location = "New York";
+
+        // When
+        List<EventListView> events = guestRepository.searchEvents(
+            "", null, null, location);
+
+        // Then
+        assertTrue(!events.isEmpty(), "Should return at least one event");
+        events.forEach(event -> 
+            assertEquals(location, event.getCityName(),
+                "Event city should match search location"));
+    }
+
+    @Test
+    void searchEvents_WithAllCriteria_ShouldReturnMatchingEvents() {
+        // Given
+        String query = "Rock";
+        LocalDate startDate = LocalDate.of(2024, 8, 1);
+        LocalDate endDate = LocalDate.of(2024, 8, 31);
+        String location = "New York";
+
+        // When
+        List<EventListView> events = guestRepository.searchEvents(
+            query, startDate, endDate, location);
+
+        // Then
+        assertTrue(!events.isEmpty(), "Should return at least one event");
+        events.forEach(event -> {
+            assertTrue(event.getEventName().toLowerCase()
+                .contains(query.toLowerCase()),
+                "Event name should contain search query");
+            assertTrue(event.getEventDate().isAfter(startDate.minusDays(1)),
+                "Event date should be after start date");
+            assertTrue(event.getEventDate().isBefore(endDate.plusDays(1)),
+                "Event date should be before end date");
+            assertEquals(location, event.getCityName(),
+                "Event city should match search location");
+        });
+    }
+
+    @Test
+    void searchEvents_WithNoMatches_ShouldReturnEmptyList() {
+        // Given
+        String query = "NonexistentEvent";
+
+        // When
+        List<EventListView> events = guestRepository.searchEvents(
+            query, null, null, null);
+
+        // Then
+        assertTrue(events.isEmpty());
+    }
 }

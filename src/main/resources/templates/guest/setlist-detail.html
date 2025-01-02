@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Setlist Details</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-md-8">
+                    <h1 th:text="${setlist.setlistName}" class="mb-3">Setlist Name</h1>
+                    <div class="setlist-details">
+                        <p class="mb-2">
+                            <i class="fas fa-user"></i>
+                            <span th:text="${setlist.artistName}">Artist Name</span>
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-music"></i>
+                            <span th:text="${setlist.eventName}">Event Name</span>
+                        </p>
+                        <p class="mb-2" th:if="${setlist.createdAt != null}">
+                            <i class="fas fa-calendar"></i>
+                            <span th:text="${#temporals.format(setlist.createdAt, 'MMMM dd, yyyy')}">Created Date</span>
+                        </p>
+                    </div>
+
+                    <!-- Songs List -->
+                    <div class="mt-4">
+                        <h2 class="h4 mb-3">Songs</h2>
+                        <div class="list-group">
+                            <div th:each="song : ${setlist.songs}" 
+                                 class="list-group-item">
+                                <i class="fas fa-music me-2"></i>
+                                <span th:text="${song}">Song Name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -16,6 +16,9 @@ public interface GuestRepository {
     List<EventView> findEventsByArtist(Long artistId);
     List<EventView> findEventsByDateAndLocation(LocalDate startDate, LocalDate endDate, String location);
     EventView findEventById(Long id);
+    List<EventListView> findAllEvents();
+    
+    List<EventListView> searchEvents(String query, LocalDate startDate, LocalDate endDate, String location);
     
     // Setlist related queries
     List<SetlistView> findSetlistsByArtist(Long artistId);

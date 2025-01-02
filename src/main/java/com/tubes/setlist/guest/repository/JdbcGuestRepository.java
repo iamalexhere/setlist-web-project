@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import com.tubes.setlist.guest.model.ArtistView;
+import com.tubes.setlist.guest.model.EventListView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
 
@@ -258,6 +259,65 @@ public class JdbcGuestRepository implements GuestRepository {
         );
     }
 
+    public List<EventListView> findAllEvents() {
+        String sql = """
+            SELECT e.id_event, e.event_name, e.event_date, v.venue_name, v.city_name,
+                   e.created_at, e.is_deleted,
+                   string_agg(DISTINCT a.artist_name, ', ') as performing_artists
+            FROM events e
+            JOIN venues v ON e.id_venue = v.id_venue
+            LEFT JOIN setlists s ON e.id_event = s.id_event
+            LEFT JOIN artists a ON s.id_artist = a.id_artist
+            WHERE e.is_deleted = false
+            GROUP BY e.id_event, e.event_name, e.event_date, v.venue_name, 
+                     v.city_name, e.created_at, e.is_deleted
+            ORDER BY e.event_date DESC
+        """;
+        
+        return jdbcTemplate.query(sql,
+            (rs, rowNum) -> new EventListView(
+                rs.getLong("id_event"),
+                rs.getString("event_name"),
+                rs.getDate("event_date").toLocalDate(),
+                rs.getString("venue_name"),
+                rs.getString("city_name"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getString("performing_artists") != null ? 
+                    List.of(rs.getString("performing_artists").split(", ")) : 
+                    List.of(),
+                rs.getBoolean("is_deleted")
+            )
+        );
+    }
+
+    public List<EventListView> searchEvents(String query, LocalDate startDate, LocalDate endDate, String location) {
+        String searchQuery = query != null ? "%" + query.toLowerCase() + "%" : "%%";
+        
+        String sql = """
+            SELECT e.id_event, e.event_name, e.event_date, v.venue_name, v.city_name,
+                   e.created_at, e.is_deleted,
+                   string_agg(DISTINCT a.artist_name, ', ') as performing_artists
+            FROM events e
+            JOIN venues v ON e.id_venue = v.id_venue
+            LEFT JOIN setlists s ON e.id_event = s.id_event
+            LEFT JOIN artists a ON s.id_artist = a.id_artist
+            WHERE e.is_deleted = false
+            AND LOWER(e.event_name) LIKE ?
+            AND (e.event_date >= COALESCE(?, '1900-01-01'::date))
+            AND (e.event_date <= COALESCE(?, '2100-12-31'::date))
+            AND (LOWER(v.city_name) = LOWER(COALESCE(?, v.city_name)))
+            GROUP BY e.id_event, e.event_name, e.event_date, v.venue_name,
+                     v.city_name, e.created_at, e.is_deleted
+            ORDER BY e.event_date DESC
+            """;
+
+        return jdbcTemplate.query(sql, new EventListRowMapper(),
+            searchQuery,
+            startDate,
+            endDate,
+            location);
+    }
+
     private class EventRowMapper implements RowMapper<EventView> {
         @Override
         public EventView mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -267,6 +327,24 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getDate("event_date").toLocalDate(),
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
+                rs.getBoolean("is_deleted")
+            );
+        }
+    }
+
+    private class EventListRowMapper implements RowMapper<EventListView> {
+        @Override
+        public EventListView mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new EventListView(
+                rs.getLong("id_event"),
+                rs.getString("event_name"),
+                rs.getDate("event_date").toLocalDate(),
+                rs.getString("venue_name"),
+                rs.getString("city_name"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getString("performing_artists") != null ? 
+                    List.of(rs.getString("performing_artists").split(", ")) : 
+                    List.of(),
                 rs.getBoolean("is_deleted")
             );
         }

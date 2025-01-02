@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Event Details</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li><a th:href="@{/guest/events}">Events</a></li>
+            <li th:text="${event.eventName}">Event Name</li>
+        </ol>
+    </nav>
+
+    <div layout:fragment="content">
+        <!-- Event Hero Section -->
+        <div class="event-hero">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 mx-auto text-center">
+                        <h1 th:text="${event.eventName}" class="display-4 mb-3">Event Name</h1>
+                        <div class="event-meta">
+                            <span class="event-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span th:text="${#temporals.format(event.eventDate, 'MMMM dd, yyyy')}">Event Date</span>
+                            </span>
+                            <span class="event-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:text="${event.venueName + ', ' + event.cityName}">Venue, City</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container py-5">
+            <!-- Setlists Section -->
+            <div class="setlists-section">
+                <div class="section-header text-center mb-5">
+                    <h2 class="section-title">Event Setlists</h2>
+                    <p class="section-subtitle">Discover the amazing performances from this event</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div th:if="${setlists.empty}" class="no-setlists">
+                            <div class="text-center py-5">
+                                <i class="fas fa-music fa-3x mb-3"></i>
+                                <h3>No Setlists Available Yet</h3>
+                                <p class="text-muted">Check back later for updates on the performances from this event.</p>
+                            </div>
+                        </div>
+
+                        <div class="setlist-grid">
+                            <div th:each="setlist : ${setlists}" class="setlist-card">
+                                <div class="setlist-header">
+                                    <div class="artist-info">
+                                        <span class="artist-label">ARTIST</span>
+                                        <h3 th:text="${setlist.artistName}">Artist Name</h3>
+                                    </div>
+                                    <div class="setlist-name">
+                                        <span class="setlist-label">SETLIST</span>
+                                        <h4 th:text="${setlist.setlistName}">Setlist Name</h4>
+                                    </div>
+                                </div>
+                                <div class="setlist-content">
+                                    <div class="song-list">
+                                        <div th:each="song, songStat : ${setlist.songs}" class="song-item">
+                                            <span class="song-number" th:text="${songStat.count}">1</span>
+                                            <span class="song-title" th:text="${song}">Song Name</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setlist-footer">
+                                    <a href="#" class="btn-view-details">View Full Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tubes.setlist.guest.model.ArtistView;
+import com.tubes.setlist.guest.model.EventListView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
 import com.tubes.setlist.guest.repository.GuestRepository;
@@ -88,27 +89,46 @@ public class GuestController {
     }
 
     @GetMapping("/events")
-    public String listEvents(
+    public String viewEvents(
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) String location,
             Model model) {
-        if (startDate != null && endDate != null && location != null) {
-            model.addAttribute("events", guestRepository.findEventsByDateAndLocation(startDate, endDate, location));
+        
+        List<EventListView> events;
+        if (query != null || startDate != null || endDate != null || location != null) {
+            events = guestRepository.searchEvents(query, startDate, endDate, location);
+        } else {
+            events = guestRepository.findAllEvents();
         }
+
+        // Always set all model attributes
+        model.addAttribute("activePage", "events");
+        model.addAttribute("events", events);
+        model.addAttribute("query", query != null ? query : "");
+        model.addAttribute("startDate", startDate != null ? startDate : LocalDate.now());
+        model.addAttribute("endDate", endDate != null ? endDate : LocalDate.now().plusMonths(6));
+        model.addAttribute("location", location != null ? location : "");
+
         return "guest/events";
     }
 
     @GetMapping("/events/{id}")
     public String viewEvent(@PathVariable Long id, Model model) {
-        model.addAttribute("event", guestRepository.findEventById(id));
-        model.addAttribute("setlists", guestRepository.findSetlistsByEvent(id));
-        return "guest/events";
+        EventView event = guestRepository.findEventById(id);
+        List<SetlistView> setlists = guestRepository.findSetlistsByEvent(id);
+
+        model.addAttribute("event", event);
+        model.addAttribute("setlists", setlists);
+
+        return "guest/event-detail";
     }
 
     @GetMapping("/setlists/{id}")
     public String viewSetlist(@PathVariable Long id, Model model) {
-        model.addAttribute("setlists", guestRepository.findSetlistById(id));
-        return "guest/setlists";
+        SetlistView setlist = guestRepository.findSetlistById(id);
+        model.addAttribute("setlist", setlist);
+        return "guest/setlist-detail";
     }
 }
