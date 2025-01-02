@@ -113,9 +113,20 @@ public class GuestControllerTest {
         Long eventId = 1L;
         EventView event = new EventView(eventId, "Rock Concert 2024", 
             LocalDate.of(2024, 8, 15), "MSG", "New York", false);
-        SetlistView setlist = new SetlistView(1L, "Coldplay MSG Concert", 
-            "Coldplay", "Rock Concert 2024", "proof.jpg", 
-            LocalDateTime.now(), Arrays.asList("Fix You", "Yellow"), false);
+        LocalDate eventDate = LocalDate.of(2024, 8, 15);
+        SetlistView setlist = new SetlistView(
+            1L, 
+            "Coldplay MSG Concert", 
+            1L,
+            "Coldplay",
+            1L,
+            "Rock Concert 2024",
+            eventDate,
+            "proof.jpg", 
+            LocalDateTime.now(), 
+            Arrays.asList("Fix You", "Yellow"), 
+            false
+        );
 
         when(guestRepository.findEventById(eventId))
             .thenReturn(event);
@@ -134,9 +145,20 @@ public class GuestControllerTest {
     void viewSetlist_ShouldReturnSetlistView() throws Exception {
         // Given
         Long setlistId = 1L;
-        SetlistView setlist = new SetlistView(setlistId, "Coldplay MSG Concert", 
-            "Coldplay", "Rock Concert 2024", "proof.jpg", 
-            LocalDateTime.now(), Arrays.asList("Fix You", "Yellow"), false);
+        LocalDate eventDate = LocalDate.of(2024, 8, 15);
+        SetlistView setlist = new SetlistView(
+            setlistId, 
+            "Coldplay MSG Concert", 
+            1L,
+            "Coldplay",
+            1L,
+            "Rock Concert 2024",
+            eventDate,
+            "proof.jpg", 
+            LocalDateTime.now(), 
+            Arrays.asList("Fix You", "Yellow"), 
+            false
+        );
 
         when(guestRepository.findSetlistById(setlistId))
             .thenReturn(setlist);
@@ -146,6 +168,149 @@ public class GuestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/setlist-detail"))
                 .andExpect(model().attributeExists("setlist"));
+    }
+
+    @Test
+    public void viewSetlist_WithValidId_ShouldReturnSetlistPage() throws Exception {
+        // Arrange
+        Long setlistId = 1L;
+        LocalDate eventDate = LocalDate.of(2024, 8, 15);
+        SetlistView setlist = new SetlistView(
+            setlistId,
+            "Taylor Swift Eras Tour Jakarta Night 1",
+            1L,
+            "Taylor Swift",
+            1L,
+            "Eras Tour Jakarta",
+            eventDate,
+            "proof.jpg",
+            LocalDateTime.now(),
+            List.of("Love Story", "Cruel Summer", "Anti-Hero"),
+            false
+        );
+        when(guestRepository.findSetlistById(setlistId)).thenReturn(setlist);
+
+        // Act & Assert
+        mockMvc.perform(get("/guest/setlists/" + setlistId))
+            .andExpect(status().isOk())
+            .andExpect(view().name("guest/setlist-detail"))
+            .andExpect(model().attribute("setlist", setlist));
+    }
+
+    @Test
+    public void listSetlistsByEvent_WithValidEventId_ShouldReturnSetlists() throws Exception {
+        // Arrange
+        Long eventId = 1L;
+        LocalDate eventDate = LocalDate.of(2024, 8, 15);
+        SetlistView setlist1 = new SetlistView(
+            1L, 
+            "Night 1",
+            1L,
+            "Taylor Swift",
+            eventId,
+            "Eras Tour Jakarta",
+            eventDate,
+            "proof.jpg",
+            LocalDateTime.now(),
+            List.of("Love Story", "Cruel Summer"),
+            false
+        );
+        SetlistView setlist2 = new SetlistView(
+            2L, 
+            "Night 2",
+            1L,
+            "Taylor Swift",
+            eventId,
+            "Eras Tour Jakarta",
+            eventDate.plusDays(1),
+            "proof2.jpg",
+            LocalDateTime.now(),
+            List.of("Shake It Off", "Anti-Hero"),
+            false
+        );
+        when(guestRepository.findSetlistsByEvent(eventId))
+            .thenReturn(List.of(setlist1, setlist2));
+
+        // Act & Assert
+        mockMvc.perform(get("/guest/events/" + eventId + "/setlists"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("guest/setlists"))
+            .andExpect(model().attribute("setlistList", List.of(setlist1, setlist2)));
+    }
+
+    @Test
+    public void listSetlistsByArtist_WithValidArtistId_ShouldReturnSetlists() throws Exception {
+        // Arrange
+        Long artistId = 1L;
+        LocalDate eventDate = LocalDate.of(2024, 8, 15);
+        SetlistView setlist1 = new SetlistView(
+            1L, 
+            "MSG Night 1",
+            artistId,
+            "Taylor Swift",
+            1L,
+            "MSG Concert",
+            eventDate,
+            "proof.jpg",
+            LocalDateTime.now(),
+            List.of("Love Story", "Cruel Summer"),
+            false
+        );
+        SetlistView setlist2 = new SetlistView(
+            2L, 
+            "MSG Night 2",
+            artistId,
+            "Taylor Swift",
+            2L,
+            "MSG Concert",
+            eventDate.plusDays(1),
+            "proof2.jpg",
+            LocalDateTime.now(),
+            List.of("Shake It Off", "Anti-Hero"),
+            false
+        );
+        when(guestRepository.findSetlistsByArtist(artistId))
+            .thenReturn(List.of(setlist1, setlist2));
+
+        // Act & Assert
+        mockMvc.perform(get("/guest/artists/" + artistId + "/setlists"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("guest/setlists"))
+            .andExpect(model().attribute("setlistList", List.of(setlist1, setlist2)));
+    }
+
+    @Test
+    public void exploreSetlists_WithArtistSearch_ShouldReturnSetlists() throws Exception {
+        // Arrange
+        Long artistId = 1L;
+        LocalDate eventDate = LocalDate.of(2024, 8, 15);
+        ArtistView artist = new ArtistView(artistId, "Taylor Swift", List.of("Pop"), false);
+        SetlistView setlist = new SetlistView(
+            1L,
+            "MSG Night 1",
+            artistId,
+            "Taylor Swift",
+            1L,
+            "MSG Concert",
+            eventDate,
+            "proof.jpg",
+            LocalDateTime.now(),
+            List.of("Love Story", "Cruel Summer"),
+            false
+        );
+
+        when(guestRepository.findArtistsByName("Taylor Swift"))
+            .thenReturn(List.of(artist));
+        when(guestRepository.findSetlistsByArtist(artistId))
+            .thenReturn(List.of(setlist));
+
+        // Act & Assert
+        mockMvc.perform(get("/guest/setlists")
+                .param("artist", "Taylor Swift"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("guest/setlists"))
+            .andExpect(model().attribute("artist", "Taylor Swift"))
+            .andExpect(model().attribute("setlistList", List.of(setlist)));
     }
 
     @Test
@@ -271,9 +436,20 @@ public class GuestControllerTest {
         Long eventId = 1L;
         EventView event = new EventView(eventId, "Rock Concert 2024",
             LocalDate.of(2024, 8, 15), "MSG", "New York", false);
-        List<String> songs = Arrays.asList("Fix You", "Yellow");
-        SetlistView setlist = new SetlistView(1L, "Main Set", "Coldplay",
-            "Rock Concert 2024", null, LocalDateTime.now(), songs, false);
+        LocalDate eventDate = LocalDate.of(2024, 8, 15);
+        SetlistView setlist = new SetlistView(
+            1L, 
+            "Main Set", 
+            1L,
+            "Coldplay",
+            1L,
+            "Rock Concert 2024",
+            eventDate,
+            null, 
+            LocalDateTime.now(), 
+            Arrays.asList("Fix You", "Yellow"), 
+            false
+        );
 
         when(guestRepository.findEventById(eventId))
             .thenReturn(event);

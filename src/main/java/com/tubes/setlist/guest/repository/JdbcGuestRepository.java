@@ -131,40 +131,78 @@ public class JdbcGuestRepository implements GuestRepository {
     @Override
     public List<SetlistView> findSetlistsByEvent(Long eventId) {
         String sql = """
-            SELECT s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
+            SELECT s.id_setlist, s.setlist_name, 
+                   a.id_artist, a.artist_name, 
+                   e.id_event, e.event_name, e.event_date,
                    s.proof_url, s.created_at, s.is_deleted,
                    string_agg(sg.song_name, ', ') as songs
             FROM setlists s
             JOIN artists a ON s.id_artist = a.id_artist
             JOIN events e ON s.id_event = e.id_event
-            LEFT JOIN setlists_songs ss ON s.id_setlist = ss.id_setlist
-            LEFT JOIN songs sg ON ss.id_song = sg.id_song
+            LEFT JOIN setlists_songs sl ON s.id_setlist = sl.id_setlist
+            LEFT JOIN songs sg ON sl.id_song = sg.id_song
             WHERE s.id_event = ?
-            GROUP BY s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
+            GROUP BY s.id_setlist, s.setlist_name, 
+                     a.id_artist, a.artist_name, 
+                     e.id_event, e.event_name, e.event_date,
                      s.proof_url, s.created_at, s.is_deleted
             ORDER BY s.created_at DESC
         """;
         
-        return jdbcTemplate.query(sql, new SetlistRowMapper(), eventId);
+        return jdbcTemplate.query(sql,
+            (rs, rowNum) -> new SetlistView(
+                rs.getLong("id_setlist"),
+                rs.getString("setlist_name"),
+                rs.getLong("id_artist"),
+                rs.getString("artist_name"),
+                rs.getLong("id_event"),
+                rs.getString("event_name"),
+                rs.getDate("event_date").toLocalDate(),
+                rs.getString("proof_url"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getString("songs") != null ? List.of(rs.getString("songs").split(", ")) : List.of(),
+                rs.getBoolean("is_deleted")
+            ),
+            eventId
+        );
     }
 
     @Override
     public SetlistView findSetlistById(Long id) {
         String sql = """
-            SELECT s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
+            SELECT s.id_setlist, s.setlist_name, 
+                   a.id_artist, a.artist_name, 
+                   e.id_event, e.event_name, e.event_date,
                    s.proof_url, s.created_at, s.is_deleted,
                    string_agg(sg.song_name, ', ') as songs
             FROM setlists s
             JOIN artists a ON s.id_artist = a.id_artist
-            JOIN events e ON s.id_event = e.id_event
-            LEFT JOIN setlists_songs ss ON s.id_setlist = ss.id_setlist
-            LEFT JOIN songs sg ON ss.id_song = sg.id_song
+            LEFT JOIN events e ON s.id_event = e.id_event
+            LEFT JOIN setlists_songs sl ON s.id_setlist = sl.id_setlist
+            LEFT JOIN songs sg ON sl.id_song = sg.id_song
             WHERE s.id_setlist = ?
-            GROUP BY s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
+            GROUP BY s.id_setlist, s.setlist_name, 
+                     a.id_artist, a.artist_name, 
+                     e.id_event, e.event_name, e.event_date,
                      s.proof_url, s.created_at, s.is_deleted
         """;
         
-        return jdbcTemplate.queryForObject(sql, new SetlistRowMapper(), id);
+        return jdbcTemplate.queryForObject(sql,
+            (rs, rowNum) -> new SetlistView(
+                rs.getLong("id_setlist"),
+                rs.getString("setlist_name"),
+                rs.getLong("id_artist"),
+                rs.getString("artist_name"),
+                rs.getLong("id_event"),
+                rs.getString("event_name"),
+                rs.getDate("event_date").toLocalDate(),
+                rs.getString("proof_url"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getString("songs") != null ? List.of(rs.getString("songs").split(", ")) : List.of(),
+                rs.getBoolean("is_deleted")
+            ),
+            id
+        );
     }
 
     @Override
@@ -229,7 +267,9 @@ public class JdbcGuestRepository implements GuestRepository {
     @Override
     public List<SetlistView> findSetlistsByArtist(Long artistId) {
         String sql = """
-            SELECT s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
+            SELECT s.id_setlist, s.setlist_name, 
+                   a.id_artist, a.artist_name, 
+                   e.id_event, e.event_name, e.event_date,
                    s.proof_url, s.created_at, s.is_deleted,
                    string_agg(sg.song_name, ', ') as songs
             FROM setlists s
@@ -238,7 +278,9 @@ public class JdbcGuestRepository implements GuestRepository {
             LEFT JOIN setlists_songs sl ON s.id_setlist = sl.id_setlist
             LEFT JOIN songs sg ON sl.id_song = sg.id_song
             WHERE s.id_artist = ?
-            GROUP BY s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
+            GROUP BY s.id_setlist, s.setlist_name, 
+                     a.id_artist, a.artist_name, 
+                     e.id_event, e.event_name, e.event_date,
                      s.proof_url, s.created_at, s.is_deleted
             ORDER BY s.created_at DESC
         """;
@@ -247,11 +289,14 @@ public class JdbcGuestRepository implements GuestRepository {
             (rs, rowNum) -> new SetlistView(
                 rs.getLong("id_setlist"),
                 rs.getString("setlist_name"),
+                rs.getLong("id_artist"),
                 rs.getString("artist_name"),
+                rs.getLong("id_event"),
                 rs.getString("event_name"),
+                rs.getDate("event_date").toLocalDate(),
                 rs.getString("proof_url"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
-                List.of(rs.getString("songs").split(", ")),
+                rs.getString("songs") != null ? List.of(rs.getString("songs").split(", ")) : List.of(),
                 rs.getBoolean("is_deleted")
             ),
             artistId
@@ -347,22 +392,6 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getDate("event_date").toLocalDate(),
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
-                rs.getBoolean("is_deleted")
-            );
-        }
-    }
-
-    private class SetlistRowMapper implements RowMapper<SetlistView> {
-        @Override
-        public SetlistView mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new SetlistView(
-                rs.getLong("id_setlist"),
-                rs.getString("setlist_name"),
-                rs.getString("artist_name"),
-                rs.getString("event_name"),
-                rs.getString("proof_url"),
-                rs.getTimestamp("created_at").toLocalDateTime(),
-                List.of(rs.getString("songs").split(", ")),
                 rs.getBoolean("is_deleted")
             );
         }

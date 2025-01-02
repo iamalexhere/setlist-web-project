@@ -1,6 +1,7 @@
 package com.tubes.setlist.guest.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,8 +91,8 @@ public class GuestController {
     @GetMapping("/events")
     public String viewEvents(
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
             @RequestParam(required = false) String location,
             Model model) {
         
@@ -122,10 +123,9 @@ public class GuestController {
     public String viewEvent(@PathVariable Long id, Model model) {
         EventView event = guestRepository.findEventById(id);
         List<SetlistView> setlists = guestRepository.findSetlistsByEvent(id);
-
+        
         model.addAttribute("event", event);
         model.addAttribute("setlists", setlists);
-
         return "guest/event-detail";
     }
 
@@ -134,5 +134,66 @@ public class GuestController {
         SetlistView setlist = guestRepository.findSetlistById(id);
         model.addAttribute("setlist", setlist);
         return "guest/setlist-detail";
+    }
+
+    @GetMapping("/events/{eventId}/setlists")
+    public String listSetlistsByEvent(
+            @PathVariable Long eventId,
+            Model model) {
+        List<SetlistView> setlists = guestRepository.findSetlistsByEvent(eventId);
+        model.addAttribute("setlistList", setlists);
+        return "guest/setlists";
+    }
+
+    @GetMapping("/artists/{artistId}/setlists") 
+    public String listSetlistsByArtist(
+            @PathVariable Long artistId,
+            Model model) {
+        List<SetlistView> setlists = guestRepository.findSetlistsByArtist(artistId);
+        model.addAttribute("setlistList", setlists);
+        return "guest/setlists";
+    }
+
+    @GetMapping("/setlists")
+    public String exploreSetlists(
+            @RequestParam(required = false) String artist,
+            @RequestParam(required = false) String event,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            Model model) {
+
+        List<SetlistView> setlists;
+        if (artist != null && !artist.isEmpty()) {
+            // Search by artist name
+            List<ArtistView> artists = guestRepository.findArtistsByName(artist);
+            if (!artists.isEmpty()) {
+                setlists = guestRepository.findSetlistsByArtist(artists.get(0).getIdArtist());
+            } else {
+                setlists = List.of();
+            }
+        } else if (event != null && !event.isEmpty()) {
+            // Search by event name
+            List<EventView> events = guestRepository.searchEvents(event, null, null, null);
+            if (!events.isEmpty()) {
+                setlists = guestRepository.findSetlistsByEvent(events.get(0).getIdEvent());
+            } else {
+                setlists = List.of();
+            }
+        } else {
+            // Get recent setlists
+            setlists = new ArrayList<>();
+            List<EventView> recentEvents = guestRepository.findAllEvents();
+            for (EventView recentEvent : recentEvents.subList(0, Math.min(5, recentEvents.size()))) {
+                setlists.addAll(guestRepository.findSetlistsByEvent(recentEvent.getIdEvent()));
+            }
+        }
+
+        // Add search parameters to model
+        model.addAttribute("activePage", "setlists");
+        model.addAttribute("artist", artist);
+        model.addAttribute("event", event);
+        model.addAttribute("setlistList", setlists);
+        
+        return "guest/setlists";
     }
 }

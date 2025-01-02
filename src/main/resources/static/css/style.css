@@ -82,20 +82,22 @@ body {
 .hero {
     text-align: center;
     padding: 4rem 2rem;
-    background: linear-gradient(to bottom, var(--crust), var(--base));
+    background: linear-gradient(135deg, var(--lavender) 0%, var(--blue) 100%);
     margin-bottom: 3rem;
+    color: white;
 }
 
 .hero h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: white;
 }
 
 .hero p {
     font-size: 1.2rem;
-    color: var(--text);
+    color: white;
     margin-bottom: 2rem;
+    opacity: 0.9;
 }
 
 .search-container {
@@ -484,9 +486,9 @@ footer {
 }
 
 .event-date {
-    color: var(--lavender);
-    font-weight: 600;
-    margin-bottom: 0.75rem;
+    color: var(--peach);
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .event-content h3 {
@@ -2501,15 +2503,6 @@ select.form-control {
     color: var(--text-muted);
 }
 
-.breadcrumb a {
-    color: var(--text-muted);
-    text-decoration: none;
-}
-
-.breadcrumb a:hover {
-    color: var(--primary);
-}
-
 /* Pagination */
 .pagination {
     display: flex;
@@ -2659,9 +2652,9 @@ select.form-control {
 }
 
 .setlist-date {
-    color: var(--lavender);
+    color: var(--peach);
+    font-size: 0.9rem;
     font-weight: 500;
-    margin-bottom: 0.5rem;
 }
 
 .setlist-header h3 {

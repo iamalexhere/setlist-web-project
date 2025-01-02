@@ -249,4 +249,50 @@ public class JdbcGuestRepositoryTest {
         // Then
         assertTrue(events.isEmpty());
     }
+
+    @Test
+    public void findSetlistById_WithValidId_ShouldReturnSetlist() {
+        // Arrange
+        Long setlistId = 1L;
+
+        // Act
+        SetlistView setlist = guestRepository.findSetlistById(setlistId);
+
+        // Assert
+        assertNotNull(setlist);
+        assertEquals("Konser Sheila On 7 Jakarta", setlist.getSetlistName());
+        assertEquals("Sheila On 7", setlist.getArtistName());
+        assertEquals("Konser Musik Indonesia", setlist.getEventName());
+        assertFalse(setlist.isDeleted());
+        assertNotNull(setlist.getSongs());
+    }
+
+    @Test
+    public void findSetlistsByEvent_WithValidEventId_ShouldReturnSetlists() {
+        // Arrange
+        Long eventId = 1L;
+
+        // Act
+        List<SetlistView> setlists = guestRepository.findSetlistsByEvent(eventId);
+
+        // Assert
+        assertFalse(setlists.isEmpty());
+        assertEquals("Konser Musik Indonesia", setlists.get(0).getEventName());
+        assertFalse(setlists.get(0).isDeleted());
+    }
+
+    @Test
+    public void findSetlistsByArtist_WithValidArtistId_ShouldReturnSetlists() {
+        // Arrange
+        Long artistId = 1L;
+
+        // Act
+        List<SetlistView> setlists = guestRepository.findSetlistsByArtist(artistId);
+
+        // Assert
+        assertFalse(setlists.isEmpty());
+        assertEquals("Sheila On 7", setlists.get(0).getArtistName());
+        assertFalse(setlists.get(0).isDeleted());
+    }
+
 }

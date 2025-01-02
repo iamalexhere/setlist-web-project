@@ -1,45 +1,262 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/main}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Setlist Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${setlist.setlistName + ' - Setlist'}">Setlist Detail</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div layout:fragment="content">
-        <div class="container py-5">
-            <div class="row">
-                <div class="col-md-8">
-                    <h1 th:text="${setlist.setlistName}" class="mb-3">Setlist Name</h1>
-                    <div class="setlist-details">
-                        <p class="mb-2">
-                            <i class="fas fa-user"></i>
-                            <span th:text="${setlist.artistName}">Artist Name</span>
-                        </p>
-                        <p class="mb-2">
-                            <i class="fas fa-music"></i>
-                            <span th:text="${setlist.eventName}">Event Name</span>
-                        </p>
-                        <p class="mb-2" th:if="${setlist.createdAt != null}">
-                            <i class="fas fa-calendar"></i>
-                            <span th:text="${#temporals.format(setlist.createdAt, 'MMMM dd, yyyy')}">Created Date</span>
-                        </p>
-                    </div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-                    <!-- Songs List -->
-                    <div class="mt-4">
-                        <h2 class="h4 mb-3">Songs</h2>
-                        <div class="list-group">
-                            <div th:each="song : ${setlist.songs}" 
-                                 class="list-group-item">
-                                <i class="fas fa-music me-2"></i>
-                                <span th:text="${song}">Song Name</span>
-                            </div>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="container">
+            <ol>
+                <li><a th:href="@{/guest/setlists}">Setlists</a></li>
+                <li th:text="${setlist.setlistName}">Setlist Name</li>
+            </ol>
+        </div>
+    </nav>
+
+    <!-- Setlist Hero -->
+    <div class="setlist-hero-detail">
+        <div class="container">
+            <div class="setlist-header">
+                <div class="setlist-info">
+                    <h1 th:text="${setlist.setlistName}">Setlist Name</h1>
+                    <div class="meta-info">
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <a th:href="@{/guest/artists/{artistName}(artistName=${setlist.artistName})}" 
+                               th:text="${setlist.artistName}">Artist Name</a>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <a th:href="@{/guest/events/{eventName}(eventName=${setlist.eventName})}" 
+                               th:text="${setlist.eventName}">Event Name</a>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span th:text="${#temporals.format(setlist.createdAt, 'dd MMMM yyyy')}">Date Added</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Main Content -->
+    <div class="setlist-content-wrapper">
+        <div class="container">
+            <div class="content-grid">
+                <!-- Songs List -->
+                <div class="songs-section">
+                    <div class="section-header">
+                        <h2>Songs</h2>
+                        <span class="song-count" th:text="${setlist.songs.size() + ' Songs'}">15 Songs</span>
+                    </div>
+                    <div class="songs-list">
+                        <div th:each="song, songStat : ${setlist.songs}" class="song-item">
+                            <div class="song-number" th:text="${songStat.count}">1</div>
+                            <div class="song-details">
+                                <span class="song-name" th:text="${song}">Song Name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proof Section -->
+                <div class="proof-section" th:if="${setlist.proofUrl != null}">
+                    <div class="section-header">
+                        <h2>Setlist Proof</h2>
+                    </div>
+                    <div class="proof-content">
+                        <img th:src="${setlist.proofUrl}" alt="Setlist Proof" class="proof-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .breadcrumb {
+            background: #f5f5f5;
+            padding: 15px 0;
+            margin-bottom: 0;
+        }
+
+        .breadcrumb ol {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb li {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb li:not(:last-child)::after {
+            content: '/';
+            margin: 0 10px;
+            color: #666;
+        }
+
+        .breadcrumb a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .setlist-hero-detail {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://source.unsplash.com/random/1920x400/?concert') no-repeat center center;
+            background-size: cover;
+            color: white;
+            padding: 60px 0;
+        }
+
+        .setlist-header {
+            text-align: center;
+        }
+
+        .setlist-info h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meta-item i {
+            color: #007bff;
+        }
+
+        .meta-item a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .meta-item a:hover {
+            color: #007bff;
+        }
+
+        .setlist-content-wrapper {
+            padding: 60px 0;
+            background: #f8f9fa;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .song-count {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .songs-list {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .song-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+
+        .song-item:last-child {
+            border-bottom: none;
+        }
+
+        .song-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .song-number {
+            width: 30px;
+            height: 30px;
+            background: #007bff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+
+        .song-details {
+            flex: 1;
+        }
+
+        .song-name {
+            font-weight: 500;
+        }
+
+        .proof-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .proof-content {
+            margin-top: 20px;
+        }
+
+        .proof-image {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+    </style>
 </body>
 </html>
