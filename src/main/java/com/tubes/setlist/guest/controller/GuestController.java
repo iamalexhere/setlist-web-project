@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.tubes.setlist.guest.model.ArtistView;
-import com.tubes.setlist.guest.model.EventListView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
 import com.tubes.setlist.guest.repository.GuestRepository;
@@ -96,7 +95,12 @@ public class GuestController {
             @RequestParam(required = false) String location,
             Model model) {
         
-        List<EventListView> events;
+        List<EventView> events;
+        
+        // Convert empty strings to null
+        query = (query != null && !query.trim().isEmpty()) ? query.trim() : null;
+        location = (location != null && !location.trim().isEmpty()) ? location.trim() : null;
+        
         if (query != null || startDate != null || endDate != null || location != null) {
             events = guestRepository.searchEvents(query, startDate, endDate, location);
         } else {
@@ -107,8 +111,8 @@ public class GuestController {
         model.addAttribute("activePage", "events");
         model.addAttribute("events", events);
         model.addAttribute("query", query != null ? query : "");
-        model.addAttribute("startDate", startDate != null ? startDate : LocalDate.now());
-        model.addAttribute("endDate", endDate != null ? endDate : LocalDate.now().plusMonths(6));
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
         model.addAttribute("location", location != null ? location : "");
 
         return "guest/events";

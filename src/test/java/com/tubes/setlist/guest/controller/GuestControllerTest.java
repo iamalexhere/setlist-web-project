@@ -21,6 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.tubes.setlist.guest.model.*;
 import com.tubes.setlist.guest.repository.GuestRepository;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+
 @WebMvcTest(GuestController.class)
 public class GuestControllerTest {
 
@@ -149,9 +152,8 @@ public class GuestControllerTest {
     void viewEvents_WithNoParams_ShouldReturnAllEvents() throws Exception {
         // Given
         List<String> artists = Arrays.asList("Coldplay", "Metallica");
-        EventListView event = new EventListView(1L, "Rock Concert 2024",
-            LocalDate.of(2024, 8, 15), "MSG", "New York",
-            LocalDateTime.now(), artists, false);
+        EventView event = new EventView(1L, "Rock Concert 2024",
+            LocalDate.of(2024, 8, 15), "MSG", "New York", false, artists);
         
         when(guestRepository.findAllEvents())
             .thenReturn(Arrays.asList(event));
@@ -161,39 +163,10 @@ public class GuestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/events"))
                 .andExpect(model().attributeExists("events"))
-                .andExpect(model().attributeExists("query"))
-                .andExpect(model().attributeExists("startDate"))
-                .andExpect(model().attributeExists("endDate"))
-                .andExpect(model().attributeExists("location"));
-    }
-
-    @Test
-    void viewEvents_WithSearchParams_ShouldReturnFilteredEvents() throws Exception {
-        // Given
-        List<String> artists = Arrays.asList("Coldplay", "Metallica");
-        EventListView event = new EventListView(1L, "Rock Concert 2024",
-            LocalDate.of(2024, 8, 15), "MSG", "New York",
-            LocalDateTime.now(), artists, false);
-        
-        when(guestRepository.searchEvents(anyString(), any(), any(), anyString()))
-            .thenReturn(Arrays.asList(event));
-
-        LocalDate startDate = LocalDate.of(2024, 8, 1);
-        LocalDate endDate = LocalDate.of(2024, 8, 31);
-
-        // When & Then
-        mockMvc.perform(get("/guest/events")
-                .param("query", "Rock")
-                .param("startDate", startDate.toString())
-                .param("endDate", endDate.toString())
-                .param("location", "New York"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("guest/events"))
-                .andExpect(model().attributeExists("events"))
-                .andExpect(model().attributeExists("query"))
-                .andExpect(model().attributeExists("startDate"))
-                .andExpect(model().attributeExists("endDate"))
-                .andExpect(model().attributeExists("location"));
+                .andExpect(model().attribute("query", is("")))
+                .andExpect(model().attribute("startDate", nullValue()))
+                .andExpect(model().attribute("endDate", nullValue()))
+                .andExpect(model().attribute("location", is("")));
     }
 
     @Test
@@ -204,14 +177,92 @@ public class GuestControllerTest {
 
         // When & Then
         mockMvc.perform(get("/guest/events")
-                .param("query", "NonexistentEvent"))
+                .param("query", "nonexistent"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/events"))
-                .andExpect(model().attribute("events", Arrays.asList()))
-                .andExpect(model().attributeExists("query"))
-                .andExpect(model().attributeExists("startDate"))
-                .andExpect(model().attributeExists("endDate"))
-                .andExpect(model().attributeExists("location"));
+                .andExpect(model().attributeExists("events"))
+                .andExpect(model().attribute("query", is("nonexistent")))
+                .andExpect(model().attribute("startDate", nullValue()))
+                .andExpect(model().attribute("endDate", nullValue()))
+                .andExpect(model().attribute("location", is("")));
+    }
+
+    @Test
+    void viewEvents_WithQueryOnly_ShouldReturnMatchingEvents() throws Exception {
+        // Given
+        List<String> artists = Arrays.asList("The Beatles");
+        EventView event = new EventView(1L, "Summer Music Fest",
+            LocalDate.of(2024, 9, 1), "Wembley Stadium", "London", false, artists);
+        
+        when(guestRepository.searchEvents(anyString(), any(), any(), anyString()))
+            .thenReturn(Arrays.asList(event));
+
+        // When & Then
+        mockMvc.perform(get("/guest/events")
+                .param("query", "summer")
+                .param("startDate", "")
+                .param("endDate", "")
+                .param("location", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/events"))
+                .andExpect(model().attributeExists("events"))
+                .andExpect(model().attribute("query", is("summer")))
+                .andExpect(model().attribute("startDate", nullValue()))
+                .andExpect(model().attribute("endDate", nullValue()))
+                .andExpect(model().attribute("location", is("")));
+    }
+
+    @Test
+    void viewEvents_WithDatesOnly_ShouldReturnEventsInDateRange() throws Exception {
+        // Given
+        List<String> artists = Arrays.asList("Coldplay", "Metallica");
+        EventView event = new EventView(1L, "Rock Concert 2024",
+            LocalDate.of(2024, 8, 15), "MSG", "New York", false, artists);
+        
+        when(guestRepository.searchEvents(anyString(), any(), any(), anyString()))
+            .thenReturn(Arrays.asList(event));
+
+        LocalDate startDate = LocalDate.of(2024, 8, 1);
+        LocalDate endDate = LocalDate.of(2024, 8, 31);
+
+        // When & Then
+        mockMvc.perform(get("/guest/events")
+                .param("query", "")
+                .param("startDate", startDate.toString())
+                .param("endDate", endDate.toString())
+                .param("location", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/events"))
+                .andExpect(model().attributeExists("events"))
+                .andExpect(model().attribute("query", is("")))
+                .andExpect(model().attribute("startDate", is(startDate)))
+                .andExpect(model().attribute("endDate", is(endDate)))
+                .andExpect(model().attribute("location", is("")));
+    }
+
+    @Test
+    void viewEvents_WithLocationOnly_ShouldReturnEventsInLocation() throws Exception {
+        // Given
+        List<String> artists = Arrays.asList("Coldplay", "Metallica");
+        EventView event = new EventView(1L, "Rock Concert 2024",
+            LocalDate.of(2024, 8, 15), "MSG", "New York", false, artists);
+        
+        when(guestRepository.searchEvents(anyString(), any(), any(), anyString()))
+            .thenReturn(Arrays.asList(event));
+
+        // When & Then
+        mockMvc.perform(get("/guest/events")
+                .param("query", "")
+                .param("startDate", "")
+                .param("endDate", "")
+                .param("location", "New York"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/events"))
+                .andExpect(model().attributeExists("events"))
+                .andExpect(model().attribute("query", is("")))
+                .andExpect(model().attribute("startDate", nullValue()))
+                .andExpect(model().attribute("endDate", nullValue()))
+                .andExpect(model().attribute("location", is("New York")));
     }
 
     @Test

@@ -29,9 +29,9 @@
                            class="search-box" placeholder="Search for events...">
                     
                     <div class="date-filters">
-                        <input type="date" name="startDate" th:value="${startDate}"
+                        <input type="date" name="startDate" th:value="${startDate != null ? #temporals.format(startDate, 'yyyy-MM-dd') : ''}"
                                class="date-input" placeholder="Start Date">
-                        <input type="date" name="endDate" th:value="${endDate}"
+                        <input type="date" name="endDate" th:value="${endDate != null ? #temporals.format(endDate, 'yyyy-MM-dd') : ''}"
                                class="date-input" placeholder="End Date">
                     </div>
                     

@@ -135,7 +135,7 @@ public class JdbcGuestRepositoryTest {
     @Test
     void findAllEvents_ShouldReturnAllNonDeletedEvents() {
         // When
-        List<EventListView> events = guestRepository.findAllEvents();
+        List<EventView> events = guestRepository.findAllEvents();
 
         // Then
         assertFalse(events.isEmpty());
@@ -148,6 +148,7 @@ public class JdbcGuestRepositoryTest {
             assertNotNull(event.getCityName());
             assertNotNull(event.getEventDate());
             assertFalse(event.isDeleted());
+            assertNotNull(event.getArtists()); // Verify artists list is present
         });
 
         // Verify specific event exists
@@ -161,7 +162,7 @@ public class JdbcGuestRepositoryTest {
         String query = "Rock";
         
         // When
-        List<EventListView> events = guestRepository.searchEvents(
+        List<EventView> events = guestRepository.searchEvents(
             query, null, null, null);
 
         // Then
@@ -179,7 +180,7 @@ public class JdbcGuestRepositoryTest {
         LocalDate endDate = LocalDate.of(2024, 8, 31);
 
         // When
-        List<EventListView> events = guestRepository.searchEvents(
+        List<EventView> events = guestRepository.searchEvents(
             "", startDate, endDate, null);
 
         // Then
@@ -198,7 +199,7 @@ public class JdbcGuestRepositoryTest {
         String location = "New York";
 
         // When
-        List<EventListView> events = guestRepository.searchEvents(
+        List<EventView> events = guestRepository.searchEvents(
             "", null, null, location);
 
         // Then
@@ -217,7 +218,7 @@ public class JdbcGuestRepositoryTest {
         String location = "New York";
 
         // When
-        List<EventListView> events = guestRepository.searchEvents(
+        List<EventView> events = guestRepository.searchEvents(
             query, startDate, endDate, location);
 
         // Then
@@ -232,6 +233,7 @@ public class JdbcGuestRepositoryTest {
                 "Event date should be before end date");
             assertEquals(location, event.getCityName(),
                 "Event city should match search location");
+            assertNotNull(event.getArtists()); // Verify artists list is present
         });
     }
 
@@ -241,7 +243,7 @@ public class JdbcGuestRepositoryTest {
         String query = "NonexistentEvent";
 
         // When
-        List<EventListView> events = guestRepository.searchEvents(
+        List<EventView> events = guestRepository.searchEvents(
             query, null, null, null);
 
         // Then
