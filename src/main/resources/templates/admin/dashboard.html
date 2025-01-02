@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                <h1>Admin Panel</h1>
+            </div>
+            <nav class="admin-nav">
+                <a href="/admin" class="admin-nav-item active">
+                    <span class="icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/admin/members" class="admin-nav-item">
+                    <span class="icon">👥</span>
+                    Members
+                </a>
+                <a href="/admin/setlists" class="admin-nav-item">
+                    <span class="icon">📝</span>
+                    Setlists
+                </a>
+                <a href="/admin/corrections" class="admin-nav-item">
+                    <span class="icon">✏️</span>
+                    Corrections
+                </a>
+                <a href="/admin/reports" class="admin-nav-item">
+                    <span class="icon">📈</span>
+                    Reports
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2>Dashboard</h2>
+                <div class="admin-header-actions">
+                    <div class="admin-profile">
+                        <span class="admin-name">Admin</span>
+                        <a href="/logout" class="btn btn-secondary">Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--blue)">👥</div>
+                    <div class="stat-content">
+                        <h3>Total Members</h3>
+                        <p class="stat-number" th:text="${totalMembers}">150</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--green)">📝</div>
+                    <div class="stat-content">
+                        <h3>Total Setlists</h3>
+                        <p class="stat-number" th:text="${totalSetlists}">324</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--yellow)">⏳</div>
+                    <div class="stat-content">
+                        <h3>Pending Setlists</h3>
+                        <p class="stat-number" th:text="${pendingSetlists}">12</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--red)">✏️</div>
+                    <div class="stat-content">
+                        <h3>Pending Corrections</h3>
+                        <p class="stat-number" th:text="${pendingCorrections}">8</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <section class="admin-section">
+                <div class="section-header">
+                    <h3>Recent Activity</h3>
+                    <a href="/admin/activity" class="btn btn-text">View All</a>
+                </div>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: var(--blue)">📝</div>
+                        <div class="activity-content">
+                            <p class="activity-text">New setlist added by <strong>johndoe</strong></p>
+                            <p class="activity-meta">Taylor Swift - Eras Tour - Singapore National Stadium</p>
+                            <span class="activity-time">2 minutes ago</span>
+                        </div>
+                        <div class="activity-actions">
+                            <a href="/admin/setlists/1" class="btn btn-secondary">Review</a>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: var(--yellow)">✏️</div>
+                        <div class="activity-content">
+                            <p class="activity-text">Correction submitted by <strong>jane_smith</strong></p>
+                            <p class="activity-meta">Coldplay - Music of the Spheres - Tokyo Dome</p>
+                            <span class="activity-time">15 minutes ago</span>
+                        </div>
+                        <div class="activity-actions">
+                            <a href="/admin/corrections/1" class="btn btn-secondary">Review</a>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: var(--green)">👤</div>
+                        <div class="activity-content">
+                            <p class="activity-text">New member registered</p>
+                            <p class="activity-meta">mark_wilson</p>
+                            <span class="activity-time">1 hour ago</span>
+                        </div>
+                        <div class="activity-actions">
+                            <a href="/admin/members/1" class="btn btn-secondary">View</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="admin-section">
+                <div class="section-header">
+                    <h3>Quick Actions</h3>
+                </div>
+                <div class="quick-actions">
+                    <a th:href="@{/admin/setlists?status=pending}" class="action-card">
+                        <div class="action-icon" style="background: var(--yellow)">⏳</div>
+                        <h4>Review Pending Setlists</h4>
+                        <p>Review and approve new setlist submissions</p>
+                    </a>
+                    <a th:href="@{/admin/corrections}" class="action-card">
+                        <div class="action-icon" style="background: var(--red)">✏️</div>
+                        <h4>Review Corrections</h4>
+                        <p>Review and approve setlist corrections</p>
+                    </a>
+                    <a th:href="@{/admin/members}" class="action-card">
+                        <div class="action-icon" style="background: var(--blue)">👥</div>
+                        <h4>Manage Members</h4>
+                        <p>View and manage member accounts</p>
+                    </a>
+                    <a th:href="@{/admin/reports}" class="action-card">
+                        <div class="action-icon" style="background: var(--green)">📊</div>
+                        <h4>Generate Reports</h4>
+                        <p>View site statistics and generate reports</p>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Add any dashboard-specific JavaScript here
+    </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${artist.artistName + ' - Setlist'}">Artist - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li><a th:href="@{/guest/artists}">Artists</a></li>
+            <li th:text="${artist.artistName}">Artist Name</li>
+        </ol>
+    </nav>
+
+    <div class="artist-detail">
+        <header class="artist-header">
+            <div class="artist-info">
+                <h1 th:text="${artist.artistName}">Artist Name</h1>
+                <div class="artist-categories">
+                    <span th:each="category : ${artist.categories}" 
+                          th:text="${category}"
+                          class="category-tag">Category</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="upcoming-events" th:if="${not #lists.isEmpty(events)}">
+            <h2>Upcoming Events</h2>
+            <div class="event-list">
+                <div class="event-card" th:each="event : ${events}">
+                    <div class="event-date" th:text="${#temporals.format(event.eventDate, 'MMM dd, yyyy')}">Jan 1, 2024</div>
+                    <div class="event-details">
+                        <h3 th:text="${event.eventName}">Event Name</h3>
+                        <p th:text="${event.venueName}">Venue Name</p>
+                    </div>
+                    <a th:href="@{/guest/events/{id}(id=${event.idEvent})}" class="view-event">View Details</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="setlists" th:if="${not #lists.isEmpty(setlists)}">
+            <h2>Recent Setlists</h2>
+            <div class="setlist-list">
+                <div class="setlist-card" th:each="setlist : ${setlists}">
+                    <div class="setlist-header">
+                        <div class="setlist-date" th:text="${#temporals.format(setlist.createdAt, 'MMM dd, yyyy')}">Jan 1, 2024</div>
+                        <h3 th:text="${setlist.setlistName}">Setlist Name</h3>
+                        <p th:text="${setlist.eventName}">Event Name</p>
+                    </div>
+                    <div class="song-list">
+                        <ol>
+                            <li th:each="song : ${setlist.songs}" th:text="${song}">Song Name</li>
+                        </ol>
+                    </div>
+                    <div class="setlist-proof" th:if="${setlist.proofUrl}">
+                        <a th:href="${setlist.proofUrl}" target="_blank" class="proof-link">View Proof</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

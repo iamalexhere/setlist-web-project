@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setlists - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li>Setlists</li>
+        </ol>
+    </nav>
+
+    <div class="hero setlist-hero">
+        <h1>Concert Setlists</h1>
+        <p>Explore setlists from your favorite artists and events</p>
+        
+        <!-- Search Form -->
+        <div class="search-container">
+            <form th:action="@{/guest/setlists}" method="get" class="search-form">
+                <div class="search-filters">
+                    <div class="search-input-group">
+                        <input type="text" name="artist" th:value="${artist}" 
+                               class="search-box" placeholder="Search by artist name...">
+                        <span class="search-separator">or</span>
+                        <input type="text" name="event" th:value="${event}"
+                               class="search-box" placeholder="Search by event name...">
+                        <button type="submit" class="search-button">Search</button>
+                        <a th:if="${artist != null or event != null}" 
+                           th:href="@{/guest/setlists}" 
+                           class="clear-button">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Setlist Grid -->
+    <section class="setlist-section" th:if="${not #lists.isEmpty(setlistList)}">
+        <div class="setlist-grid">
+            <div class="setlist-card" th:each="setlist : ${setlistList}">
+                <div class="setlist-content">
+                    <h3>
+                        <a th:href="@{/guest/setlists/{id}(id=${setlist.idSetlist})}" 
+                           th:text="${setlist.setlistName}">Setlist Name</a>
+                    </h3>
+                    <div class="setlist-meta">
+                        <p class="artist-name">
+                            <a th:href="@{/guest/artists/{id}(id=${setlist.idArtist})}" 
+                               th:text="${setlist.artistName}">Artist Name</a>
+                        </p>
+                        <p class="event-name">
+                            <a th:href="@{/guest/events/{id}(id=${setlist.idEvent})}" 
+                               th:text="${setlist.eventName}">Event Name</a>
+                        </p>
+                        <p class="event-date" 
+                           th:text="${#temporals.format(setlist.eventDate, 'MMM dd, yyyy')}">
+                            Event Date
+                        </p>
+                    </div>
+                    <div class="song-preview" th:if="${not #lists.isEmpty(setlist.songs)}">
+                        <p class="songs-count" 
+                           th:text="${#lists.size(setlist.songs) + ' songs'}">0 songs</p>
+                        <div class="song-list">
+                            <span th:each="song, iterStat : ${setlist.songs}" 
+                                  th:if="${iterStat.index < 3}"
+                                  th:text="${song + (iterStat.last ? '' : ', ')}">
+                                Song Name
+                            </span>
+                            <span th:if="${#lists.size(setlist.songs) > 3}">...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Empty State -->
+    <section class="no-results" th:if="${#lists.isEmpty(setlistList)}">
+        <div class="no-results-message">
+            <h2>No setlists found</h2>
+            <p th:if="${artist != null or event != null}">
+                Try adjusting your search criteria
+            </p>
+            <p th:unless="${artist != null or event != null}">
+                There are no setlists available yet
+            </p>
+            <a th:if="${artist != null or event != null}" 
+               th:href="@{/guest/setlists}" 
+               class="clear-search">Clear Search</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

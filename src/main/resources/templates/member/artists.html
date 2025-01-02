@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Artists - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <main class="content-container">
+        <div class="page-header">
+            <h1>Manage Artists</h1>
+            <a href="/member/artists/add" class="btn btn-primary">Add New Artist</a>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Search artists..." id="artistSearch">
+        </div>
+
+        <div class="artist-grid" th:if="${not #lists.isEmpty(artists)}">
+            <div class="artist-card" th:each="artist : ${artists}">
+                <img th:src="${artist.imageUrl}" alt="Artist Image" class="artist-image">
+                <div class="artist-info">
+                    <h3 th:text="${artist.name}">Artist Name</h3>
+                    <p class="genre" th:text="${artist.genre}">Genre</p>
+                    <div class="stats">
+                        <span th:text="${artist.showCount + ' shows'}">0 shows</span>
+                        <span th:text="${artist.setlistCount + ' setlists'}">0 setlists</span>
+                    </div>
+                    <div class="card-actions">
+                        <a th:href="@{/member/artists/{id}/edit(id=${artist.id})}" class="btn">Edit</a>
+                        <a th:href="@{/member/artists/{id}/shows(id=${artist.id})}" class="btn">View Shows</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(artists)}">
+            <p>No artists found. Add your first artist!</p>
+            <a href="/member/artists/add" class="btn btn-primary">Add Artist</a>
+        </div>
+    </main>
+</body>
+</html>

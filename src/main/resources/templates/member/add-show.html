@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Show - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+    
+    <main class="form-container">
+        <div class="form-card">
+            <h1>Add New Show</h1>
+            
+            <form th:action="@{/member/shows/add}" method="post" class="form">
+                <div class="form-group">
+                    <label for="artist">Artist</label>
+                    <select id="artist" name="artistId" class="form-control" required>
+                        <option value="">Select Artist</option>
+                        <option th:each="artist : ${artists}" 
+                                th:value="${artist.id}" 
+                                th:text="${artist.name}">Artist Name</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="venue">Venue</label>
+                    <select id="venue" name="venueId" class="form-control" required>
+                        <option value="">Select Venue</option>
+                        <option th:each="venue : ${venues}" 
+                                th:value="${venue.id}" 
+                                th:text="${venue.name + ' - ' + venue.city}">Venue Name - City</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Show Date</label>
+                    <input type="date" id="date" name="date" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="time">Show Time</label>
+                    <input type="time" id="time" name="time" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tourName">Tour Name (Optional)</label>
+                    <input type="text" id="tourName" name="tourName" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Additional Notes</label>
+                    <textarea id="description" name="description" rows="4" class="form-control"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/member/shows" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Add Show</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

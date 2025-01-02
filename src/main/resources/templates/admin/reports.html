@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - Admin - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                <h1>Admin Panel</h1>
+            </div>
+            <nav class="admin-nav">
+                <a href="/admin" class="admin-nav-item">
+                    <span class="icon">📊</span>
+                    Dashboard
+                </a>
+                <a href="/admin/members" class="admin-nav-item">
+                    <span class="icon">👥</span>
+                    Members
+                </a>
+                <a href="/admin/setlists" class="admin-nav-item">
+                    <span class="icon">📝</span>
+                    Setlists
+                </a>
+                <a href="/admin/corrections" class="admin-nav-item">
+                    <span class="icon">✏️</span>
+                    Corrections
+                </a>
+                <a href="/admin/reports" class="admin-nav-item active">
+                    <span class="icon">📈</span>
+                    Reports
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2>Reports & Analytics</h2>
+                <div class="admin-header-actions">
+                    <div class="date-range">
+                        <select id="timeRange" class="form-control">
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="90">Last 3 months</option>
+                            <option value="365">Last year</option>
+                        </select>
+                    </div>
+                    <div class="admin-profile">
+                        <span class="admin-name">Admin</span>
+                        <a href="/logout" class="btn btn-secondary">Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Reports Grid -->
+            <div class="reports-grid">
+                <!-- Activity Timeline -->
+                <div class="report-card wide">
+                    <div class="report-header">
+                        <h3>Activity Timeline</h3>
+                        <div class="report-actions">
+                            <button class="btn btn-text active" data-metric="setlists">Setlists</button>
+                            <button class="btn btn-text" data-metric="corrections">Corrections</button>
+                            <button class="btn btn-text" data-metric="members">New Members</button>
+                        </div>
+                    </div>
+                    <div id="timelineChart" class="chart-container"></div>
+                </div>
+
+                <!-- Top Artists -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Top Artists</h3>
+                        <div class="report-actions">
+                            <button class="btn btn-icon" title="Download CSV">📥</button>
+                        </div>
+                    </div>
+                    <div id="artistsChart" class="chart-container"></div>
+                </div>
+
+                <!-- Popular Venues -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Popular Venues</h3>
+                        <div class="report-actions">
+                            <button class="btn btn-icon" title="Download CSV">📥</button>
+                        </div>
+                    </div>
+                    <div id="venuesChart" class="chart-container"></div>
+                </div>
+
+                <!-- Member Growth -->
+                <div class="report-card wide">
+                    <div class="report-header">
+                        <h3>Member Growth</h3>
+                        <div class="report-actions">
+                            <button class="btn btn-text active" data-view="cumulative">Cumulative</button>
+                            <button class="btn btn-text" data-view="monthly">Monthly</button>
+                        </div>
+                    </div>
+                    <div id="memberGrowthChart" class="chart-container"></div>
+                </div>
+
+                <!-- Contribution Distribution -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Contribution Distribution</h3>
+                    </div>
+                    <div id="contributionChart" class="chart-container"></div>
+                </div>
+
+                <!-- Correction Success Rate -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Correction Success Rate</h3>
+                    </div>
+                    <div id="correctionRateChart" class="chart-container"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script th:inline="javascript">
+        // Get data from Thymeleaf
+        const timelineData = /*[[${timelineData}]]*/ [];
+        const artistData = /*[[${artistData}]]*/ [];
+        const venueData = /*[[${venueData}]]*/ [];
+        const memberGrowthData = /*[[${memberGrowthData}]]*/ [];
+        const contributionData = /*[[${contributionData}]]*/ [];
+        const correctionRateData = /*[[${correctionRateData}]]*/ [];
+
+        // Initialize charts when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initTimelineChart();
+            initArtistsChart();
+            initVenuesChart();
+            initMemberGrowthChart();
+            initContributionChart();
+            initCorrectionRateChart();
+        });
+
+        // Activity Timeline Chart
+        function initTimelineChart() {
+            const margin = {top: 20, right: 30, bottom: 30, left: 40};
+            const width = document.getElementById('timelineChart').clientWidth - margin.left - margin.right;
+            const height = 300 - margin.top - margin.bottom;
+
+            const svg = d3.select('#timelineChart')
+                .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Create scales
+            const x = d3.scaleTime()
+                .domain(d3.extent(timelineData, d => new Date(d.date)))
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(timelineData, d => d.value)])
+                .range([height, 0]);
+
+            // Add axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .call(d3.axisLeft(y));
+
+            // Create line generator
+            const line = d3.line()
+                .x(d => x(new Date(d.date)))
+                .y(d => y(d.value))
+                .curve(d3.curveMonotoneX);
+
+            // Add the line path
+            svg.append('path')
+                .datum(timelineData)
+                .attr('class', 'line')
+                .attr('d', line)
+                .attr('fill', 'none')
+                .attr('stroke', 'var(--blue)')
+                .attr('stroke-width', 2);
+
+            // Add dots
+            svg.selectAll('.dot')
+                .data(timelineData)
+                .enter().append('circle')
+                .attr('class', 'dot')
+                .attr('cx', d => x(new Date(d.date)))
+                .attr('cy', d => y(d.value))
+                .attr('r', 4)
+                .attr('fill', 'var(--blue)');
+
+            // Add hover effects
+            const tooltip = d3.select('#timelineChart')
+                .append('div')
+                .attr('class', 'tooltip')
+                .style('opacity', 0);
+
+            svg.selectAll('.dot')
+                .on('mouseover', function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('r', 6);
+
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    
+                    tooltip.html(`${d.date}<br/>${d.value} items`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('r', 4);
+
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                });
+        }
+
+        // Top Artists Chart (Horizontal Bar Chart)
+        function initArtistsChart() {
+            const margin = {top: 20, right: 30, bottom: 40, left: 90};
+            const width = document.getElementById('artistsChart').clientWidth - margin.left - margin.right;
+            const height = 300 - margin.top - margin.bottom;
+
+            const svg = d3.select('#artistsChart')
+                .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Create scales
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(artistData, d => d.count)])
+                .range([0, width]);
+
+            const y = d3.scaleBand()
+                .domain(artistData.map(d => d.name))
+                .range([0, height])
+                .padding(0.1);
+
+            // Add axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .call(d3.axisLeft(y));
+
+            // Add bars
+            svg.selectAll('rect')
+                .data(artistData)
+                .enter()
+                .append('rect')
+                    .attr('y', d => y(d.name))
+                    .attr('height', y.bandwidth())
+                    .attr('x', 0)
+                    .attr('width', d => x(d.count))
+                    .attr('fill', 'var(--blue)')
+                    .attr('rx', 4)
+                    .attr('ry', 4);
+
+            // Add value labels
+            svg.selectAll('.value')
+                .data(artistData)
+                .enter()
+                .append('text')
+                    .attr('class', 'value')
+                    .attr('x', d => x(d.count) + 5)
+                    .attr('y', d => y(d.name) + y.bandwidth() / 2)
+                    .attr('dy', '.35em')
+                    .text(d => d.count);
+        }
+
+        // Popular Venues Chart (Donut Chart)
+        function initVenuesChart() {
+            const width = document.getElementById('venuesChart').clientWidth;
+            const height = 300;
+            const radius = Math.min(width, height) / 2;
+
+            const svg = d3.select('#venuesChart')
+                .append('svg')
+                    .attr('width', width)
+                    .attr('height', height)
+                .append('g')
+                    .attr('transform', `translate(${width/2},${height/2})`);
+
+            const color = d3.scaleOrdinal()
+                .domain(venueData.map(d => d.name))
+                .range(d3.schemeCategory10);
+
+            const pie = d3.pie()
+                .value(d => d.count)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(radius * 0.6)
+                .outerRadius(radius * 0.8);
+
+            const outerArc = d3.arc()
+                .innerRadius(radius * 0.9)
+                .outerRadius(radius * 0.9);
+
+            // Add the arcs
+            const paths = svg.selectAll('path')
+                .data(pie(venueData))
+                .enter()
+                .append('path')
+                    .attr('d', arc)
+                    .attr('fill', d => color(d.data.name))
+                    .attr('stroke', 'var(--base)')
+                    .style('stroke-width', '2px');
+
+            // Add labels
+            const labels = svg.selectAll('text')
+                .data(pie(venueData))
+                .enter()
+                .append('text')
+                    .attr('dy', '.35em')
+                    .text(d => `${d.data.name} (${d.data.count})`);
+
+            function midAngle(d) {
+                return d.startAngle + (d.endAngle - d.startAngle) / 2;
+            }
+
+            labels.attr('transform', function(d) {
+                const pos = outerArc.centroid(d);
+                pos[0] = radius * (midAngle(d) < Math.PI ? 1 : -1);
+                return `translate(${pos})`;
+            })
+            .style('text-anchor', function(d) {
+                return midAngle(d) < Math.PI ? 'start' : 'end';
+            });
+
+            // Add polylines
+            const polylines = svg.selectAll('polyline')
+                .data(pie(venueData))
+                .enter()
+                .append('polyline');
+
+            polylines.attr('points', function(d) {
+                const pos = outerArc.centroid(d);
+                pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+                return [arc.centroid(d), outerArc.centroid(d), pos];
+            })
+            .style('fill', 'none')
+            .style('stroke', 'var(--text-op)')
+            .style('stroke-width', '1px');
+        }
+
+        // Member Growth Chart (Area Chart)
+        function initMemberGrowthChart() {
+            const margin = {top: 20, right: 30, bottom: 30, left: 40};
+            const width = document.getElementById('memberGrowthChart').clientWidth - margin.left - margin.right;
+            const height = 300 - margin.top - margin.bottom;
+
+            const svg = d3.select('#memberGrowthChart')
+                .append('svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Create scales
+            const x = d3.scaleTime()
+                .domain(d3.extent(memberGrowthData, d => new Date(d.date)))
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(memberGrowthData, d => d.count)])
+                .range([height, 0]);
+
+            // Add axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            svg.append('g')
+                .call(d3.axisLeft(y));
+
+            // Create area generator
+            const area = d3.area()
+                .x(d => x(new Date(d.date)))
+                .y0(height)
+                .y1(d => y(d.count))
+                .curve(d3.curveMonotoneX);
+
+            // Add the area
+            svg.append('path')
+                .datum(memberGrowthData)
+                .attr('class', 'area')
+                .attr('d', area)
+                .attr('fill', 'var(--blue)')
+                .attr('fill-opacity', 0.2);
+
+            // Add the line
+            const line = d3.line()
+                .x(d => x(new Date(d.date)))
+                .y(d => y(d.count))
+                .curve(d3.curveMonotoneX);
+
+            svg.append('path')
+                .datum(memberGrowthData)
+                .attr('class', 'line')
+                .attr('d', line)
+                .attr('fill', 'none')
+                .attr('stroke', 'var(--blue)')
+                .attr('stroke-width', 2);
+        }
+
+        // Contribution Distribution Chart (Pie Chart)
+        function initContributionChart() {
+            const width = document.getElementById('contributionChart').clientWidth;
+            const height = 300;
+            const radius = Math.min(width, height) / 2;
+
+            const svg = d3.select('#contributionChart')
+                .append('svg')
+                    .attr('width', width)
+                    .attr('height', height)
+                .append('g')
+                    .attr('transform', `translate(${width/2},${height/2})`);
+
+            const color = d3.scaleOrdinal()
+                .domain(contributionData.map(d => d.type))
+                .range(['var(--blue)', 'var(--green)', 'var(--yellow)']);
+
+            const pie = d3.pie()
+                .value(d => d.count)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(0)
+                .outerRadius(radius * 0.8);
+
+            // Add the arcs
+            const arcs = svg.selectAll('arc')
+                .data(pie(contributionData))
+                .enter()
+                .append('g')
+                .attr('class', 'arc');
+
+            arcs.append('path')
+                .attr('d', arc)
+                .attr('fill', d => color(d.data.type))
+                .attr('stroke', 'var(--base)')
+                .style('stroke-width', '2px');
+
+            // Add labels
+            arcs.append('text')
+                .attr('transform', d => `translate(${arc.centroid(d)})`)
+                .attr('dy', '.35em')
+                .style('text-anchor', 'middle')
+                .text(d => `${d.data.type}: ${d.data.count}`);
+        }
+
+        // Correction Success Rate Chart (Gauge Chart)
+        function initCorrectionRateChart() {
+            const width = document.getElementById('correctionRateChart').clientWidth;
+            const height = 300;
+            const radius = Math.min(width, height) / 2;
+
+            const svg = d3.select('#correctionRateChart')
+                .append('svg')
+                    .attr('width', width)
+                    .attr('height', height)
+                .append('g')
+                    .attr('transform', `translate(${width/2},${height/2})`);
+
+            const successRate = correctionRateData.approved / 
+                (correctionRateData.approved + correctionRateData.rejected) * 100;
+
+            const arc = d3.arc()
+                .innerRadius(radius * 0.7)
+                .outerRadius(radius * 0.9)
+                .startAngle(-Math.PI / 2);
+
+            // Background arc
+            svg.append('path')
+                .datum({endAngle: Math.PI / 2})
+                .style('fill', 'var(--surface0)')
+                .attr('d', arc);
+
+            // Foreground arc
+            const foreground = svg.append('path')
+                .datum({endAngle: -Math.PI / 2})
+                .style('fill', 'var(--green)')
+                .attr('d', arc);
+
+            // Add the percentage text
+            svg.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.35em')
+                .style('font-size', '2em')
+                .text(`${Math.round(successRate)}%`);
+
+            // Animate the foreground arc
+            foreground.transition()
+                .duration(1000)
+                .attrTween('d', function(d) {
+                    const interpolate = d3.interpolate(d.endAngle, (-Math.PI / 2) + (Math.PI * (successRate / 100)));
+                    return function(t) {
+                        d.endAngle = interpolate(t);
+                        return arc(d);
+                    };
+                });
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // Clear all charts
+            d3.selectAll('.chart-container svg').remove();
+
+            // Reinitialize charts
+            initTimelineChart();
+            initArtistsChart();
+            initVenuesChart();
+            initMemberGrowthChart();
+            initContributionChart();
+            initCorrectionRateChart();
+        });
+
+        // Handle time range changes
+        document.getElementById('timeRange').addEventListener('change', function(e) {
+            // TODO: Fetch new data based on selected time range
+            // and update charts
+        });
+    </script>
+</body>
+</html>

@@ -10,13 +10,26 @@
     <nav th:fragment="navbar" class="navbar">
         <div class="container">
             <a href="/" class="logo">Setlist</a>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/artists">Artists</a></li>
-                <li><a href="/venues">Venues</a></li>
-                <li><a href="/events">Events</a></li>
-                <li><a href="/auth/login">Login</a></li>
-            </ul>
+            <div class="nav-links">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/guest/events}" 
+                       th:classappend="${activePage == 'events' ? 'active' : ''}">Events</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/guest/artists}" 
+                       th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/guest/setlists}" 
+                       th:classappend="${activePage == 'setlists' ? 'active' : ''}">Setlists</a>
+                </li>
+                <li class="nav-item" th:if="${session.userId == null}">
+                    <a class="nav-link btn-login" th:href="@{/auth/login}">Login</a>
+                </li>
+                <li class="nav-item" th:if="${session.userId != null}">
+                    <a class="nav-link btn-logout" th:href="@{/auth/logout}">Logout</a>
+                </li>
+            </div>
         </div>
     </nav>
 </body>

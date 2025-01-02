@@ -10,105 +10,107 @@
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li>Artists</li>
+        </ol>
+    </nav>
+
     <div class="hero artist-hero">
         <h1>Discover Artists</h1>
         <p>Find setlists from your favorite performers</p>
         <div class="search-container">
-            <input type="text" class="search-box" placeholder="Search for artists...">
+            <form th:action="@{/guest/artists}" method="get" class="search-form">
+                <div class="search-input-group">
+                    <input type="text" name="name" class="search-box" 
+                           th:value="${searchQuery}" 
+                           placeholder="Search for artists...">
+                    <input type="hidden" name="genre" th:value="${selectedGenre}">
+                    <button type="submit" class="search-button">Search</button>
+                    <a th:if="${hasSearch}" th:href="@{/guest/artists}" class="clear-button">Clear</a>
+                </div>
+            </form>
         </div>
     </div>
 
-    <section class="featured-artists">
+    <!-- <section class="featured-artists">
         <h2 class="section-title">Featured Artists</h2>
         <div class="artist-grid">
-            <div class="artist-card">
+            <div class="artist-card" th:each="artist : ${featuredArtists}">
                 <div class="artist-image">
-                    <img src="https://placehold.co/200x200" alt="Taylor Swift">
+                    <img src="https://placehold.co/200x200" th:alt="${artist.artistName}">
                 </div>
-                <h3>Taylor Swift</h3>
-                <p>The Eras Tour</p>
-                <p class="stats">145 setlists</p>
-            </div>
-            <div class="artist-card">
-                <div class="artist-image">
-                    <img src="https://placehold.co/200x200" alt="Ed Sheeran">
-                </div>
-                <h3>Ed Sheeran</h3>
-                <p>Mathematics Tour</p>
-                <p class="stats">98 setlists</p>
-            </div>
-            <div class="artist-card">
-                <div class="artist-image">
-                    <img src="https://placehold.co/200x200" alt="Coldplay">
-                </div>
-                <h3>Coldplay</h3>
-                <p>Music of the Spheres World Tour</p>
-                <p class="stats">120 setlists</p>
+                <h3 th:text="${artist.artistName}">Artist Name</h3>
+                <p class="artist-categories">
+                    <span th:each="category, iterStat : ${artist.categories}" 
+                          th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
+                </p>
+                <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="view-artist">View Setlists</a>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <section class="artist-categories">
-        <h2 class="section-title">Browse by Genre</h2>
+        <div class="section-header">
+            <h2 class="section-title">Browse by Genre</h2>
+            <a th:if="${!#strings.isEmpty(selectedGenre)}" 
+               th:href="@{/guest/artists(name=${searchQuery})}" 
+               class="clear-genre">Clear Genre Filter</a>
+        </div>
         <div class="category-grid">
-            <a href="#" class="category-card" style="background-color: var(--pink)">
-                <h3>Pop</h3>
-                <p>1,234 artists</p>
-            </a>
-            <a href="#" class="category-card" style="background-color: var(--mauve)">
-                <h3>Rock</h3>
-                <p>890 artists</p>
-            </a>
-            <a href="#" class="category-card" style="background-color: var(--blue)">
-                <h3>Hip Hop</h3>
-                <p>567 artists</p>
-            </a>
-            <a href="#" class="category-card" style="background-color: var(--teal)">
-                <h3>Electronic</h3>
-                <p>432 artists</p>
-            </a>
-            <a href="#" class="category-card" style="background-color: var(--peach)">
-                <h3>Jazz</h3>
-                <p>234 artists</p>
-            </a>
-            <a href="#" class="category-card" style="background-color: var(--rosewater)">
-                <h3>Classical</h3>
-                <p>123 artists</p>
+            <a th:href="@{/guest/artists(genre=${entry.key}, name=${searchQuery})}" 
+               th:each="entry : ${genreCounts}"
+               class="category-card" 
+               th:classappend="${entry.key == selectedGenre ? 'active' : ''}"
+               th:style="${'background-color: var(--' + (#strings.toLowerCase(entry.key)) + ')'}">
+                <h3 th:text="${entry.key}">Genre</h3>
+                <span class="count" th:text="${entry.value + ' artists'}">0 artists</span>
             </a>
         </div>
     </section>
 
-    <section class="recent-artists">
-        <h2 class="section-title">Recently Added Artists</h2>
-        <div class="artist-list">
-            <div class="artist-row">
-                <div class="artist-info">
-                    <h3>Olivia Rodrigo</h3>
-                    <p>GUTS World Tour</p>
+    <section class="all-artists">
+        <h2 class="section-title" th:text="${hasSearch ? 
+            ('Search Results' + (!#strings.isEmpty(selectedGenre) ? ' in ' + selectedGenre : '')) : 
+            'All Artists'}">All Artists</h2>
+        
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(searchedArtists)}">
+            <h3>No Artists Found</h3>
+            <p th:if="${hasSearch}">Try adjusting your search criteria or browse all artists</p>
+            <p th:unless="${hasSearch}">There are no artists in the database yet</p>
+        </div>
+        
+        <!-- Artist Grid -->
+        <div class="artist-grid" th:if="${not #lists.isEmpty(searchedArtists)}">
+            <div class="artist-card" th:each="artist : ${searchedArtists}">
+                <div class="artist-image">
+                    <img src="https://placehold.co/200x200" th:alt="${artist.artistName}">
                 </div>
-                <p class="date">Added 2 days ago</p>
-            </div>
-            <div class="artist-row">
-                <div class="artist-info">
-                    <h3>The Weeknd</h3>
-                    <p>After Hours til Dawn Tour</p>
-                </div>
-                <p class="date">Added 3 days ago</p>
-            </div>
-            <div class="artist-row">
-                <div class="artist-info">
-                    <h3>Arctic Monkeys</h3>
-                    <p>The Car Tour</p>
-                </div>
-                <p class="date">Added 5 days ago</p>
+                <h3 th:text="${artist.artistName}">Artist Name</h3>
+                <p class="artist-categories">
+                    <span th:each="category, iterStat : ${artist.categories}" 
+                          th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
+                </p>
+                <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="view-artist">View Setlists</a>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:href="@{/guest/artists(page=${currentPage - 1}, name=${searchQuery}, genre=${selectedGenre})}" 
+               th:class="${currentPage <= 1 ? 'disabled' : ''}">&laquo; Previous</a>
+            
+            <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/guest/artists(page=${i}, name=${searchQuery}, genre=${selectedGenre})}" 
+                   th:text="${i}"
+                   th:class="${i == currentPage ? 'active' : ''}">1</a>
+            </span>
+            
+            <a th:href="@{/guest/artists(page=${currentPage + 1}, name=${searchQuery}, genre=${selectedGenre})}" 
+               th:class="${currentPage >= totalPages ? 'disabled' : ''}">Next &raquo;</a>
+        </div>
     </section>
-
-    <footer>
-        <p>&copy; 2024 Setlist. All rights reserved.</p>
-    </footer>
-
-    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>
