@@ -3,7 +3,6 @@ package com.tubes.setlist.guest.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import com.tubes.setlist.guest.model.*;
+import com.tubes.setlist.guest.model.ArtistView;
+import com.tubes.setlist.guest.model.EventView;
+import com.tubes.setlist.guest.model.SetlistView;
 
 @Repository
 public class JdbcGuestRepository implements GuestRepository {
@@ -230,11 +231,12 @@ public class JdbcGuestRepository implements GuestRepository {
         String sql = """
             SELECT s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
                    s.proof_url, s.created_at, s.is_deleted,
-                   string_agg(sl.song_name, ', ') as songs
+                   string_agg(sg.song_name, ', ') as songs
             FROM setlists s
             JOIN artists a ON s.id_artist = a.id_artist
             LEFT JOIN events e ON s.id_event = e.id_event
-            LEFT JOIN setlist_songs sl ON s.id_setlist = sl.id_setlist
+            LEFT JOIN setlists_songs sl ON s.id_setlist = sl.id_setlist
+            LEFT JOIN songs sg ON sl.id_song = sg.id_song
             WHERE s.id_artist = ?
             GROUP BY s.id_setlist, s.setlist_name, a.artist_name, e.event_name,
                      s.proof_url, s.created_at, s.is_deleted

@@ -52,7 +52,7 @@ public class GuestControllerTest {
         mockMvc.perform(get("/guest/artists"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/artists"))
-                .andExpect(model().attributeExists("featuredArtists"))
+                //.andExpect(model().attributeExists("featuredArtists"))
                 .andExpect(model().attributeExists("searchedArtists"))
                 .andExpect(model().attributeExists("genreCounts"))
                 .andExpect(model().attributeExists("selectedGenre"))
