@@ -57,8 +57,8 @@ public class AuthController {
         RedirectAttributes redirectAttributes
     ) {
         try {
-            authService.login(email, password);
-            return "redirect:/";
+            String redirectUrl = authService.login(email, password);
+            return redirectUrl;
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/auth/login";

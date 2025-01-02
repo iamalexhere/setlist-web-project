@@ -36,8 +36,8 @@ public class AuthService {
         // Hash password
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        // Insert new user with MEMBER role (assuming role_id 2 is for MEMBER)
-        String sql = "INSERT INTO users (username, email, hashed_password, id_role) VALUES (?, ?, ?, 2)";
+        // Insert new user with MEMBER role
+        String sql = "INSERT INTO users (username, email, hashed_password, id_role) VALUES (?, ?, ?, 1)";
         jdbcTemplate.update(sql, username, email, hashedPassword);
     }
 
@@ -50,7 +50,7 @@ public class AuthService {
         private String roleName;
     }
 
-    public void login(String email, String password) {
+    public String login(String email, String password) {
         try {
             String sql = "SELECT u.id_user, u.username, u.email, u.hashed_password, r.role_name " +
                         "FROM users u " +
@@ -75,11 +75,25 @@ public class AuthService {
                 session.setAttribute("username", user.getUsername());
                 session.setAttribute("email", user.getEmail());
                 session.setAttribute("role", user.getRoleName());
+                
+                // Return redirect URL based on role
+                return getRedirectUrlByRole(user.getRoleName());
             } else {
                 throw new RuntimeException("Invalid password");
             }
         } catch (EmptyResultDataAccessException e) {
             throw new RuntimeException("Email not found");
+        }
+    }
+
+    private String getRedirectUrlByRole(String role) {
+        switch (role) {
+            case "Admin":
+                return "redirect:/admin/dashboard";
+            case "Member":
+                return "redirect:/member/dashboard";
+            default:
+                return "redirect:/auth/login";
         }
     }
 
