@@ -9,24 +9,46 @@
 <body>
     <nav th:fragment="navbar" class="navbar">
         <div class="container">
-            <a href="/" class="logo">Setlist</a>
+            <a th:href="${session.role == 'Member' ? '/member/dashboard' : '/'}" class="logo">Setlist</a>
             <div class="nav-links">
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/guest/events}" 
-                       th:classappend="${activePage == 'events' ? 'active' : ''}">Events</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/guest/artists}" 
-                       th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/guest/setlists}" 
-                       th:classappend="${activePage == 'setlists' ? 'active' : ''}">Setlists</a>
-                </li>
+                <!-- Guest Navigation -->
+                <th:block th:if="${session.role == null || session.role != 'Member'}">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/guest/events}" 
+                           th:classappend="${activePage == 'events' ? 'active' : ''}">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/guest/artists}" 
+                           th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/guest/setlists}" 
+                           th:classappend="${activePage == 'setlists' ? 'active' : ''}">Setlists</a>
+                    </li>
+                </th:block>
+
+                <!-- Member Navigation -->
+                <th:block th:if="${session.role == 'Member'}">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/member/artists}" 
+                           th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/member/shows}" 
+                           th:classappend="${activePage == 'shows' ? 'active' : ''}">Shows</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/member/setlists}" 
+                           th:classappend="${activePage == 'setlists' ? 'active' : ''}">Setlists</a>
+                    </li>
+                </th:block>
+
+                <!-- Authentication -->
                 <li class="nav-item" th:if="${session.userId == null}">
                     <a class="nav-link btn-login" th:href="@{/auth/login}">Login</a>
                 </li>
                 <li class="nav-item" th:if="${session.userId != null}">
+                    <span class="nav-link username" th:text="${session.username}">Username</span>
                     <a class="nav-link btn-logout" th:href="@{/auth/logout}">Logout</a>
                 </li>
             </div>

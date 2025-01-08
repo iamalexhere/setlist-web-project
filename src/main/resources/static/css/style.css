@@ -1281,7 +1281,7 @@ footer {
     font-weight: 500;
 }
 
-.form-control, .form-group input[type="text"], .form-group input[type="url"], .form-group textarea, .form-group input[type="file"] {
+.form-control, .form-group input[type="text"], .form-group input[type="url"], .form-group textarea, .form-group input[type="file"], .form-group select {
     width: 100%;
     padding: 0.8rem 1rem;
     border: 2px solid var(--surface0);
@@ -2765,4 +2765,12 @@ select.form-control {
 
 .setlist-proof {
     text-align: right;
+}
+
+.message-error {
+    color: red;
+}
+
+.message-accept {
+    color: green;
 }

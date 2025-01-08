@@ -5,39 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Artist - Setlist</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div th:replace="fragments/navbar :: navbar"></div>
     
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li><a th:href="@{/member/artists}">Artists</a></li>
+            <li>Add Artist</li>
+        </ol>
+    </nav>
+
     <main class="form-container">
         <div class="form-card">
             <h1>Add New Artist</h1>
             
             <form th:action="@{/member/artists/add}" method="post" enctype="multipart/form-data" class="form">
-                <div class="form-group">
-                    <label for="name">Artist Name</label>
-                    <input type="text" id="name" name="name" required>
+                <div th:if="${error}" class="message-error">
+                    <p th:text="${error}"></p>
+                </div>
+
+                <div th:if="${accept}" class="message-accept">
+                    <p th:text="${accept}"></p>
                 </div>
 
                 <div class="form-group">
-                    <label for="genre">Genre</label>
-                    <input type="text" id="genre" name="genre" required>
+                    <label for="name">Artist Name</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="genreName">Genre</label>
+                    <select id="genreName" name="genreName" class="form-control" required>
+                        <option value="" disabled selected>Select a genre</option>
+                        <option th:each="genre : ${genres}" 
+                                th:value="${genre.category_name}" 
+                                th:text="${genre.category_name}">
+                        </option>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4"></textarea>
+                    <textarea id="description" name="description" class="form-control" rows="4"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="image">Artist Image</label>
-                    <input type="file" id="image" name="image" accept="image/*">
+                    <input type="file" id="image" name="image" class="form-control" accept="image/*">
                     <small class="form-help">Maximum file size: 5MB. Supported formats: JPG, PNG</small>
                 </div>
 
                 <div class="form-actions">
+                    <a th:href="@{/member/artists}" class="btn btn-secondary">Cancel</a>
                     <button type="submit" class="btn btn-primary">Add Artist</button>
-                    <a href="/member/artists" class="btn">Cancel</a>
                 </div>
             </form>
         </div>
