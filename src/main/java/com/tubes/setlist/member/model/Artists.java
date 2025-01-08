@@ -9,6 +9,9 @@ import java.util.List;
 public class Artists {
     private Long idArtist;
     private String artistName;
+    private String imageFilename;
+    private String imageOriginalFilename;
+    private String imageUrl;
     private List<String> categories;
     private boolean isDeleted;
 }

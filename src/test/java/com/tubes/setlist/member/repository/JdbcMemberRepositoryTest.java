@@ -1,10 +1,12 @@
 package com.tubes.setlist.member.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,12 +30,34 @@ public class JdbcMemberRepositoryTest {
         String artistName = "Test Artist";
 
         // When
-        memberRepository.addArtist(artistName);
+        memberRepository.addArtist(artistName, null, null);
         List<Artists> foundArtists = memberRepository.findArtistsByName(artistName);
 
         // Then
         assertFalse(foundArtists.isEmpty());
         assertEquals(artistName, foundArtists.get(0).getArtistName());
+        assertNotNull(foundArtists.get(0).getImageUrl());
+        assertEquals("https://picsum.photos/200/300", foundArtists.get(0).getImageUrl());
+    }
+
+    @Test
+    public void testAddArtistWithImage() {
+        // Given
+        String artistName = "Test Artist With Image";
+        String imageFilename = "test-image.jpg";
+        String originalFilename = "original-test-image.jpg";
+
+        // When
+        memberRepository.addArtist(artistName, imageFilename, originalFilename);
+        List<Artists> foundArtists = memberRepository.findArtistsByName(artistName);
+
+        // Then
+        assertFalse(foundArtists.isEmpty());
+        Artists artist = foundArtists.get(0);
+        assertEquals(artistName, artist.getArtistName());
+        assertEquals(imageFilename, artist.getImageFilename());
+        assertEquals(originalFilename, artist.getImageOriginalFilename());
+        assertEquals("/images/artists/" + imageFilename, artist.getImageUrl());
     }
 
     @Test
@@ -55,7 +79,7 @@ public class JdbcMemberRepositoryTest {
         // Given
         String artistName = "Test Artist";
         String categoryName = "Test Genre";
-        memberRepository.addArtist(artistName);
+        memberRepository.addArtist(artistName, null, null);
         memberRepository.addCategories(categoryName);
 
         List<Artists> artists = memberRepository.findArtistsByName(artistName);
@@ -83,6 +107,8 @@ public class JdbcMemberRepositoryTest {
         assertEquals(artistName, artists.get(0).getArtistName());
         assertTrue(artists.get(0).getCategories().contains("Pop"));
         assertTrue(artists.get(0).getCategories().contains("Rock"));
+        assertNotNull(artists.get(0).getImageUrl());
+        assertEquals("https://picsum.photos/200/300", artists.get(0).getImageUrl());
     }
 
     @Test
@@ -100,6 +126,8 @@ public class JdbcMemberRepositoryTest {
         assertFalse(artists.isEmpty());
         assertTrue(artists.stream().allMatch(artist -> 
             artist.getCategories().contains(genre)));
+        assertTrue(artists.stream().allMatch(artist -> 
+            artist.getImageUrl() != null && artist.getImageUrl().equals("https://picsum.photos/200/300")));
     }
 
     @Test

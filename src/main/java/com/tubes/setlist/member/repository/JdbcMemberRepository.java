@@ -21,9 +21,10 @@ public class JdbcMemberRepository implements MemberRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Override
-    public void addArtist(String artist_name) {
-        String sql = "INSERT INTO artists (artist_name) VALUES (?)";
-        jdbcTemplate.update(sql, artist_name);
+    public void addArtist(String artist_name, String imageFilename, String imageOriginalFilename) {
+        String sql = "INSERT INTO artists (artist_name, image_filename, image_original_filename, image_url) VALUES (?, ?, ?, ?)";
+        String imageUrl = imageFilename != null ? "/images/artists/" + imageFilename : "https://picsum.photos/200/300";
+        jdbcTemplate.update(sql, artist_name, imageFilename, imageOriginalFilename, imageUrl);
     }
     
     @Override
@@ -51,13 +52,16 @@ public class JdbcMemberRepository implements MemberRepository {
             WITH artist_categories AS (
                 SELECT a.id_artist, 
                        a.artist_name,
+                       a.image_filename,
+                       a.image_original_filename,
+                       a.image_url,
                        a.is_deleted,
                        string_agg(c.category_name, ', ') as categories
                 FROM artists a
                 LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
                 LEFT JOIN categories c ON ac.id_category = c.id_category
                 WHERE LOWER(a.artist_name) LIKE LOWER(?)
-                GROUP BY a.id_artist, a.artist_name, a.is_deleted
+                GROUP BY a.id_artist, a.artist_name, a.image_filename, a.image_original_filename, a.image_url, a.is_deleted
             )
             SELECT * FROM artist_categories
             ORDER BY artist_name
@@ -72,6 +76,9 @@ public class JdbcMemberRepository implements MemberRepository {
             WITH artist_categories AS (
                 SELECT a.id_artist, 
                     a.artist_name,
+                    a.image_filename,
+                    a.image_original_filename,
+                    a.image_url,
                     a.is_deleted,
                     string_agg(c.category_name, ', ') as categories
                 FROM artists a
@@ -88,7 +95,7 @@ public class JdbcMemberRepository implements MemberRepository {
                     )
                 )
                 AND NOT a.is_deleted
-                GROUP BY a.id_artist, a.artist_name, a.is_deleted
+                GROUP BY a.id_artist, a.artist_name, a.image_filename, a.image_original_filename, a.image_url, a.is_deleted
             )
             SELECT * FROM artist_categories
             ORDER BY artist_name
@@ -102,6 +109,9 @@ public class JdbcMemberRepository implements MemberRepository {
             (rs, rowNum) -> new Artists(
                 rs.getLong("id_artist"),
                 rs.getString("artist_name"),
+                rs.getString("image_filename"),
+                rs.getString("image_original_filename"),
+                rs.getString("image_url"),
                 rs.getString("categories") != null ? Arrays.asList(rs.getString("categories").split(", ")) : List.of(),
                 rs.getBoolean("is_deleted")
             ),
@@ -180,6 +190,9 @@ public class JdbcMemberRepository implements MemberRepository {
         return new Artists(
             resultSet.getLong("id_artist"),
             resultSet.getString("artist_name"),
+            resultSet.getString("image_filename"),
+            resultSet.getString("image_original_filename"),
+            resultSet.getString("image_url"),
             categoriesList,
             resultSet.getBoolean("is_deleted")
         );
