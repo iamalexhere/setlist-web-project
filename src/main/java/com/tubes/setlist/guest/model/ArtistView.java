@@ -9,6 +9,9 @@ import lombok.Data;
 public class ArtistView {
     private Long idArtist;
     private String artistName;
+    private String imageFilename;
+    private String imageOriginalFilename;
+    private String imageUrl;
     private List<String> categories;
     private Boolean isDeleted;
 }

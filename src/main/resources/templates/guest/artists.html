@@ -39,7 +39,7 @@
         <div class="artist-grid">
             <div class="artist-card" th:each="artist : ${featuredArtists}">
                 <div class="artist-image">
-                    <img src="https://placehold.co/200x200" th:alt="${artist.artistName}">
+                    <img th:src="${artist.imageUrl}" th:alt="${artist.artistName}">
                 </div>
                 <h3 th:text="${artist.artistName}">Artist Name</h3>
                 <p class="artist-categories">
@@ -86,7 +86,7 @@
         <div class="artist-grid" th:if="${not #lists.isEmpty(searchedArtists)}">
             <div class="artist-card" th:each="artist : ${searchedArtists}">
                 <div class="artist-image">
-                    <img src="https://placehold.co/200x200" th:alt="${artist.artistName}">
+                    <img th:src="${artist.imageUrl}" th:alt="${artist.artistName}">
                 </div>
                 <h3 th:text="${artist.artistName}">Artist Name</h3>
                 <p class="artist-categories">

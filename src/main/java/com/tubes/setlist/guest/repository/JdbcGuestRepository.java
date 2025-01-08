@@ -28,13 +28,16 @@ public class JdbcGuestRepository implements GuestRepository {
             WITH artist_categories AS (
                 SELECT a.id_artist, 
                        a.artist_name,
+                       a.image_filename,
+                       a.image_original_filename,
+                       a.image_url,
                        a.is_deleted,
                        string_agg(c.category_name, ', ') as categories
                 FROM artists a
                 LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
                 LEFT JOIN categories c ON ac.id_category = c.id_category
                 WHERE LOWER(a.artist_name) LIKE LOWER(?)
-                GROUP BY a.id_artist, a.artist_name, a.is_deleted
+                GROUP BY a.id_artist, a.artist_name, a.image_filename, a.image_original_filename, a.image_url, a.is_deleted
             )
             SELECT * FROM artist_categories
             ORDER BY artist_name
@@ -45,7 +48,10 @@ public class JdbcGuestRepository implements GuestRepository {
             (rs, rowNum) -> new ArtistView(
                 rs.getLong("id_artist"),
                 rs.getString("artist_name"),
-                List.of(rs.getString("categories").split(", ")),
+                rs.getString("image_filename"),
+                rs.getString("image_original_filename"),
+                rs.getString("image_url"),
+                rs.getString("categories") != null ? List.of(rs.getString("categories").split(", ")) : List.of(),
                 rs.getBoolean("is_deleted")
             ),
             "%" + name + "%"
@@ -58,27 +64,35 @@ public class JdbcGuestRepository implements GuestRepository {
             WITH artist_categories AS (
                 SELECT a.id_artist, 
                        a.artist_name,
+                       a.image_filename,
+                       a.image_original_filename,
+                       a.image_url,
                        a.is_deleted,
                        string_agg(c.category_name, ', ') as categories
                 FROM artists a
                 LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
                 LEFT JOIN categories c ON ac.id_category = c.id_category
                 WHERE a.id_artist = ?
-                GROUP BY a.id_artist, a.artist_name, a.is_deleted
+                GROUP BY a.id_artist, a.artist_name, a.image_filename, a.image_original_filename, a.image_url, a.is_deleted
             )
             SELECT * FROM artist_categories
         """;
         
-        return jdbcTemplate.queryForObject(
-            sql,
+        List<ArtistView> artists = jdbcTemplate.query(
+            sql, 
             (rs, rowNum) -> new ArtistView(
                 rs.getLong("id_artist"),
                 rs.getString("artist_name"),
-                List.of(rs.getString("categories").split(", ")),
+                rs.getString("image_filename"),
+                rs.getString("image_original_filename"),
+                rs.getString("image_url"),
+                rs.getString("categories") != null ? List.of(rs.getString("categories").split(", ")) : List.of(),
                 rs.getBoolean("is_deleted")
             ),
             id
         );
+        
+        return artists.isEmpty() ? null : artists.get(0);
     }
 
     @Override
@@ -211,20 +225,26 @@ public class JdbcGuestRepository implements GuestRepository {
             WITH artist_categories AS (
                 SELECT a.id_artist, 
                        a.artist_name,
+                       a.image_filename,
+                       a.image_original_filename,
+                       a.image_url,
                        a.is_deleted,
                        string_agg(c.category_name, ', ') as categories
                 FROM artists a
                 LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
                 LEFT JOIN categories c ON ac.id_category = c.id_category
                 WHERE LOWER(a.artist_name) LIKE LOWER(?)
-                  AND (CAST(? AS VARCHAR) IS NULL OR EXISTS (
-                      SELECT 1 FROM artists_categories ac2
-                      JOIN categories c2 ON ac2.id_category = c2.id_category
-                      WHERE ac2.id_artist = a.id_artist
-                      AND LOWER(c2.category_name) = LOWER(CAST(? AS VARCHAR))
-                  ))
+                  AND (
+                      ? IS NULL 
+                      OR EXISTS (
+                          SELECT 1 FROM artists_categories ac2
+                          JOIN categories c2 ON ac2.id_category = c2.id_category
+                          WHERE ac2.id_artist = a.id_artist
+                          AND LOWER(c2.category_name) = LOWER(?)
+                      )
+                  )
                   AND NOT a.is_deleted
-                GROUP BY a.id_artist, a.artist_name, a.is_deleted
+                GROUP BY a.id_artist, a.artist_name, a.image_filename, a.image_original_filename, a.image_url, a.is_deleted
             )
             SELECT * FROM artist_categories
             ORDER BY artist_name
@@ -235,7 +255,10 @@ public class JdbcGuestRepository implements GuestRepository {
             (rs, rowNum) -> new ArtistView(
                 rs.getLong("id_artist"),
                 rs.getString("artist_name"),
-                List.of(rs.getString("categories").split(", ")),
+                rs.getString("image_filename"),
+                rs.getString("image_original_filename"),
+                rs.getString("image_url"),
+                rs.getString("categories") != null ? List.of(rs.getString("categories").split(", ")) : List.of(),
                 rs.getBoolean("is_deleted")
             ),
             "%" + name + "%",
