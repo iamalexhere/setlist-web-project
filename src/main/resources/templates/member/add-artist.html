@@ -14,6 +14,16 @@
             <h1>Add New Artist</h1>
             
             <form th:action="@{/member/artists/add}" method="post" enctype="multipart/form-data" class="form">
+                <div th:if="${error}" class="message-error">
+                    <p th:text="${error}"></p>
+                </div>
+                <br>
+
+                <div th:if="${accept}" class="message-accept">
+                    <p th:text="${accept}"></p>
+                </div>
+                <br>
+
                 <div class="form-group">
                     <label for="name">Artist Name</label>
                     <input type="text" id="name" name="name" required>
@@ -21,7 +31,11 @@
 
                 <div class="form-group">
                     <label for="genre">Genre</label>
-                    <input type="text" id="genre" name="genre" required>
+                    <select id="genreName" name="genreName">
+                        <option value="" disabled selected></option>
+                        <option th:each="genre : ${genres}" th:value="${genre.genreName}" th:text="${genre.genreName}"></option>
+                       
+                    </select>
                 </div>
 
                 <div class="form-group">
