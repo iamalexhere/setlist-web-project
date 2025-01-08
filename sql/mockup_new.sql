@@ -41,13 +41,14 @@ INSERT INTO categories (category_name) VALUES
 
 -- Populate Artists
 INSERT INTO artists (artist_name, image_url) VALUES
-    ('Sheila On 7', 'https://picsum.photos/200/300'),
-    ('Coldplay', 'https://picsum.photos/200/300'),
-    ('The Beatles', 'https://picsum.photos/200/300'),
-    ('Metallica', 'https://picsum.photos/200/300'),
-	('Nirvana', 'https://picsum.photos/200/300'),
-    ('Radiohead', 'https://picsum.photos/200/300'),
-    ('John Mayer', 'https://picsum.photos/200/300');
+    ('Sheila On 7', '/images/artists/sheila_on_7.jpg'),
+    ('Coldplay', '/images/artists/coldplay.jpg'),
+    ('The Beatles', '/images/artists/the_beatles.jpg'),
+    ('Metallica', '/images/artists/metalica.jpg'),
+	('Nirvana', '/images/artists/nirvana.jpg'),
+    ('Radiohead', '/images/artists/radiohead.jpg'),
+    ('John Mayer', '/images/artists/johnmayer.jpg'),
+    ('Bernadya', '/images/artists/bernadya.jpeg');
 
 -- Populate Artists_Categories
 INSERT INTO artists_categories (id_artist, id_category) VALUES
@@ -62,16 +63,52 @@ INSERT INTO artists_categories (id_artist, id_category) VALUES
 	(6, 1),
     (6, 5),
     (7, 7),
-    (7, 3);
+    (7, 3),
+    (8, 2),
+    (8, 5);
 
 -- Populate Songs
 INSERT INTO songs (id_artist, song_name) VALUES
     (1, 'Dan'),
     (1, 'Melompat Lebih Tinggi'),
+    (1, 'Bertahan Di Sana'),
+    (1, 'Sekali Lagi'),
+    (1, 'Kita'),
+    (1, 'Dan...'),
+    (1, 'Sahabat Sejati'),
+    (1, 'Itu Aku'),
+    (1, 'Pejantan Tangguh'),
+    (1, 'Pria Kesepian'),
+    (1, 'J.A.P'),
+    (1, 'Sephia'),
+    (1, 'Seberapa Pantas'),
+    (1, 'Berhenti Berharap'),
+    (1, 'Jalan Terus'),
     (2, 'Fix You'),
     (2, 'Yellow'),
+    (2, 'Always in My Head'),
+    (2, 'Magic'),
+    (2, 'Ink'),
+    (2, 'True Love'),
+    (2, 'Midnight'),
+    (2, 'Another''s Arms'),
+    (2, 'Oceans'),
+    (2, 'A Sky Full of Stars'),
+    (2, 'Fly On'),
+    (2, 'O'),
+    (2, 'All Your Friends'),
+    (2, 'Ghost Story'),
+    (2, 'O (Reprise)'),
     (3, 'Hey Jude'),
     (3, 'Let It Be'),
+    (3, 'Yesterday'),
+    (3, 'In My Life'),
+    (3, 'Come Together'),
+    (3, 'Here Comes the Sun'),
+    (3, 'Eleanor Rigby'),
+    (3, 'Something'),
+    (3, 'Blackbird'),
+    (3, 'A Day in the Life'),
     (4, 'Enter Sandman'),
 	(4, 'Master of Puppets'),
 	(5, 'Smells Like Teen Spirit'),
@@ -79,7 +116,15 @@ INSERT INTO songs (id_artist, song_name) VALUES
     (6, 'Creep'),
     (6, 'Paranoid Android'),
     (7, 'Gravity'),
-	(7, 'Your Body is a Wonderland');
+	(7, 'Your Body is a Wonderland'),
+    (8, 'Sialnya, Hidup Harus Tetap Berjalan'),
+    (8, 'Kata Mereka Ini Berlebihan'),
+    (8, 'Lama-Lama'),
+    (8, 'Kini Mereka Tahu'),
+    (8, 'Untungnya, Hidup Harus Tetap Berjalan'),
+    (8, 'Ambang Pintu'),
+    (8, 'Berlari'),
+    (8, 'Kita Kubur Sampai Mati');
 
 -- Populate Setlists
 INSERT INTO setlists (id_artist, id_event, setlist_name, proof_filename, proof_original_filename, proof_url) VALUES
