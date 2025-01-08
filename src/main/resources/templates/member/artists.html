@@ -5,42 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Artists - Setlist</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div th:replace="fragments/navbar :: navbar"></div>
-    
-    <main class="content-container">
-        <div class="page-header">
-            <h1>Manage Artists</h1>
-            <a href="/member/artists/add" class="btn btn-primary">Add New Artist</a>
-        </div>
 
-        <div class="search-bar">
-            <input type="text" placeholder="Search artists..." id="artistSearch">
-        </div>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li>Artists</li>
+        </ol>
+    </nav>
 
+    <div class="hero artist-hero">
+        <h1>Manage Artists</h1>
+        <p>Add and manage your artists</p>
+        <div class="search-container">
+            <form th:action="@{/member/artists}" method="get" class="search-form">
+                <div class="search-input-group">
+                    <input type="text" name="name" class="search-box" 
+                           th:value="${searchQuery}" 
+                           placeholder="Search for artists...">
+                    <input type="hidden" name="genre" th:value="${selectedGenre}">
+                    <button type="submit" class="search-button">Search</button>
+                    <a th:if="${hasSearch}" th:href="@{/member/artists}" class="clear-button">Clear</a>
+                </div>
+            </form>
+        </div>
+        <div class="action-buttons">
+            <a th:href="@{/member/add-artist}" class="btn btn-primary">Add New Artist</a>
+        </div>
+    </div>
+
+    <section class="artist-categories">
+        <div class="section-header">
+            <h2 class="section-title">Browse by Genre</h2>
+            <a th:if="${!#strings.isEmpty(selectedGenre)}" 
+               th:href="@{/member/artists(name=${searchQuery})}" 
+               class="clear-genre">Clear Genre Filter</a>
+        </div>
+        <div class="category-grid">
+            <a th:href="@{/member/artists(genre=${entry.key}, name=${searchQuery})}" 
+               th:each="entry : ${genreCounts}"
+               class="category-card" 
+               th:classappend="${entry.key == selectedGenre ? 'active' : ''}"
+               th:style="${'background-color: var(--' + (#strings.toLowerCase(entry.key)) + ')'}">
+                <h3 th:text="${entry.key}">Genre</h3>
+                <span class="count" th:text="${entry.value + ' artists'}">0 artists</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="all-artists">
+        <h2 class="section-title" th:text="${hasSearch ? 
+            ('Search Results' + (!#strings.isEmpty(selectedGenre) ? ' in ' + selectedGenre : '')) : 
+            'All Artists'}">All Artists</h2>
+        
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(artists)}">
+            <h3>No Artists Found</h3>
+            <p th:if="${hasSearch}">Try adjusting your search criteria or browse all artists</p>
+            <p th:unless="${hasSearch}">There are no artists in the database yet</p>
+            <a th:href="@{/member/add-artist}" class="btn btn-primary">Add Artist</a>
+        </div>
+        
+        <!-- Artist Grid -->
         <div class="artist-grid" th:if="${not #lists.isEmpty(artists)}">
             <div class="artist-card" th:each="artist : ${artists}">
-                <img th:src="${artist.imageUrl}" alt="Artist Image" class="artist-image">
-                <div class="artist-info">
-                    <h3 th:text="${artist.name}">Artist Name</h3>
-                    <p class="genre" th:text="${artist.genre}">Genre</p>
-                    <div class="stats">
-                        <span th:text="${artist.showCount + ' shows'}">0 shows</span>
-                        <span th:text="${artist.setlistCount + ' setlists'}">0 setlists</span>
-                    </div>
-                    <div class="card-actions">
-                        <a th:href="@{/member/artists/{id}/edit(id=${artist.id})}" class="btn">Edit</a>
-                        <a th:href="@{/member/artists/{id}/shows(id=${artist.id})}" class="btn">View Shows</a>
-                    </div>
+                <div class="artist-image">
+                    <img src="https://placehold.co/200x200" th:alt="${artist.artistName}">
+                </div>
+                <h3 th:text="${artist.artistName}">Artist Name</h3>
+                <p class="artist-categories">
+                    <span th:each="category, iterStat : ${artist.categories}" 
+                          th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
+                </p>
+                <div class="card-actions">
+                    <a th:href="@{/member/artists/{id}/edit(id=${artist.idArtist})}" class="btn">Edit</a>
+                    <a th:href="@{/member/artists/{id}/shows(id=${artist.idArtist})}" class="btn">View Shows</a>
                 </div>
             </div>
         </div>
 
-        <div class="empty-state" th:if="${#lists.isEmpty(artists)}">
-            <p>No artists found. Add your first artist!</p>
-            <a href="/member/artists/add" class="btn btn-primary">Add Artist</a>
+        <!-- Pagination -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 1}" 
+               th:href="@{/member/artists(page=${currentPage - 1}, name=${searchQuery}, genre=${selectedGenre})}" 
+               class="page-link">&laquo; Previous</a>
+            
+            <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+                <a th:if="${pageNum != currentPage}" 
+                   th:href="@{/member/artists(page=${pageNum}, name=${searchQuery}, genre=${selectedGenre})}" 
+                   class="page-link" th:text="${pageNum}">1</a>
+                <span th:if="${pageNum == currentPage}" 
+                      class="page-link active" th:text="${pageNum}">1</span>
+            </th:block>
+            
+            <a th:if="${currentPage < totalPages}" 
+               th:href="@{/member/artists(page=${currentPage + 1}, name=${searchQuery}, genre=${selectedGenre})}" 
+               class="page-link">Next &raquo;</a>
         </div>
-    </main>
+    </section>
 </body>
 </html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Navbar Fragment</title>
+</head>
+<body>
+    <nav th:fragment="navbar" class="navbar">
+        <div class="navbar-brand">
+            <a th:href="@{/member/dashboard}">Setlist</a>
+        </div>
+        <div class="navbar-menu">
+            <a th:href="@{/member/dashboard}" class="nav-link">Dashboard</a>
+            <a th:href="@{/member/artists}" class="nav-link">Artists</a>
+            <a th:href="@{/member/setlists}" class="nav-link">Setlists</a>
+            <a th:href="@{/member/shows}" class="nav-link">Shows</a>
+        </div>
+        <div class="navbar-user">
+            <span class="username" th:text="${username}">Username</span>
+            <a th:href="@{/auth/logout}" class="nav-link">Logout</a>
+        </div>
+    </nav>
+</body>
+</html>

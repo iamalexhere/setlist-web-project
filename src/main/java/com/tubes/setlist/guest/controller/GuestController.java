@@ -31,7 +31,7 @@ public class GuestController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String genre,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "4") int size,
             Model model) {
         
         // Get all genres with counts
@@ -159,7 +159,7 @@ public class GuestController {
             @RequestParam(required = false) String artist,
             @RequestParam(required = false) String event,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "4") int size,
             Model model) {
 
         List<SetlistView> setlists;
