@@ -12,7 +12,7 @@
     <main class="content-container">
         <div class="page-header">
             <h1>Manage Shows</h1>
-            <a href="/member/shows/add" class="btn btn-primary">Add New Show</a>
+            <a th:href="@{/member/add-show}" class="btn btn-primary">Add New Show</a>
         </div>
 
         <div class="search-bar">
@@ -46,7 +46,7 @@
 
         <div class="empty-state" th:if="${#lists.isEmpty(shows)}">
             <p>No shows found. Add your first show!</p>
-            <a href="/member/shows/add" class="btn btn-primary">Add Show</a>
+            <a th:href="@{/member/add-show}" class="btn btn-primary">Add Show</a>
         </div>
     </main>
 </body>

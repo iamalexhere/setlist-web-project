@@ -1,7 +1,10 @@
 package com.tubes.setlist.member.controller;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,7 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.member.model.Artists;
+import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.model.GenreView;
+import com.tubes.setlist.member.model.Venues;
 import com.tubes.setlist.member.repository.MemberRepository;
 
 import jakarta.servlet.http.HttpSession;
@@ -100,6 +105,13 @@ public class MemberController {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
+
+        List<Artists> artists = this.repo.findAllArtists();
+        List<Venues> venues = this.repo.findAllVenues();
+
+        model.addAttribute("artist", artists);
+        model.addAttribute("venues", venues);
+
         return "member/add-show";
     }
 
@@ -130,5 +142,30 @@ public class MemberController {
         }
         model.addAttribute("accept", "The artist " + "'" + artistName + "'" + " has been successfully associated with the genre " + "'"+ genreName + "'" + ".");
         return "member/add-artist";
+    }
+
+    @PostMapping("/shows/add")
+    public String memberAddShow(
+        @RequestParam("showName") String showName,
+        @RequestParam("artistId") String artistName,
+        @RequestParam("venueId") Long venueId,
+        @RequestParam("date") LocalDate date,
+        @RequestParam("time") LocalTime time,
+        @RequestParam("tourName") String tourName,
+        @RequestParam("description") String description,
+        Model model
+    ) {
+
+        String nameVenue = this.repo.findVenuesById(venueId).get(0).getVenueName();
+        Optional<Events> searchEvent = this.repo.searchEvents(venueId, showName, date);
+
+        if(!searchEvent.isPresent()) {
+            this.repo.addEvents(venueId, showName, date);
+            model.addAttribute("accept", "The show " + "'" + showName + "'" + " has been successfully associated with the venue " + "'"+ nameVenue + "'" + ".");
+            return "member/add-show";
+        }
+
+        model.addAttribute("error", "The show " + "'" + showName + "'" + " is already associated with the venue " + "'" + nameVenue + "'" + ".");
+        return "member/add-show";
     }
 }

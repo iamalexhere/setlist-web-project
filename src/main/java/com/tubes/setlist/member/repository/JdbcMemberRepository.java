@@ -2,17 +2,21 @@ package com.tubes.setlist.member.repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
+import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.model.GenreView;
+import com.tubes.setlist.member.model.Venues;
 
 @Repository
 public class JdbcMemberRepository implements MemberRepository {
@@ -43,6 +47,12 @@ public class JdbcMemberRepository implements MemberRepository {
         String sql = "SELECT * FROM categories WHERE category_name = ?";
         List<Categories> categories = jdbcTemplate.query(sql, this::mapRowToCategories, category_name);
         return categories.get(0);
+    }
+
+    @Override
+    public List<Artists> findAllArtists() {
+        String sql = "SELECT id_artist, artist_name FROM artists";
+        return jdbcTemplate.query(sql, this::mapRowToArtists);
     }
 
     @Override
@@ -98,6 +108,43 @@ public class JdbcMemberRepository implements MemberRepository {
         return listGenre;
     }
 
+    @Override
+    public List<Venues> findAllVenues() {
+        String sql = "SELECT * FROM venues";
+        return jdbcTemplate.query(sql, this::mapRowToVenues);
+    }
+
+    @Override
+    public List<Venues> findVenuesById(Long idVenue) {
+        String sql = "SELECT * FROM venues where id_venue = ?";
+        return jdbcTemplate.query(sql, this::mapRowToVenues, idVenue);
+    }
+
+    @Override
+    public Optional<Events> searchEvents(Long venueId, String showName, LocalDate date) {
+        String sql = "SELECT * FROM events WHERE id_venue = ? AND event_name = ? AND event_date = ?";
+        try {
+            return jdbcTemplate.queryForObject(
+                sql,
+                new Object[]{venueId, showName, date},
+                (resultSet, rowNum) -> Optional.of(new Events(
+                    resultSet.getLong("id_event"),
+                    resultSet.getLong("id_venue"),
+                    resultSet.getString("event_name"),
+                    resultSet.getDate("event_date").toLocalDate()
+                ))
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void addEvents(Long idVenue, String eventName, LocalDate eventDate) {
+        String sql = "INSERT INTO events (id_venue, event_name, event_date) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, idVenue, eventName, eventDate);
+    }
+
     private GenreView mapRowToGenre(ResultSet resultset, int rowNum) throws SQLException {
         return new GenreView(
             resultset.getString("category_name"));
@@ -114,6 +161,23 @@ public class JdbcMemberRepository implements MemberRepository {
         return new Artists(
             resultSet.getLong("id_artist"), 
             resultSet.getString("artist_name")
+        );
+    }
+
+    private Venues mapRowToVenues(ResultSet resultSet, int rowNum) throws SQLException {
+        return new Venues(
+            resultSet.getLong("id_venue"),
+            resultSet.getString("venue_name"),
+            resultSet.getString("city_name")
+        );
+    }
+
+    private Events mapRowToEvents(ResultSet resultSet, int rowNum) throws SQLException {
+        return new Events(
+            resultSet.getLong("id_event"),
+            resultSet.getLong("id_venue"), 
+            resultSet.getString("event_name"), 
+            resultSet.getDate("event_date").toLocalDate()
         );
     }
     
