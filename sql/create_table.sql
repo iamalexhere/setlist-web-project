@@ -51,6 +51,9 @@ CREATE TABLE categories(
 CREATE TABLE artists(
 	id_artist SERIAL PRIMARY KEY,
 	artist_name VARCHAR(60) NOT NULL,
+	image_filename VARCHAR(255),
+	image_original_filename VARCHAR(255),
+	image_url VARCHAR(255),
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	is_deleted BOOLEAN DEFAULT FALSE
 );

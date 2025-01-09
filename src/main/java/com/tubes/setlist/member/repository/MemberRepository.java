@@ -7,7 +7,7 @@ import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
 
 public interface MemberRepository {
-    void addArtist(String artist_name);
+    void addArtist(String artist_name, String imageFilename, String imageOriginalFilename);
     void addCategories(String category_name);
     void addCategoriesArtist(Long id_artist, Long id_category);
 

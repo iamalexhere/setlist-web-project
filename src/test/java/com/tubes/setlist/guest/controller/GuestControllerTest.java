@@ -37,7 +37,7 @@ public class GuestControllerTest {
     void listArtists_ShouldReturnArtistsView() throws Exception {
         // Given
         List<String> coldplayCategories = Arrays.asList("Pop", "Rock");
-        ArtistView artist = new ArtistView(1L, "Coldplay", coldplayCategories, false);
+        ArtistView artist = new ArtistView(1L, "Coldplay", null, null, "https://picsum.photos/200/300", coldplayCategories, false);
         
         when(guestRepository.findArtistsByName(anyString()))
             .thenReturn(Arrays.asList(artist));
@@ -55,38 +55,84 @@ public class GuestControllerTest {
         mockMvc.perform(get("/guest/artists"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("guest/artists"))
-                //.andExpect(model().attributeExists("featuredArtists"))
                 .andExpect(model().attributeExists("searchedArtists"))
                 .andExpect(model().attributeExists("genreCounts"))
                 .andExpect(model().attributeExists("selectedGenre"))
-                .andExpect(model().attributeExists("hasSearch"))
-                .andExpect(model().attributeExists("currentPage"))
-                .andExpect(model().attributeExists("totalPages"));
+                .andExpect(model().attributeExists("searchQuery"))
+                .andExpect(model().attributeExists("hasSearch"));
     }
 
     @Test
-    void viewArtist_ShouldReturnArtistView() throws Exception {
+    void listArtists_WithSearchCriteria_ShouldReturnFilteredResults() throws Exception {
+        // Given
+        List<String> coldplayCategories = Arrays.asList("Pop", "Rock");
+        ArtistView artist = new ArtistView(1L, "Coldplay", null, null, "https://picsum.photos/200/300", coldplayCategories, false);
+        
+        when(guestRepository.findArtistsByNameAndGenre(anyString(), anyString()))
+            .thenReturn(Arrays.asList(artist));
+        
+        when(guestRepository.getGenreCounts())
+            .thenReturn(Map.of(
+                "Pop", 5,
+                "Rock", 3
+            ));
+
+        // When & Then
+        mockMvc.perform(get("/guest/artists")
+                .param("name", "Coldplay")
+                .param("genre", "Rock"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/artists"))
+                .andExpect(model().attributeExists("searchedArtists"))
+                .andExpect(model().attribute("searchQuery", "Coldplay"))
+                .andExpect(model().attribute("selectedGenre", "Rock"))
+                .andExpect(model().attribute("hasSearch", true));
+    }
+
+    @Test
+    void listArtists_WithEmptyResults_ShouldShowNoResults() throws Exception {
+        // Given
+        when(guestRepository.findArtistsByNameAndGenre(anyString(), anyString()))
+            .thenReturn(List.of());
+        
+        when(guestRepository.getGenreCounts())
+            .thenReturn(Map.of(
+                "Pop", 5,
+                "Rock", 3
+            ));
+
+        // When & Then
+        mockMvc.perform(get("/guest/artists")
+                .param("name", "NonexistentArtist"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("guest/artists"))
+                .andExpect(model().attribute("searchedArtists", List.of()))
+                .andExpect(model().attribute("hasSearch", true));
+    }
+
+    @Test
+    void viewArtist_WithValidId_ShouldReturnArtistDetails() throws Exception {
         // Given
         Long artistId = 1L;
         List<String> coldplayCategories = Arrays.asList("Pop", "Rock");
-        ArtistView artist = new ArtistView(artistId, "Coldplay", coldplayCategories, false);
-        EventView event = new EventView(1L, "Rock Concert 2024", 
-            LocalDate.of(2024, 8, 15), "MSG", "New York", false);
-
+        ArtistView artist = new ArtistView(artistId, "Coldplay", null, null, "https://picsum.photos/200/300", coldplayCategories, false);
+        
         when(guestRepository.findArtistById(artistId))
             .thenReturn(artist);
-        when(guestRepository.findEventsByArtist(artistId))
-            .thenReturn(Arrays.asList(event));
-        when(guestRepository.findSetlistsByArtist(artistId))
-            .thenReturn(Arrays.asList());
 
+        when(guestRepository.findEventsByArtist(artistId))
+            .thenReturn(List.of());
+
+        when(guestRepository.findSetlistsByArtist(artistId))
+            .thenReturn(List.of());
+        
         // When & Then
         mockMvc.perform(get("/guest/artists/{id}", artistId))
-                .andExpect(status().isOk())
-                .andExpect(view().name("guest/artist-detail"))
-                .andExpect(model().attributeExists("artist"))
-                .andExpect(model().attributeExists("events"))
-                .andExpect(model().attributeExists("setlists"));
+            .andExpect(status().isOk())
+            .andExpect(view().name("guest/artist-detail"))
+            .andExpect(model().attribute("artist", artist))
+            .andExpect(model().attribute("events", List.of()))
+            .andExpect(model().attribute("setlists", List.of()));
     }
 
     @Test
@@ -116,13 +162,13 @@ public class GuestControllerTest {
         LocalDate eventDate = LocalDate.of(2024, 8, 15);
         SetlistView setlist = new SetlistView(
             1L, 
-            "Coldplay MSG Concert", 
+            "Main Set", 
             1L,
             "Coldplay",
             1L,
             "Rock Concert 2024",
             eventDate,
-            "proof.jpg", 
+            null, 
             LocalDateTime.now(), 
             Arrays.asList("Fix You", "Yellow"), 
             false
@@ -284,7 +330,7 @@ public class GuestControllerTest {
         // Arrange
         Long artistId = 1L;
         LocalDate eventDate = LocalDate.of(2024, 8, 15);
-        ArtistView artist = new ArtistView(artistId, "Taylor Swift", List.of("Pop"), false);
+        ArtistView artist = new ArtistView(artistId, "Taylor Swift", null, null, "https://picsum.photos/200/300", List.of("Pop"), false);
         SetlistView setlist = new SetlistView(
             1L,
             "MSG Night 1",

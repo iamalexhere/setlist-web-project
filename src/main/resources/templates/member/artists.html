@@ -73,16 +73,19 @@
         <div class="artist-grid" th:if="${not #lists.isEmpty(artists)}">
             <div class="artist-card" th:each="artist : ${artists}">
                 <div class="artist-image">
-                    <img src="https://placehold.co/200x200" th:alt="${artist.artistName}">
+                    <img th:if="${artist.imageUrl != null}" th:src="${artist.imageUrl}" th:alt="${artist.artistName}">
+                    <img th:unless="${artist.imageUrl != null}" src="/images/default-artist.jpg" th:alt="${artist.artistName}">
                 </div>
-                <h3 th:text="${artist.artistName}">Artist Name</h3>
-                <p class="artist-categories">
-                    <span th:each="category, iterStat : ${artist.categories}" 
-                          th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
-                </p>
-                <div class="card-actions">
-                    <a th:href="@{/member/artists/{id}/edit(id=${artist.idArtist})}" class="btn">Edit</a>
-                    <a th:href="@{/member/artists/{id}/shows(id=${artist.idArtist})}" class="btn">View Shows</a>
+                <div class="artist-info">
+                    <h3 class="artist-name" th:text="${artist.artistName}"></h3>
+                    <p class="artist-categories">
+                        <span th:each="category, iterStat : ${artist.categories}" 
+                              th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
+                    </p>
+                    <div class="card-actions">
+                        <a th:href="@{/member/artists/{id}/edit(id=${artist.idArtist})}" class="btn">Edit</a>
+                        <a th:href="@{/member/artists/{id}/shows(id=${artist.idArtist})}" class="btn">View Shows</a>
+                    </div>
                 </div>
             </div>
         </div>

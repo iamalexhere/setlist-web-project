@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
 import com.tubes.setlist.member.repository.MemberRepository;
+import com.tubes.setlist.member.service.FileStorageService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -24,6 +25,9 @@ public class MemberController {
 
     @Autowired
     MemberRepository repo;
+
+    @Autowired
+    private FileStorageService fileStorageService;
     
     private boolean checkMemberAccess(HttpSession session) {
         String role = (String) session.getAttribute("role");
@@ -139,28 +143,50 @@ public class MemberController {
     public String memberAddArtist(
         @RequestParam("name") String artistName,
         @RequestParam("genreName") String genreName,
-        @RequestParam("description") String description,
-        @RequestParam("image") MultipartFile image,
+        @RequestParam(value = "image", required = false) MultipartFile image,
+        HttpSession session,
         Model model
     ) {
-        List<Artists> nameArtist = this.repo.findArtistsByName(artistName);
-        Long idCategory = this.repo.findIdCategory(genreName).getId_category();
-        if(!nameArtist.isEmpty()) {
-            Long idArtist = nameArtist.get(0).getIdArtist();
-            if(!this.repo.findArtistsByNameAndGenre(artistName, genreName, 1, 1).isEmpty()) {
-                model.addAttribute("error", "The artist " + "'" + artistName + "'" + " is already associated with the genre " + "'" + genreName + "'" + ".");
-                return "member/add-artist";
-            }
-            else {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+        List<Categories> categories = this.repo.findAllGenre();
+        model.addAttribute("genres", categories);
+
+        try {
+            List<Artists> nameArtist = this.repo.findArtistsByName(artistName);
+            Long idCategory = this.repo.findIdCategory(genreName).getId_category();
+
+            // Handle existing artist case
+            if (!nameArtist.isEmpty()) {
+                Long idArtist = nameArtist.get(0).getIdArtist();
+                if (!this.repo.findArtistsByNameAndGenre(artistName, genreName, 1, 1).isEmpty()) {
+                    model.addAttribute("error", "The artist '" + artistName + "' is already associated with the genre '" + genreName + "'.");
+                    return "member/add-artist";
+                } else {
+                    this.repo.addCategoriesArtist(idArtist, idCategory);
+                }
+            } else {
+                // Handle new artist case
+                String imageFilename = null;
+                String originalFilename = null;
+
+                if (image != null && !image.isEmpty()) {
+                    imageFilename = fileStorageService.storeFile(image);
+                    originalFilename = image.getOriginalFilename();
+                }
+
+                this.repo.addArtist(artistName, imageFilename, originalFilename);
+                Long idArtist = this.repo.findArtistsByName(artistName).get(0).getIdArtist();
                 this.repo.addCategoriesArtist(idArtist, idCategory);
             }
+
+            model.addAttribute("accept", "The artist '" + artistName + "' has been successfully associated with the genre '" + genreName + "'.");
+            return "member/add-artist";
+        } catch (Exception e) {
+            model.addAttribute("error", "An error occurred while adding the artist: " + e.getMessage());
+            return "member/add-artist";
         }
-        else {
-            this.repo.addArtist(artistName);
-            Long idArtist = this.repo.findArtistsByName(artistName).get(0).getIdArtist();
-            this.repo.addCategoriesArtist(idArtist, idCategory);
-        }
-        model.addAttribute("accept", "The artist " + "'" + artistName + "'" + " has been successfully associated with the genre " + "'"+ genreName + "'" + ".");
-        return "member/add-artist";
     }
 }
