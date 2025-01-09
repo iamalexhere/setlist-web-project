@@ -151,4 +151,30 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
         return false;
     }
 
+    @Override
+    public List<DataArtistsSongs> showUnaddedArtistsSong (int idSetlist){
+        String sql = "SELECT filteredAS.id_artist, filteredAS.artist_name, filteredAS.id_song, filteredAS.song_name " + 
+                        "FROM (SELECT artists.id_artist, artist_name, id_song, song_name FROM artists " + 
+                        "INNER JOIN songs ON artists.id_artist = songs.id_artist " + 
+                        "WHERE artists.id_artist = (SELECT id_artist FROM setlists " + 
+                        "WHERE id_setlist = "+ idSetlist +")) AS filteredAS " + 
+                        "LEFT JOIN ( SELECT setlists.id_setlist, song_name , songs.id_song, setlists.id_artist " + 
+                        "FROM setlists INNER JOIN setlists_songs " +
+                        "ON setlists.id_setlist = setlists_songs.id_setlist " + 
+                        "INNER JOIN songs ON songs.id_song = setlists_songs.id_song " + 
+                        "WHERE setlists.id_setlist = "+ idSetlist +") AS filteredSS " + 
+                        "ON filteredAS.id_song = filteredSS.id_song\n" + 
+                        "WHERE id_setlist IS NULL;";
+        return jdbcTemplate.query(sql, this::mapRowToUnselectedSongs);
+    }
+
+    private DataArtistsSongs mapRowToUnselectedSongs(ResultSet resultSet, int rowNum) throws SQLException {
+        return new DataArtistsSongs (
+            resultSet.getInt("id_artist"),
+            resultSet.getString("artist_name"),
+            resultSet.getInt("id_song"),
+            resultSet.getString("song_name")
+        );
+    }
+
 }

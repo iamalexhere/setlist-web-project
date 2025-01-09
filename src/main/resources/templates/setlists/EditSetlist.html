@@ -33,7 +33,15 @@
                 </tr>
             </table>
             <br>
-            <button>add</button>
+            <form method="post" action="insertSetlist" th:object="${data}">
+                <select name="idSong" class="form-control" >
+                    <option th:each="row : ${unselected}" 
+                            th:value="${row.idSong}" 
+                            th:text="${row.songName}">
+                    </option>
+                </select>
+                <input type="submit" value="Add" />
+            </form>
         </div>
         </br>
 

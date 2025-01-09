@@ -78,6 +78,8 @@ public class SelistsController {
     public String editSetlist (@PathVariable("idSetlist") int idSetlist, Model model){
         List<DataSetlistSong> songs = repo.showSetlistSongs(idSetlist);
         model.addAttribute("songs", songs);
+        List<DataArtistsSongs> unselected = repo.showUnaddedArtistsSong(idSetlist);
+        model.addAttribute("unselected", unselected);
         
         return "setlists/EditSetlist.html";
     }

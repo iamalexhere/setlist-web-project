@@ -171,6 +171,10 @@ INSERT INTO songs (id_artist, song_name)
 VALUES
     (1, 'Hey Jude'),
     (1, 'Let It Be'),
+    (1, 'Yesterday'),
+    (1, 'Come Together'),
+    (1, 'Here Comes the Sun'),
+    (1, 'Eleanor Rigby'),
     (2, 'Rolling in the Deep'),
     (2, 'Someone Like You'),
     (3, 'Rocket Man'),

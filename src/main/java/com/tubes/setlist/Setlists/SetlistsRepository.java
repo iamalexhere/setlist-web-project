@@ -10,4 +10,5 @@ public interface SetlistsRepository {
     List<DataArtists> showAllArtists();
     List<DataEvents> showAllEvents();
     boolean insertSetlist(DataInsertSetlist data) throws Exception;
+    List<DataArtistsSongs> showUnaddedArtistsSong (int idSetlist);
 }
