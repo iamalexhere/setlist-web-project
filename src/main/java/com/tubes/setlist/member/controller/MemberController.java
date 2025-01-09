@@ -7,13 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
+import com.tubes.setlist.member.model.Songs;
+import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.repository.MemberRepository;
 import com.tubes.setlist.member.service.FileStorageService;
 
@@ -104,11 +109,37 @@ public class MemberController {
     }
     
     @GetMapping("/setlists")
-    public String setlists(HttpSession session, Model model) {
+    public String setlists(
+        HttpSession session,
+        Model model,
+        @RequestParam(defaultValue = "") String artist,
+        @RequestParam(defaultValue = "") String event,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "8") int size
+    ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
+
+        // Get total setlists count for pagination
+        long totalSetlists = repo.getTotalSetlists(artist, event);
+        int totalPages = (int) Math.ceil((double) totalSetlists / size);
+        
+        // Ensure page is within bounds
+        page = Math.max(1, Math.min(page, Math.max(1, totalPages)));
+        
+        // Get paginated setlists
+        List<Setlist> setlists = repo.findSetlists(artist, event, page, size);
+
+        // Add model attributes
+        model.addAttribute("setlists", setlists);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("artist", artist);
+        model.addAttribute("event", event);
+        model.addAttribute("hasSearch", !artist.isEmpty() || !event.isEmpty());
+
         return "member/setlists";
     }
     
@@ -118,7 +149,59 @@ public class MemberController {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
+
+        // Get list of artists for dropdown
+        List<Artists> artists = repo.findArtistsByName("");
+        model.addAttribute("artists", artists);
+
+        // Get list of events for dropdown
+        List<Events> events = repo.findAllEvents();
+        model.addAttribute("events", events);
+
         return "member/add-setlist";
+    }
+
+    @GetMapping("/api/songs/by-artist/{artistId}")
+    @ResponseBody
+    public List<Songs> getSongsByArtist(@PathVariable Long artistId) {
+        return repo.findSongsByArtist(artistId);
+    }
+
+    @PostMapping("/setlists/add")
+    public String addSetlist(
+        @RequestParam("name") String setlistName,
+        @RequestParam("artistId") Long artistId,
+        @RequestParam("eventId") Long eventId,
+        @RequestParam(value = "songIds", required = false) List<Long> songIds,
+        @RequestParam(value = "proof", required = false) MultipartFile proof,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+        
+        try {
+            String proofFilename = null;
+            String proofOriginalFilename = null;
+
+            if (proof != null && !proof.isEmpty()) {
+                proofFilename = fileStorageService.storeFile(proof);
+                proofOriginalFilename = proof.getOriginalFilename();
+            }
+
+            repo.addSetlist(setlistName, artistId, eventId, songIds, proofFilename, proofOriginalFilename);
+            return "redirect:/member/setlists";
+        } catch (Exception e) {
+            // Repopulate dropdowns in case of error
+            List<Artists> artists = repo.findArtistsByName("");
+            List<Events> events = repo.findAllEvents();
+            model.addAttribute("artists", artists);
+            model.addAttribute("events", events);
+            model.addAttribute("error", "An error occurred while adding the setlist: " + e.getMessage());
+            return "member/add-setlist";
+        }
     }
     
     @GetMapping("/shows")
@@ -188,5 +271,135 @@ public class MemberController {
             model.addAttribute("error", "An error occurred while adding the artist: " + e.getMessage());
             return "member/add-artist";
         }
+    }
+
+    @GetMapping("/songs")
+    public String songs(
+        HttpSession session,
+        Model model,
+        @RequestParam(defaultValue = "") String name,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "8") int size
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        // Get total songs count for pagination
+        long totalSongs = repo.getTotalSongs(name);
+        int totalPages = (int) Math.ceil((double) totalSongs / size);
+        
+        // Ensure page is within bounds
+        page = Math.max(1, Math.min(page, Math.max(1, totalPages)));
+        
+        // Get paginated songs
+        List<Songs> songs = repo.findSongsByName(name, page, size);
+
+        // Add model attributes
+        model.addAttribute("songs", songs);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("searchQuery", name);
+        model.addAttribute("hasSearch", !name.isEmpty());
+
+        return "member/songs";
+    }
+
+    @GetMapping("/add-song")
+    public String addSong(HttpSession session, Model model) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        // Get list of artists for dropdown
+        List<Artists> artists = repo.findArtistsByName("");
+        model.addAttribute("artists", artists);
+
+        return "member/add-song";
+    }
+
+    @PostMapping("/songs/add")
+    public String addSong(
+        @RequestParam("name") String songName,
+        @RequestParam("artistId") Long artistId,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+        
+        try {
+            repo.addSong(songName, artistId);
+            return "redirect:/member/songs";
+        } catch (Exception e) {
+            List<Artists> artists = repo.findArtistsByName("");
+            model.addAttribute("artists", artists);
+            model.addAttribute("error", "An error occurred while adding the song: " + e.getMessage());
+            return "member/add-song";
+        }
+    }
+
+    @GetMapping("/songs/{id}/edit")
+    public String editSong(
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Songs song = repo.findSongById(id);
+        if (song == null) {
+            return "redirect:/member/songs";
+        }
+
+        model.addAttribute("song", song);
+        return "member/edit-song";
+    }
+
+    @PostMapping("/songs/{id}/edit")
+    public String updateSong(
+        @PathVariable Long id,
+        @RequestParam("name") String songName,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        try {
+            repo.updateSong(id, songName);
+            return "redirect:/member/songs";
+        } catch (Exception e) {
+            Songs song = repo.findSongById(id);
+            model.addAttribute("song", song);
+            model.addAttribute("error", "An error occurred while updating the song: " + e.getMessage());
+            return "member/edit-song";
+        }
+    }
+
+    @PostMapping("/songs/{id}/delete")
+    public String deleteSong(
+        @PathVariable Long id,
+        HttpSession session
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            repo.deleteSong(id);
+        } catch (Exception e) {
+            // Handle error if needed
+        }
+
+        return "redirect:/member/songs";
     }
 }

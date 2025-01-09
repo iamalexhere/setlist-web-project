@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Songs - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <nav class="breadcrumb">
+        <ol>
+            <li>Songs</li>
+        </ol>
+    </nav>
+
+    <div class="hero song-hero">
+        <h1>Manage Songs</h1>
+        <p>Add and manage your songs</p>
+        <div class="search-container">
+            <form th:action="@{/member/songs}" method="get" class="search-form">
+                <div class="search-input-group">
+                    <input type="text" name="name" class="search-box" 
+                           th:value="${searchQuery}" 
+                           placeholder="Search for songs...">
+                    <button type="submit" class="search-button">Search</button>
+                    <a th:if="${hasSearch}" th:href="@{/member/songs}" class="clear-button">Clear</a>
+                </div>
+            </form>
+        </div>
+        <div class="action-buttons">
+            <a th:href="@{/member/add-song}" class="btn btn-primary">Add New Song</a>
+        </div>
+    </div>
+
+    <section class="all-songs">
+        <h2 class="section-title" th:text="${hasSearch ? 'Search Results' : 'All Songs'}">All Songs</h2>
+        
+        <div class="empty-state" th:if="${#lists.isEmpty(songs)}">
+            <h3>No Songs Found</h3>
+            <p th:if="${hasSearch}">Try adjusting your search criteria or browse all songs</p>
+            <p th:unless="${hasSearch}">There are no songs in the database yet</p>
+            <a th:href="@{/member/add-song}" class="btn btn-primary">Add Song</a>
+        </div>
+        
+        <div class="song-grid" th:if="${not #lists.isEmpty(songs)}">
+            <div class="song-card" th:each="song : ${songs}">
+                <div class="song-info">
+                    <h3 class="song-name" th:text="${song.songName}"></h3>
+                    <p class="artist-name" th:text="${song.artistName}"></p>
+                    <div class="card-actions">
+                        <a th:href="@{/member/songs/{id}/edit(id=${song.idSong})}" class="btn">Edit</a>
+                        <form th:action="@{/member/songs/{id}/delete(id=${song.idSong})}" method="post" class="inline-form">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 1}" 
+               th:href="@{/member/songs(page=${currentPage - 1}, name=${searchQuery})}" 
+               class="page-link">&laquo; Previous</a>
+            
+            <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+                <a th:if="${pageNum != currentPage}" 
+                   th:href="@{/member/songs(page=${pageNum}, name=${searchQuery})}" 
+                   class="page-link" th:text="${pageNum}">1</a>
+                <span th:if="${pageNum == currentPage}" 
+                      class="page-link active" th:text="${pageNum}">1</span>
+            </th:block>
+            
+            <a th:if="${currentPage < totalPages}" 
+               th:href="@{/member/songs(page=${currentPage + 1}, name=${searchQuery})}" 
+               class="page-link">Next &raquo;</a>
+        </div>
+    </section>
+</body>
+</html>
