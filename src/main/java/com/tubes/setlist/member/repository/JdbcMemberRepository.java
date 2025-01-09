@@ -3,20 +3,22 @@ package com.tubes.setlist.member.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
 import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.model.GenreView;
 import com.tubes.setlist.member.model.Venues;
+
 
 @Repository
 public class JdbcMemberRepository implements MemberRepository {
@@ -57,13 +59,6 @@ public class JdbcMemberRepository implements MemberRepository {
 
     @Override
     public List<Artists> findArtistsByName(String name) {
-        String sql = "SELECT * FROM artists where artist_name = ?";
-        List<Artists> artist = jdbcTemplate.query(sql, this::mapRowToArtists, name);
-        return artist;
-    }
-
-    @Override
-    public List<ArtistView> findArtistsByNameAndGenre(String name, String genre) {
         String sql = """
             WITH artist_categories AS (
                 SELECT a.id_artist, 
@@ -74,38 +69,79 @@ public class JdbcMemberRepository implements MemberRepository {
                 LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
                 LEFT JOIN categories c ON ac.id_category = c.id_category
                 WHERE LOWER(a.artist_name) LIKE LOWER(?)
-                  AND (CAST(? AS VARCHAR) IS NULL OR EXISTS (
-                      SELECT 1 FROM artists_categories ac2
-                      JOIN categories c2 ON ac2.id_category = c2.id_category
-                      WHERE ac2.id_artist = a.id_artist
-                      AND LOWER(c2.category_name) = LOWER(CAST(? AS VARCHAR))
-                  ))
-                  AND NOT a.is_deleted
                 GROUP BY a.id_artist, a.artist_name, a.is_deleted
             )
             SELECT * FROM artist_categories
             ORDER BY artist_name
         """;
         
+        return jdbcTemplate.query(sql, this::mapRowToArtists, "%" + name + "%");
+    }
+
+    @Override
+    public List<Artists> findArtistsByNameAndGenre(String name, String genre, int page, int size) {
+        String sql = """
+            WITH artist_categories AS (
+                SELECT a.id_artist, 
+                    a.artist_name,
+                    a.is_deleted,
+                    string_agg(c.category_name, ', ') as categories
+                FROM artists a
+                LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
+                LEFT JOIN categories c ON ac.id_category = c.id_category
+                WHERE LOWER(a.artist_name) LIKE LOWER(?)
+                AND (
+                    COALESCE(CAST(? AS VARCHAR), '') = '' 
+                    OR EXISTS (
+                        SELECT 1 FROM artists_categories ac2
+                        JOIN categories c2 ON ac2.id_category = c2.id_category
+                        WHERE ac2.id_artist = a.id_artist
+                        AND LOWER(c2.category_name) = LOWER(CAST(? AS VARCHAR))
+                    )
+                )
+                AND NOT a.is_deleted
+                GROUP BY a.id_artist, a.artist_name, a.is_deleted
+            )
+            SELECT * FROM artist_categories
+            ORDER BY artist_name
+            LIMIT ? OFFSET ?
+        """;
+        
+        int offset = (page - 1) * size;
+        
         return jdbcTemplate.query(
-            sql, 
-            (rs, rowNum) -> new ArtistView(
+            sql,
+            (rs, rowNum) -> new Artists(
                 rs.getLong("id_artist"),
                 rs.getString("artist_name"),
-                List.of(rs.getString("categories").split(", ")),
+                rs.getString("categories") != null ? Arrays.asList(rs.getString("categories").split(", ")) : List.of(),
                 rs.getBoolean("is_deleted")
             ),
             "%" + name + "%",
             genre,
-            genre
+            genre,
+            size,
+            offset
         );
     }
 
     @Override
-    public List<GenreView> findAllGenre() {
-        String sql = "SELECT category_name FROM categories";
-        List<GenreView> listGenre = jdbcTemplate.query(sql, this::mapRowToGenre);
-        return listGenre;
+    public Map<String, Long> getGenreCounts() {
+        String sql = """
+            SELECT c.category_name, COUNT(DISTINCT a.id_artist) as count
+            FROM categories c
+            LEFT JOIN artists_categories ac ON c.id_category = ac.id_category
+            LEFT JOIN artists a ON ac.id_artist = a.id_artist AND NOT a.is_deleted
+            GROUP BY c.category_name
+            ORDER BY c.category_name
+        """;
+        
+        Map<String, Long> genreCounts = new LinkedHashMap<>();
+        jdbcTemplate.query(sql, (rs) -> {
+            genreCounts.put(rs.getString("category_name"), rs.getLong("count"));
+        });
+        
+        return genreCounts;
     }
 
     @Override
@@ -148,6 +184,36 @@ public class JdbcMemberRepository implements MemberRepository {
     private GenreView mapRowToGenre(ResultSet resultset, int rowNum) throws SQLException {
         return new GenreView(
             resultset.getString("category_name"));
+=======
+    public long getTotalArtists(String name, String genre) {
+        String sql = """
+            SELECT COUNT(DISTINCT a.id_artist) as total
+            FROM artists a
+            LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
+            LEFT JOIN categories c ON ac.id_category = c.id_category
+            WHERE LOWER(a.artist_name) LIKE LOWER(?)
+              AND (CAST(? AS VARCHAR) IS NULL OR EXISTS (
+                  SELECT 1 FROM artists_categories ac2
+                  JOIN categories c2 ON ac2.id_category = c2.id_category
+                  WHERE ac2.id_artist = a.id_artist
+                  AND LOWER(c2.category_name) = LOWER(CAST(? AS VARCHAR))
+              ))
+              AND NOT a.is_deleted
+        """;
+        
+        return jdbcTemplate.queryForObject(
+            sql, 
+            Long.class,
+            "%" + name + "%",
+            genre,
+            genre
+        );
+    }
+
+    @Override
+    public List<Categories> findAllGenre() {
+        String sql = "SELECT * FROM categories";
+        return jdbcTemplate.query(sql, this::mapRowToCategories);
     }
 
     private Categories mapRowToCategories(ResultSet resultSet, int rowNum) throws SQLException {
@@ -158,9 +224,16 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     private Artists mapRowToArtists(ResultSet resultSet, int rowNum) throws SQLException {
+        String categoriesStr = resultSet.getString("categories");
+        List<String> categoriesList = categoriesStr != null ? 
+            Arrays.asList(categoriesStr.split(", ")) : 
+            List.of();
+            
         return new Artists(
-            resultSet.getLong("id_artist"), 
-            resultSet.getString("artist_name")
+            resultSet.getLong("id_artist"),
+            resultSet.getString("artist_name"),
+            categoriesList,
+            resultSet.getBoolean("is_deleted")
         );
     }
 
@@ -180,7 +253,4 @@ public class JdbcMemberRepository implements MemberRepository {
             resultSet.getDate("event_date").toLocalDate()
         );
     }
-    
-    
-    
 }
