@@ -5,58 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Setlist - Setlist</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div th:replace="fragments/navbar :: navbar"></div>
     
+    <nav class="breadcrumb">
+        <ol>
+            <li><a th:href="@{/member/setlists}">Setlists</a></li>
+            <li>Add Setlist</li>
+        </ol>
+    </nav>
+
     <main class="form-container">
         <div class="form-card">
             <h1>Add New Setlist</h1>
             
             <form th:action="@{/member/setlists/add}" method="post" enctype="multipart/form-data" class="form">
+                <div th:if="${error}" class="message-error">
+                    <p th:text="${error}"></p>
+                </div>
+
+                <div th:if="${accept}" class="message-accept">
+                    <p th:text="${accept}"></p>
+                </div>
+
                 <div class="form-group">
-                    <label for="show">Select Show</label>
-                    <select id="show" name="showId" class="form-control" required>
-                        <option value="">Select a Show</option>
-                        <option th:each="show : ${shows}" 
-                                th:value="${show.id}" 
-                                th:text="${show.artist.name + ' - ' + show.venue.name + ' (' + #temporals.format(show.date, 'dd MMM yyyy') + ')'}">
-                            Show Details
+                    <label for="name">Setlist Name</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="artistId">Artist</label>
+                    <select id="artistId" name="artistId" class="form-control" required>
+                        <option value="" disabled selected>Select an artist</option>
+                        <option th:each="artist : ${artists}" 
+                                th:value="${artist.idArtist}" 
+                                th:text="${artist.artistName}">
                         </option>
                     </select>
                 </div>
 
-                <div class="song-list-container">
-                    <h2>Songs</h2>
-                    
-                    <!-- Search Bar -->
-                    <div class="search-container">
-                        <input type="text" id="songSearch" class="form-control" placeholder="Search for songs...">
-                        <div id="searchResults" class="search-results"></div>
-                    </div>
-
-                    <!-- Selected Songs List -->
-                    <div id="selectedSongs" class="selected-songs">
-                        <!-- Songs will be added here -->
-                    </div>
-
-                    <!-- Hidden input to store song data -->
-                    <input type="hidden" id="songData" name="songData">
+                <div class="form-group">
+                    <label for="eventId">Event</label>
+                    <select id="eventId" name="eventId" class="form-control" required>
+                        <option value="" disabled selected>Select an event</option>
+                        <option th:each="event : ${events}" 
+                                th:value="${event.idEvent}" 
+                                th:text="${event.eventName + ' (' + #temporals.format(event.eventDate, 'dd MMM yyyy') + ')'}">
+                        </option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="notes">Additional Notes</label>
-                    <textarea id="notes" name="notes" rows="4" class="form-control"></textarea>
+                    <label>Songs</label>
+                    <div id="songList" class="song-list" data-songs="[]">
+                        <!-- Songs will be added here dynamically -->
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addSongField()">Add Song</button>
                 </div>
 
                 <div class="form-group">
-                    <label for="proof">Upload Proof (Optional)</label>
-                    <input type="file" id="proof" name="proof" accept="image/*" class="form-control">
-                    <small class="form-help">Upload a photo of the setlist, ticket, or other proof. Maximum size: 5MB</small>
+                    <label for="proof">Setlist Proof</label>
+                    <input type="file" id="proof" name="proof" class="form-control" accept="image/*">
+                    <small class="form-text">Upload a photo of the setlist (optional)</small>
                 </div>
 
                 <div class="form-actions">
-                    <a href="/member/setlists" class="btn btn-secondary">Cancel</a>
+                    <a th:href="@{/member/setlists}" class="btn btn-secondary">Cancel</a>
                     <button type="submit" class="btn btn-primary">Add Setlist</button>
                 </div>
             </form>
@@ -64,103 +80,60 @@
     </main>
 
     <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            const songSearch = document.getElementById('songSearch');
-            const searchResults = document.getElementById('searchResults');
-            const selectedSongs = document.getElementById('selectedSongs');
-            const songData = document.getElementById('songData');
-            let selectedSongsList = [];
-            let searchTimeout;
+        let songIndex = 0;
 
-            // Search songs as user types
-            songSearch.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                const query = this.value.trim();
-                
-                if (query.length < 2) {
-                    searchResults.innerHTML = '';
-                    searchResults.style.display = 'none';
-                    return;
-                }
-
-                searchTimeout = setTimeout(() => {
-                    // Simulate API call - replace with actual API endpoint
-                    fetch(`/api/songs/search?q=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(songs => {
-                            searchResults.innerHTML = '';
-                            if (songs.length === 0) {
-                                searchResults.innerHTML = '<div class="no-results">No songs found</div>';
-                            } else {
-                                songs.forEach(song => {
-                                    const div = document.createElement('div');
-                                    div.className = 'search-result-item';
-                                    div.innerHTML = `
-                                        <div class="song-info">
-                                            <span class="song-title">${song.title}</span>
-                                            <span class="song-duration">${song.duration}</span>
-                                        </div>
-                                    `;
-                                    div.addEventListener('click', () => addSong(song));
-                                    searchResults.appendChild(div);
-                                });
-                            }
-                            searchResults.style.display = 'block';
-                        });
-                }, 300);
-            });
-
-            // Hide search results when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!searchResults.contains(e.target) && e.target !== songSearch) {
-                    searchResults.style.display = 'none';
-                }
-            });
-
-            // Add song to selected list
-            function addSong(song) {
-                if (selectedSongsList.some(s => s.id === song.id)) {
-                    return; // Song already added
-                }
-
-                selectedSongsList.push(song);
-                updateSelectedSongsList();
-                searchResults.style.display = 'none';
-                songSearch.value = '';
-                updateSongData();
-            }
-
-            // Remove song from selected list
-            function removeSong(songId) {
-                selectedSongsList = selectedSongsList.filter(s => s.id !== songId);
-                updateSelectedSongsList();
-                updateSongData();
-            }
-
-            // Update the display of selected songs
-            function updateSelectedSongsList() {
-                selectedSongs.innerHTML = '';
-                selectedSongsList.forEach((song, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'selected-song-item';
-                    div.innerHTML = `
-                        <div class="song-number">${index + 1}</div>
-                        <div class="song-info">
-                            <span class="song-title">${song.title}</span>
-                            <span class="song-duration">${song.duration}</span>
-                        </div>
-                        <button type="button" class="btn btn-icon remove-song" title="Remove Song">×</button>
-                    `;
-                    div.querySelector('.remove-song').addEventListener('click', () => removeSong(song.id));
-                    selectedSongs.appendChild(div);
-                });
-            }
-
-            // Update hidden input with song data
-            function updateSongData() {
-                songData.value = JSON.stringify(selectedSongsList);
+        // Add event listener to artist dropdown
+        document.getElementById('artistId').addEventListener('change', function() {
+            const artistId = this.value;
+            if (artistId) {
+                loadSongs(artistId);
             }
         });
+
+        function loadSongs(artistId) {
+            fetch(`/member/api/songs/by-artist/${artistId}`)
+                .then(response => response.json())
+                .then(songs => {
+                    // Store songs in a data attribute for reuse
+                    document.getElementById('songList').dataset.songs = JSON.stringify(songs);
+                    // Clear existing song fields
+                    document.getElementById('songList').innerHTML = '';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function addSongField() {
+            const songList = document.getElementById('songList');
+            const songs = JSON.parse(songList.dataset.songs || '[]');
+            
+            if (songs.length === 0) {
+                alert('Please select an artist first');
+                return;
+            }
+
+            const songField = document.createElement('div');
+            songField.className = 'song-field';
+            
+            let songOptions = songs.map(song => 
+                `<option value="${song.idSong}">${song.songName}</option>`
+            ).join('');
+
+            songField.innerHTML = `
+                <div class="song-input-group">
+                    <select name="songIds" class="form-control" required>
+                        <option value="" disabled selected>Select a song</option>
+                        ${songOptions}
+                    </select>
+                    <button type="button" class="btn btn-danger" onclick="removeSong(this)">Remove</button>
+                </div>
+            `;
+            songList.appendChild(songField);
+            songIndex++;
+        }
+
+        function removeSong(button) {
+            button.closest('.song-field').remove();
+        }
     </script>
 </body>
 </html>

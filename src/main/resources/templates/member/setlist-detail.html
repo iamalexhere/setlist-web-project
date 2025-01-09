@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${setlist.setlistName + ' - Setlist'}">Setlist Detail</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <nav class="breadcrumb">
+        <ol>
+            <li><a th:href="@{/member/setlists}">Setlists</a></li>
+            <li th:text="${setlist.setlistName}">Setlist Name</li>
+        </ol>
+    </nav>
+
+    <div class="hero setlist-detail-hero">
+        <h1 th:text="${setlist.setlistName}">Setlist Name</h1>
+        <div class="setlist-meta">
+            <div class="meta-item">
+                <span class="meta-label">Artist:</span>
