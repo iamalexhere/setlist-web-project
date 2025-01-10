@@ -74,7 +74,7 @@ CREATE TABLE setlists(
 
 CREATE TABLE edits(
 	id_setlist INT NOT NULL,
-    date_added DATE NOT NULL,
+    date_added DATE DEFAULT CURRENT_DATE,
 	id_user INT NOT NULL,
     PRIMARY KEY (id_setlist, date_added),
     FOREIGN KEY (id_setlist) REFERENCES setlists(id_setlist),

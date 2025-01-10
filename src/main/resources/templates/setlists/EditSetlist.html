@@ -29,30 +29,40 @@
                     <td th:text="${row.idSong}"></td>
                     <td th:text="${row.songName}"></td>
                     <td th:text="${row.artistName}"></td>
-                    <td><button>remove</button></td>
+                    <td>
+                        <form method="post" th:action="@{/editSetlist/{idSetlist}(idSetlist=${id})}">
+                            <input type="hidden" name="type" value="-1" />
+                            <input type="hidden" name="idSong" th:value="${row.idSong}" />
+                            <input type="submit" value="remove" />
+                        </form>
+                    </td>
                 </tr>
             </table>
             <br>
-            <form method="post" action="insertSetlist" th:object="${data}">
+            <form method="post" th:action="@{/editSetlist/{idSetlist}(idSetlist=${id})}">
+                <input type="hidden" name="type" value="1" />
                 <select name="idSong" class="form-control" >
                     <option th:each="row : ${unselected}" 
                             th:value="${row.idSong}" 
                             th:text="${row.songName}">
                     </option>
                 </select>
-                <input type="submit" value="Add" />
+                <input type="submit" value="add" />
             </form>
         </div>
         </br>
 
-        <form method="post" action="insertSetlist" th:object="${data}">
-            <label>
-                <span class="form-label">Username</span>:
-                <input type="text" name="username" class="form-control" />
-            </label>
-            <br>
-            
+        <form method="post" th:action="@{/editSetlist/saveChanges}">
+            <input type="hidden" name="idSetlist" th:value="${id}" />
+            <input type="hidden" name="save" value="1" />
             <input type="submit" value="Save Changes" />
+        </form>
+
+        </br>
+        <form method="post" th:action="@{/editSetlist/saveChanges}">
+            <input type="hidden" name="idSetlist" th:value="${id}" />
+            <input type="hidden" name="save" value="-1" />
+            <input type="submit" value="Cancel Changes" />
         </form>
     </body>
 </html>

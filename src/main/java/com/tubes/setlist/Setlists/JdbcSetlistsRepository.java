@@ -177,4 +177,18 @@ public class JdbcSetlistsRepository implements SetlistsRepository{
         );
     }
 
+    @Override
+    public void insertSong(int idSetlist, int idSong) throws Exception{
+        String sql ="INSERT INTO setlists_songs (id_setlist, id_song) VALUES (?, ?)";
+        jdbcTemplate.update(sql, idSetlist, idSong);
+    }
+
+    @Override
+    public void deleteSong(int idSetlist, int idSong) throws Exception{
+        String sql ="DELETE FROM setlists_songs WHERE id_setlist = ? AND id_song = ?";
+        jdbcTemplate.update(sql, idSetlist, idSong);
+    }
+
+    
+
 }

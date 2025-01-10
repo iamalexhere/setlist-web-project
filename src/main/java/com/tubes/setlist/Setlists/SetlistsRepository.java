@@ -11,4 +11,6 @@ public interface SetlistsRepository {
     List<DataEvents> showAllEvents();
     boolean insertSetlist(DataInsertSetlist data) throws Exception;
     List<DataArtistsSongs> showUnaddedArtistsSong (int idSetlist);
+    public void insertSong(int idSetlist, int idSong) throws Exception;
+    public void deleteSong(int idSetlist, int idSong) throws Exception;
 }
