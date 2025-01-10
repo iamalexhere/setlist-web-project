@@ -431,7 +431,7 @@ public class JdbcGuestRepository implements GuestRepository {
             )
             SELECT * FROM RankedArtists 
             WHERE rn = 1
-            OFFSET ? LIMIT ?
+            ORDER BY category_name
         """;
         
         return jdbcTemplate.query(sql, (rs) -> {
@@ -449,7 +449,7 @@ public class JdbcGuestRepository implements GuestRepository {
                 artistsByCategory.put(rs.getString("category_name"), artist);
             }
             return artistsByCategory;
-        }, (page - 1) * size, size);
+        });
     }
 
     private class EventRowMapper implements RowMapper<EventView> {

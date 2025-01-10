@@ -52,4 +52,126 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.stat-card').forEach(stat => {
         observer.observe(stat);
     });
+
+    // Category Slider
+    const categoryGrid = document.querySelector('.category-grid');
+    if (!categoryGrid) return;
+
+    const prevButton = categoryGrid.parentElement.querySelector('.nav-button:first-child');
+    const nextButton = categoryGrid.parentElement.querySelector('.nav-button:last-child');
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let momentumID;
+    let velocity = 0;
+    const friction = 0.95;
+
+    // Mouse Events
+    categoryGrid.addEventListener('mousedown', e => {
+        isDown = true;
+        categoryGrid.classList.add('dragging');
+        startX = e.pageX - categoryGrid.offsetLeft;
+        scrollLeft = categoryGrid.scrollLeft;
+        cancelMomentumTracking();
+    });
+
+    categoryGrid.addEventListener('mouseleave', () => {
+        isDown = false;
+        categoryGrid.classList.remove('dragging');
+    });
+
+    categoryGrid.addEventListener('mouseup', () => {
+        isDown = false;
+        categoryGrid.classList.remove('dragging');
+        beginMomentumTracking();
+    });
+
+    categoryGrid.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - categoryGrid.offsetLeft;
+        const walk = (x - startX) * 2;
+        const prevScrollLeft = categoryGrid.scrollLeft;
+        categoryGrid.scrollLeft = scrollLeft - walk;
+        velocity = categoryGrid.scrollLeft - prevScrollLeft;
+    });
+
+    // Touch Events
+    categoryGrid.addEventListener('touchstart', e => {
+        isDown = true;
+        categoryGrid.classList.add('dragging');
+        startX = e.touches[0].pageX - categoryGrid.offsetLeft;
+        scrollLeft = categoryGrid.scrollLeft;
+        cancelMomentumTracking();
+    });
+
+    categoryGrid.addEventListener('touchend', () => {
+        isDown = false;
+        categoryGrid.classList.remove('dragging');
+        beginMomentumTracking();
+    });
+
+    categoryGrid.addEventListener('touchmove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - categoryGrid.offsetLeft;
+        const walk = (x - startX) * 2;
+        const prevScrollLeft = categoryGrid.scrollLeft;
+        categoryGrid.scrollLeft = scrollLeft - walk;
+        velocity = categoryGrid.scrollLeft - prevScrollLeft;
+    });
+
+    // Navigation Buttons
+    function updateButtonStates() {
+        if (prevButton && nextButton) {
+            prevButton.disabled = categoryGrid.scrollLeft <= 0;
+            nextButton.disabled = categoryGrid.scrollLeft >= categoryGrid.scrollWidth - categoryGrid.clientWidth;
+        }
+    }
+
+    if (prevButton) {
+        prevButton.addEventListener('click', () => {
+            cancelMomentumTracking();
+            categoryGrid.scrollBy({
+                left: -categoryGrid.offsetWidth,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener('click', () => {
+            cancelMomentumTracking();
+            categoryGrid.scrollBy({
+                left: categoryGrid.offsetWidth,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    categoryGrid.addEventListener('scroll', () => {
+        updateButtonStates();
+    });
+
+    // Momentum Scrolling
+    function beginMomentumTracking() {
+        cancelMomentumTracking();
+        momentumID = requestAnimationFrame(momentumLoop);
+    }
+
+    function cancelMomentumTracking() {
+        cancelAnimationFrame(momentumID);
+    }
+
+    function momentumLoop() {
+        categoryGrid.scrollLeft += velocity;
+        velocity *= friction;
+        if (Math.abs(velocity) > 0.1) {
+            momentumID = requestAnimationFrame(momentumLoop);
+        }
+    }
+
+    // Initial button state
+    updateButtonStates();
 });
