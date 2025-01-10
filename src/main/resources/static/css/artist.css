@@ -247,3 +247,229 @@
 .page-info {
     color: var(--subtext);
 }
+
+/* Artist Detail Page */
+.artist-detail {
+    padding: 2rem 0;
+}
+
+.artist-profile {
+    background-color: var(--surface);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin: 2rem 0 4rem;
+}
+
+.artist-cover {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+}
+
+.artist-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artist-info-detail {
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.artist-info-detail h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
+
+.artist-categories {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.category-tag {
+    background-color: var(--surface-light);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+}
+
+.follow-btn {
+    background-color: var(--accent);
+    color: var(--background);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.follow-btn:hover {
+    background-color: var(--accent-secondary);
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.75rem;
+    color: var(--text);
+}
+
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.event-card {
+    background-color: var(--surface);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+}
+
+.event-image {
+    height: 200px;
+}
+
+.event-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.event-info {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+}
+
+.event-date {
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.event-info h3 {
+    color: var(--text);
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.venue-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--subtext);
+    margin-bottom: 1.5rem;
+}
+
+.view-event {
+    display: block;
+    width: calc(100% - 2rem);
+    text-align: center;
+    background-color: var(--accent);
+    color: var(--background);
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    margin: 0 1rem;
+}
+
+.view-event:hover {
+    background-color: var(--accent-secondary);
+}
+
+.setlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.setlist-card {
+    background-color: var(--surface);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.setlist-header {
+    margin-bottom: 1.5rem;
+}
+
+.setlist-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.setlist-header h3 {
+    color: var(--text);
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.event-name {
+    color: var(--subtext);
+}
+
+.song-list {
+    margin-bottom: 1.5rem;
+}
+
+.song-list ol {
+    list-style-position: inside;
+    color: var(--text);
+}
+
+.song-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--surface-light);
+}
+
+.song-list li:last-child {
+    border-bottom: none;
+}
+
+.setlist-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.proof-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--surface-light);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.proof-btn:hover {
+    background-color: var(--accent);
+    color: var(--background);
+}
