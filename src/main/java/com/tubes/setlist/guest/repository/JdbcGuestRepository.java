@@ -99,11 +99,16 @@ public class JdbcGuestRepository implements GuestRepository {
     public List<EventView> findEventsByArtist(Long artistId) {
         String sql = """
             SELECT DISTINCT e.id_event, e.event_name, e.event_date, 
-                   v.venue_name, v.city_name, e.is_deleted
+                   v.venue_name, v.city_name, e.is_deleted,
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
             JOIN setlists s ON e.id_event = s.id_event
+            LEFT JOIN setlists s2 ON e.id_event = s2.id_event
+            LEFT JOIN artists a ON s2.id_artist = a.id_artist
             WHERE s.id_artist = ?
+            GROUP BY e.id_event, e.event_name, e.event_date, 
+                     v.venue_name, v.city_name, e.is_deleted
             ORDER BY e.event_date DESC
         """;
         
@@ -331,7 +336,7 @@ public class JdbcGuestRepository implements GuestRepository {
         String sql = """
             SELECT e.id_event, e.event_name, e.event_date, v.venue_name, v.city_name,
                    e.is_deleted,
-                   string_agg(DISTINCT a.artist_name, ', ') as performing_artists
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
             LEFT JOIN setlists s ON e.id_event = s.id_event
@@ -350,8 +355,8 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
                 rs.getBoolean("is_deleted"),
-                rs.getString("performing_artists") != null ? 
-                    List.of(rs.getString("performing_artists").split(", ")) : 
+                rs.getString("artists") != null ? 
+                    List.of(rs.getString("artists").split(", ")) : 
                     List.of()
             )
         );
@@ -364,7 +369,7 @@ public class JdbcGuestRepository implements GuestRepository {
         String sql = """
             SELECT e.id_event, e.event_name, e.event_date, v.venue_name, v.city_name,
                    e.is_deleted,
-                   string_agg(DISTINCT a.artist_name, ', ') as performing_artists
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
             LEFT JOIN setlists s ON e.id_event = s.id_event
@@ -395,8 +400,8 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
                 rs.getBoolean("is_deleted"),
-                rs.getString("performing_artists") != null ? 
-                    List.of(rs.getString("performing_artists").split(", ")) : 
+                rs.getString("artists") != null ? 
+                    List.of(rs.getString("artists").split(", ")) : 
                     List.of()
             ),
             searchQuery,
@@ -415,7 +420,10 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getDate("event_date").toLocalDate(),
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
-                rs.getBoolean("is_deleted")
+                rs.getBoolean("is_deleted"),
+                rs.getString("artists") != null ? 
+                    List.of(rs.getString("artists").split(", ")) : 
+                    List.of()
             );
         }
     }

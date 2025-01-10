@@ -26,6 +26,27 @@ public class GuestController {
     @Autowired
     private GuestRepository guestRepository;
 
+    @GetMapping({"", "/", "/dashboard"})
+    public String dashboard(Model model) {
+        // Get recent events
+        List<EventView> recentEvents = guestRepository.findAllEvents().stream()
+            .limit(3)
+            .collect(Collectors.toList());
+
+        // Get recent setlists
+        List<SetlistView> recentSetlists = new ArrayList<>();
+        for (EventView event : recentEvents) {
+            recentSetlists.addAll(guestRepository.findSetlistsByEvent(event.getIdEvent()));
+        }
+        recentSetlists = recentSetlists.stream().limit(3).collect(Collectors.toList());
+
+        model.addAttribute("activePage", "dashboard");
+        model.addAttribute("recentEvents", recentEvents);
+        model.addAttribute("recentSetlists", recentSetlists);
+        
+        return "guest/index";
+    }
+
     @GetMapping("/artists")
     public String listArtists(
             @RequestParam(required = false) String name,
