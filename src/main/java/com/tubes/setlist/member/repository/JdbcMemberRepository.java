@@ -502,4 +502,24 @@ public class JdbcMemberRepository implements MemberRepository {
         String imageUrl = imageFilename != null ? "/images/artists/" + imageFilename : null;
         jdbcTemplate.update(sql, artistName, imageFilename, imageOriginalFilename, imageUrl, id);
     }
+
+    @Override
+    public List<Events> findEventsByArtist(Long artistId) {
+        String sql = """
+            SELECT DISTINCT e.* 
+            FROM events e
+            JOIN setlists s ON e.id_event = s.id_event
+            WHERE s.id_artist = ?
+            AND NOT e.is_deleted
+            ORDER BY e.event_date DESC
+        """;
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Events(
+            rs.getLong("id_event"),
+            rs.getLong("id_venue"),
+            rs.getString("event_name"),
+            rs.getDate("event_date").toLocalDate(),
+            rs.getBoolean("is_deleted")
+        ), artistId);
+    }
 }

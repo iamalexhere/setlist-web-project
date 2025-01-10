@@ -20,9 +20,35 @@
 
     <div class="hero artist-hero">
         <h1 th:text="${artist.artistName + ' Shows'}">Artist Shows</h1>
-        <p>List of setlists for this artist</p>
+        <p>List of events and setlists for this artist</p>
     </div>
 
+    <!-- Events Section -->
+    <section class="upcoming-events">
+        <h2 class="section-title">Events</h2>
+        
+        <!-- Empty State for Events -->
+        <div class="empty-state" th:if="${#lists.isEmpty(events)}">
+            <h3>No Events Found</h3>
+            <p>There are no events scheduled for this artist yet</p>
+        </div>
+        
+        <!-- Event List -->
+        <div class="event-list" th:if="${not #lists.isEmpty(events)}">
+            <div class="event-card" th:each="event : ${events}">
+                <div class="event-date">
+                    <span class="day" th:text="${#temporals.format(event.eventDate, 'dd')}">01</span>
+                    <span class="month" th:text="${#temporals.format(event.eventDate, 'MMM')}">JAN</span>
+                    <span class="year" th:text="${#temporals.format(event.eventDate, 'yyyy')}">2024</span>
+                </div>
+                <div class="event-details">
+                    <h3 th:text="${event.eventName}">Event Name</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Setlists Section -->
     <section class="all-setlists">
         <h2 class="section-title">All Setlists</h2>
         

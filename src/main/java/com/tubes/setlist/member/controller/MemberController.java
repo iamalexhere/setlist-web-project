@@ -559,4 +559,39 @@ public class MemberController {
             return "member/edit-artist";
         }
     }
+
+    @GetMapping("/artists/{id}/shows")
+    public String getArtistShows(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "8") int size,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Artists artist = repo.findArtistById(id);
+        if (artist == null) {
+            return "redirect:/member/artists";
+        }
+
+        // Get events for this artist
+        List<Events> events = repo.findEventsByArtist(id);
+
+        // Get setlists for this artist
+        List<Setlist> setlists = repo.findSetlists(artist.getArtistName(), "", page, size);
+        long totalSetlists = repo.getTotalSetlists(artist.getArtistName(), "");
+        int totalPages = (int) Math.ceil((double) totalSetlists / size);
+
+        model.addAttribute("artist", artist);
+        model.addAttribute("events", events);
+        model.addAttribute("setlists", setlists);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        
+        return "member/artist-shows";
+    }
 }
