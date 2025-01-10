@@ -137,11 +137,16 @@ public class JdbcGuestRepository implements GuestRepository {
     @Override
     public EventView findEventById(Long id) {
         String sql = """
-            SELECT e.id_event, e.event_name, e.event_date, 
-                   v.venue_name, v.city_name, e.is_deleted
+            SELECT e.id_event, e.event_name, e.event_date,
+                   v.venue_name, v.city_name, e.is_deleted,
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
+            LEFT JOIN setlists s ON e.id_event = s.id_event
+            LEFT JOIN artists a ON s.id_artist = a.id_artist
             WHERE e.id_event = ?
+            GROUP BY e.id_event, e.event_name, e.event_date,
+                     v.venue_name, v.city_name, e.is_deleted
         """;
         
         return jdbcTemplate.queryForObject(sql, new EventRowMapper(), id);

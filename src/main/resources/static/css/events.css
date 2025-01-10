@@ -241,3 +241,219 @@
 .page-info {
     color: var(--subtext);
 }
+
+/* Event Detail Page */
+.event-detail-header {
+    background: linear-gradient(to bottom, var(--surface-light), var(--surface));
+    padding: 4rem 0;
+    margin-top: -2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.event-detail-info {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.event-detail-info .event-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--primary-light);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
+
+.event-detail-info .event-date:hover {
+    transform: translateY(-2px);
+    background-color: var(--primary);
+}
+
+.event-detail-info h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.event-detail-info .venue-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--subtext);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.event-detail-info .artist-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.event-detail-info .artist-tag {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.event-detail-info .artist-tag:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+/* Setlist Section */
+.setlist-section {
+    padding: 4rem 0;
+}
+
+.setlist-section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.section-description {
+    color: var(--subtext);
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+}
+
+.setlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.setlist-card {
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.setlist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.setlist-header {
+    padding: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setlist-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.setlist-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.event-name {
+    color: var(--subtext);
+    font-size: 1rem;
+}
+
+.song-list {
+    padding: 2rem;
+    flex: 1;
+}
+
+.song-list ol {
+    list-style-position: inside;
+    margin: 0;
+    padding: 0;
+}
+
+.song-list li {
+    color: var(--text);
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.song-list li:hover {
+    padding-left: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.song-list li:last-child {
+    border-bottom: none;
+}
+
+.setlist-actions {
+    padding: 1.5rem;
+    background: var(--surface-light);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.proof-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--primary-light);
+    color: var(--text);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.proof-btn:hover {
+    background: var(--primary);
+    color: var(--background);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+    color: var(--subtext);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
