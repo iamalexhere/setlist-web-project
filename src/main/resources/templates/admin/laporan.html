@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Setlists</title>
+    </head>
+    <body>
+        <h1> Laporan </h1>
+        <div> 
+            <h2>User with most edits</h2>
+            <table border=1>
+                <tr>
+                    <th> Username </th>
+                    <th> Edit done </th>
+                </tr>
+                <tr th:each="row : ${userEdit}">
+                    <td th:text="${row.name}"></td>
+                    <td th:text="${row.num}"></td>
+                </tr>
+            </table>
+        </div>
+        <div> 
+            <h2>Populary referenced artist</h2>
+            <table border=1>
+                <tr>
+                    <th> Artist Name </th>
+                    <th> Referenced Num </th>
+                </tr>
+                <tr th:each="row : ${artistPop}">
+                    <td th:text="${row.name}"></td>
+                    <td th:text="${row.num}"></td>
+                </tr>
+            </table>
+        </div>
+        <div> 
+            <h2>Monthly inserts</h2>
+            <table border=1>
+                <tr>
+                    <th> Date Month </th>
+                    <th> Total Setlist Inserts </th>
+                </tr>
+                <tr th:each="row : ${setlistInsert}">
+                    <td th:text="${#dates.format(row.date, 'yyyy-MM')}"></td>
+                    <td th:text="${row.num}"></td>
+                </tr>
+            </table>
+        </div>
+    <body>
+</html>
