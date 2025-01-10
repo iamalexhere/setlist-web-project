@@ -30,4 +30,7 @@ public interface GuestRepository {
     
     // Category related queries
     Map<String, ArtistView> getRandomArtistsByCategory(int page, int size);
+    
+    // Random artist images
+    List<String> getRandomArtistImages(int limit);
 }

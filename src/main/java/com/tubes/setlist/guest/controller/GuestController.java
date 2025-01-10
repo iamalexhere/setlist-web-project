@@ -35,13 +35,18 @@ public class GuestController {
 
         // Get random artists by category
         Map<String, ArtistView> categoryArtists = guestRepository.getRandomArtistsByCategory(1, 0);
+        
+        // Get random artist images for hero section
+        List<String> heroImages = guestRepository.getRandomArtistImages(5);
 
         model.addAttribute("activePage", "dashboard");
         model.addAttribute("recentEvents", recentEvents);
         model.addAttribute("categoryArtists", categoryArtists);
+        model.addAttribute("heroImages", heroImages);
         
         return "guest/index";
     }
+
 
 
     @GetMapping("/artists")

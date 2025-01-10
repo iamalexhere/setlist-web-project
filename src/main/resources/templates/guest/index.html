@@ -38,8 +38,13 @@
 
     <main class="container">
         <section class="hero">
-            <h1>Concert Setlists</h1>
-            <p>Discover what your favorite artists play live.<br>All right here. Let's go.</p>
+            <div class="hero-slideshow">
+                <div th:each="image : ${heroImages}" class="hero-slide" th:style="'background-image: url(' + ${image} + ')'"></div>
+            </div>
+            <div class="hero-content">
+                <h1>Concert Setlists</h1>
+                <p>Discover what your favorite artists play live.<br>All right here. Let's go.</p>
+            </div>
         </section>
 
         <section>

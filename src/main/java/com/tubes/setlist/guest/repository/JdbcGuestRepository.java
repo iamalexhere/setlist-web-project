@@ -452,6 +452,20 @@ public class JdbcGuestRepository implements GuestRepository {
         });
     }
 
+    @Override
+    public List<String> getRandomArtistImages(int limit) {
+        String sql = """
+            SELECT image_url 
+            FROM artists 
+            WHERE image_url IS NOT NULL 
+            AND NOT is_deleted 
+            ORDER BY RANDOM() 
+            LIMIT ?
+        """;
+        
+        return jdbcTemplate.queryForList(sql, String.class, limit);
+    }
+
     private class EventRowMapper implements RowMapper<EventView> {
         @Override
         public EventView mapRow(ResultSet rs, int rowNum) throws SQLException {
