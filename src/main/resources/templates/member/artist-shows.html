@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Shows - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li><a th:href="@{/member/artists}">Artists</a></li>
+            <li>Artist Shows</li>
+        </ol>
+    </nav>
+
+    <div class="hero artist-hero">
+        <h1 th:text="${artist.artistName + ' Shows'}">Artist Shows</h1>
+        <p>List of events and setlists for this artist</p>
+    </div>
+
+    <!-- Events Section -->
+    <section class="upcoming-events">
+        <h2 class="section-title">Events</h2>
+        
+        <!-- Empty State for Events -->
+        <div class="empty-state" th:if="${#lists.isEmpty(events)}">
+            <h3>No Events Found</h3>
+            <p>There are no events scheduled for this artist yet</p>
+        </div>
+        
+        <!-- Event List -->
+        <div class="event-list" th:if="${not #lists.isEmpty(events)}">
+            <div class="event-card" th:each="event : ${events}">
+                <div class="event-date">
+                    <span class="day" th:text="${#temporals.format(event.eventDate, 'dd')}">01</span>
+                    <span class="month" th:text="${#temporals.format(event.eventDate, 'MMM')}">JAN</span>
+                    <span class="year" th:text="${#temporals.format(event.eventDate, 'yyyy')}">2024</span>
+                </div>
+                <div class="event-details">
+                    <h3 th:text="${event.eventName}">Event Name</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Setlists Section -->
+    <section class="all-setlists">
+        <h2 class="section-title">All Setlists</h2>
+        
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(setlists)}">
+            <h3>No Setlists Found</h3>
+            <p>There are no setlists for this artist yet</p>
+        </div>
+        
+        <!-- Setlist Grid -->
+        <div class="setlist-grid" th:if="${not #lists.isEmpty(setlists)}">
+            <div class="setlist-card" th:each="setlist : ${setlists}">
+                <div class="setlist-info">
+                    <h3 class="setlist-name" th:text="${setlist.setlistName}"></h3>
+                    <p class="event-name" th:text="${setlist.eventName}"></p>
+                    <p class="event-date" th:text="${#temporals.format(setlist.eventDate, 'dd MMMM yyyy')}"></p>
+                    <div class="card-actions">
+                        <a th:href="@{/member/setlists/{id}(id=${setlist.idSetlist})}" class="btn">View Detail</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 1}" 
+               th:href="@{/member/artists/{id}/shows(id=${artist.idArtist}, page=${currentPage - 1})}" 
+               class="page-link">&laquo; Previous</a>
+            
+            <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+                <a th:if="${pageNum != currentPage}" 
+                   th:href="@{/member/artists/{id}/shows(id=${artist.idArtist}, page=${pageNum})}" 
+                   class="page-link" th:text="${pageNum}">1</a>
+                <span th:if="${pageNum == currentPage}" 
+                      class="page-link active" th:text="${pageNum}">1</span>
+            </th:block>
+            
+            <a th:if="${currentPage < totalPages}" 
+               th:href="@{/member/artists/{id}/shows(id=${artist.idArtist}, page=${currentPage + 1})}" 
+               class="page-link">Next &raquo;</a>
+        </div>
+    </section>
+</body>
+</html>

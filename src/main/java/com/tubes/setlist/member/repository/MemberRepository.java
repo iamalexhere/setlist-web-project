@@ -8,6 +8,7 @@ import com.tubes.setlist.member.model.Categories;
 import com.tubes.setlist.member.model.Songs;
 import com.tubes.setlist.member.model.Setlist;
 import com.tubes.setlist.member.model.Events;
+
 public interface MemberRepository {
     void addArtist(String artist_name, String imageFilename, String imageOriginalFilename);
     void addCategories(String category_name);
@@ -21,7 +22,6 @@ public interface MemberRepository {
     List<Categories> findAllGenre();
     Categories findIdCategory(String category_name);
 
-    // Add new methods for songs
     void addSong(String songName, Long artistId);
     List<Songs> findSongsByArtist(Long artistId);
     List<Songs> findSongsByName(String name, int page, int size);
@@ -30,7 +30,6 @@ public interface MemberRepository {
     void deleteSong(Long songId);
     Songs findSongById(Long songId);
 
-    // Setlist methods
     List<Setlist> findSetlists(String artist, String event, int page, int size);
     long getTotalSetlists(String artist, String event);
     Setlist findSetlistById(Long id);
@@ -39,6 +38,9 @@ public interface MemberRepository {
     void deleteSetlist(Long id);
     List<Long> getSetlistSongs(Long idSetlist);
 
-    // Add new method for events
     List<Events> findAllEvents();
+    List<Events> findEventsByArtist(Long artistId);
+    
+    Artists findArtistById(Long id);
+    void updateArtist(Long id, String artistName, String imageFilename, String imageOriginalFilename);
 }

@@ -466,4 +466,60 @@ public class JdbcMemberRepository implements MemberRepository {
             resultSet.getString("artist_name")
         );
     }
+
+    @Override
+    public Artists findArtistById(Long id) {
+        String sql = """
+            SELECT a.id_artist, 
+                   a.artist_name,
+                   a.image_filename,
+                   a.image_original_filename,
+                   a.image_url,
+                   a.is_deleted,
+                   string_agg(c.category_name, ', ') as categories
+            FROM artists a
+            LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
+            LEFT JOIN categories c ON ac.id_category = c.id_category
+            WHERE a.id_artist = ?
+            GROUP BY a.id_artist, a.artist_name, a.image_filename, a.image_original_filename, a.image_url, a.is_deleted
+        """;
+        
+        List<Artists> artists = jdbcTemplate.query(sql, this::mapRowToArtists, id);
+        return artists.isEmpty() ? null : artists.get(0);
+    }
+
+    @Override
+    public void updateArtist(Long id, String artistName, String imageFilename, String imageOriginalFilename) {
+        String sql = """
+            UPDATE artists 
+            SET artist_name = ?,
+                image_filename = COALESCE(?, image_filename),
+                image_original_filename = COALESCE(?, image_original_filename),
+                image_url = COALESCE(?, image_url)
+            WHERE id_artist = ?
+        """;
+        
+        String imageUrl = imageFilename != null ? "/images/artists/" + imageFilename : null;
+        jdbcTemplate.update(sql, artistName, imageFilename, imageOriginalFilename, imageUrl, id);
+    }
+
+    @Override
+    public List<Events> findEventsByArtist(Long artistId) {
+        String sql = """
+            SELECT DISTINCT e.* 
+            FROM events e
+            JOIN setlists s ON e.id_event = s.id_event
+            WHERE s.id_artist = ?
+            AND NOT e.is_deleted
+            ORDER BY e.event_date DESC
+        """;
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Events(
+            rs.getLong("id_event"),
+            rs.getLong("id_venue"),
+            rs.getString("event_name"),
+            rs.getDate("event_date").toLocalDate(),
+            rs.getBoolean("is_deleted")
+        ), artistId);
+    }
 }

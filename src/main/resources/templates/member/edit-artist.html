@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Artist - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <ol>
+            <li><a th:href="@{/member/artists}">Artists</a></li>
+            <li>Edit Artist</li>
+        </ol>
+    </nav>
+
+    <div class="hero artist-hero">
+        <h1>Edit Artist</h1>
+        <p>Update artist details</p>
+    </div>
+
+    <section class="form-section">
+        <form th:action="@{/member/artists/{id}/edit(id=${artist.idArtist})}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="artistName">Artist Name</label>
+                <input type="text" id="artistName" name="artistName" th:value="${artist.artistName}" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Image</label>
+                <input type="file" id="image" name="image">
+                <p th:if="${artist.imageUrl}">Current Image: <img th:src="${artist.imageUrl}" alt="Current Artist Image" style="width: 100px; height: auto;"></p>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Artist</button>
+        </form>
+    </section>
+</body>
+</html>

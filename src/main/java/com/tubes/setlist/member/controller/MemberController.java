@@ -508,4 +508,90 @@ public class MemberController {
 
         return "redirect:/member/songs";
     }
+
+    @GetMapping("/artists/{id}/edit")
+    public String editArtist(
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Artists artist = repo.findArtistById(id);
+        if (artist == null) {
+            return "redirect:/member/artists";
+        }
+
+        model.addAttribute("artist", artist);
+        return "member/edit-artist";
+    }
+
+    @PostMapping("/artists/{id}/edit")
+    public String updateArtist(
+        @PathVariable Long id,
+        @RequestParam("artistName") String artistName,
+        @RequestParam(value = "image", required = false) MultipartFile image,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        try {
+            String imageFilename = null;
+            String originalFilename = null;
+
+            if (image != null && !image.isEmpty()) {
+                imageFilename = fileStorageService.storeFile(image);
+                originalFilename = image.getOriginalFilename();
+            }
+
+            repo.updateArtist(id, artistName, imageFilename, originalFilename);
+            return "redirect:/member/artists";
+        } catch (Exception e) {
+            Artists artist = repo.findArtistById(id);
+            model.addAttribute("artist", artist);
+            model.addAttribute("error", "An error occurred while updating the artist: " + e.getMessage());
+            return "member/edit-artist";
+        }
+    }
+
+    @GetMapping("/artists/{id}/shows")
+    public String getArtistShows(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "8") int size,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Artists artist = repo.findArtistById(id);
+        if (artist == null) {
+            return "redirect:/member/artists";
+        }
+
+        // Get events for this artist
+        List<Events> events = repo.findEventsByArtist(id);
+
+        // Get setlists for this artist
+        List<Setlist> setlists = repo.findSetlists(artist.getArtistName(), "", page, size);
+        long totalSetlists = repo.getTotalSetlists(artist.getArtistName(), "");
+        int totalPages = (int) Math.ceil((double) totalSetlists / size);
+
+        model.addAttribute("artist", artist);
+        model.addAttribute("events", events);
+        model.addAttribute("setlists", setlists);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        
+        return "member/artist-shows";
+    }
 }
