@@ -9,32 +9,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-content">
-                <div class="left-nav">
-                    <a href="/" class="brand">SETLIST</a>
-                    <div class="search-container">
-                        <form th:action="@{/guest/events}" method="get">
-                            <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gray-400)"></i>
-                            <input type="text" name="query" class="search-box" placeholder="What do you want to see live?">
-                        </form>
-                    </div>
-                </div>
-                <div class="nav-links">
-                    <a href="/guest/events" class="nav-link">Events</a>
-                    <a href="/guest/artists" class="nav-link">Artists</a>
-                    <a href="/guest/venues" class="nav-link">Venues</a>
-                    <a href="/guest/setlists" class="nav-link">Setlists</a>
-                </div>
-                <div class="nav-links">
-                    <a href="/auth/login" class="nav-link">Login</a>
-                    <a href="/auth/register" class="nav-link">Register</a>
-                    <i class="fas fa-moon"></i>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <!-- Include navbar fragment -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
 
     <main class="container">
         <section class="hero">
