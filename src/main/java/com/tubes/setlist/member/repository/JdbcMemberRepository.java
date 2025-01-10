@@ -466,4 +466,25 @@ public class JdbcMemberRepository implements MemberRepository {
             resultSet.getString("artist_name")
         );
     }
+
+    @Override
+    public Artists findArtistById(Long id) {
+        String sql = """
+            SELECT a.id_artist, 
+                   a.artist_name,
+                   a.image_filename,
+                   a.image_original_filename,
+                   a.image_url,
+                   a.is_deleted,
+                   string_agg(c.category_name, ', ') as categories
+            FROM artists a
+            LEFT JOIN artists_categories ac ON a.id_artist = ac.id_artist
+            LEFT JOIN categories c ON ac.id_category = c.id_category
+            WHERE a.id_artist = ?
+            GROUP BY a.id_artist, a.artist_name, a.image_filename, a.image_original_filename, a.image_url, a.is_deleted
+        """;
+        
+        List<Artists> artists = jdbcTemplate.query(sql, this::mapRowToArtists, id);
+        return artists.isEmpty() ? null : artists.get(0);
+    }
 }

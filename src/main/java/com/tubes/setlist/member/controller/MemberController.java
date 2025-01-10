@@ -508,4 +508,24 @@ public class MemberController {
 
         return "redirect:/member/songs";
     }
+
+    @GetMapping("/artists/{id}/edit")
+    public String editArtist(
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Artists artist = repo.findArtistById(id);
+        if (artist == null) {
+            return "redirect:/member/artists";
+        }
+
+        model.addAttribute("artist", artist);
+        return "member/edit-artist";
+    }
 }
