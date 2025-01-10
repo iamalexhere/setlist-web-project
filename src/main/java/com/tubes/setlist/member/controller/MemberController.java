@@ -168,6 +168,21 @@ public class MemberController {
         return repo.findSongsByArtist(artistId);
     }
 
+    @GetMapping("/setlists/{id}")
+    public String getSetlistDetail(@PathVariable Long id, Model model, HttpSession session) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        Setlist setlist = repo.findSetlistById(id);
+        if (setlist == null) {
+            return "redirect:/member/setlists";
+        }
+        
+        model.addAttribute("setlist", setlist);
+        return "member/setlist-detail";
+    }
+
     @PostMapping("/setlists/add")
     public String addSetlist(
         @RequestParam("name") String setlistName,
