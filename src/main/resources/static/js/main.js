@@ -14,10 +14,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Search functionality
     const searchBox = document.querySelector('.search-box');
     if (searchBox) {
-        searchBox.addEventListener('input', function(e) {
-            // Add search logic here
-            console.log('Searching for:', e.target.value);
-        });
+        // Search delay for artist search
+        let searchTimeout;
+        function handleSearch(event) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (event.target.value.length >= 2 || event.target.value.length === 0) {
+                    event.target.form.submit();
+                }
+            }, 500);
+        }
+
+        searchBox.addEventListener('input', handleSearch);
     }
 
     // Animate numbers in stats
