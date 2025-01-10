@@ -54,7 +54,7 @@ public class GuestController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String genre,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "4") int size,
+            @RequestParam(defaultValue = "6") int size,
             Model model) {
         
         // Get all genres with counts
