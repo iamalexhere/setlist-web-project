@@ -41,4 +41,5 @@ public interface MemberRepository {
     List<Events> findAllEvents();
     
     Artists findArtistById(Long id);
+    void updateArtist(Long id, String artistName, String imageFilename, String imageOriginalFilename);
 }

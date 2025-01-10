@@ -528,4 +528,35 @@ public class MemberController {
         model.addAttribute("artist", artist);
         return "member/edit-artist";
     }
+
+    @PostMapping("/artists/{id}/edit")
+    public String updateArtist(
+        @PathVariable Long id,
+        @RequestParam("artistName") String artistName,
+        @RequestParam(value = "image", required = false) MultipartFile image,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        try {
+            String imageFilename = null;
+            String originalFilename = null;
+
+            if (image != null && !image.isEmpty()) {
+                imageFilename = fileStorageService.storeFile(image);
+                originalFilename = image.getOriginalFilename();
+            }
+
+            repo.updateArtist(id, artistName, imageFilename, originalFilename);
+            return "redirect:/member/artists";
+        } catch (Exception e) {
+            Artists artist = repo.findArtistById(id);
+            model.addAttribute("artist", artist);
+            model.addAttribute("error", "An error occurred while updating the artist: " + e.getMessage());
+            return "member/edit-artist";
+        }
+    }
 }

@@ -487,4 +487,19 @@ public class JdbcMemberRepository implements MemberRepository {
         List<Artists> artists = jdbcTemplate.query(sql, this::mapRowToArtists, id);
         return artists.isEmpty() ? null : artists.get(0);
     }
+
+    @Override
+    public void updateArtist(Long id, String artistName, String imageFilename, String imageOriginalFilename) {
+        String sql = """
+            UPDATE artists 
+            SET artist_name = ?,
+                image_filename = COALESCE(?, image_filename),
+                image_original_filename = COALESCE(?, image_original_filename),
+                image_url = COALESCE(?, image_url)
+            WHERE id_artist = ?
+        """;
+        
+        String imageUrl = imageFilename != null ? "/images/artists/" + imageFilename : null;
+        jdbcTemplate.update(sql, artistName, imageFilename, imageOriginalFilename, imageUrl, id);
+    }
 }
