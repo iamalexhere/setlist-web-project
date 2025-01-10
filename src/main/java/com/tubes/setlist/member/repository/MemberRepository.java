@@ -8,6 +8,7 @@ import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.EventsVenues;
 import com.tubes.setlist.member.model.GenreView;
 import com.tubes.setlist.member.model.Venues;
 
@@ -35,4 +36,9 @@ public interface MemberRepository {
 
     //events
     Optional<Events> searchEvents(Long venueId, String showName, LocalDate date);
+    List<EventsVenues> searchEventsByKeyword(String keyword);
+    List<EventsVenues> findAllEvents();
+    EventsVenues findEventsById(Long eventId);
+    void updateEvent(Long eventId, Long idVenue, String eventName, LocalDate eventDate);
+    void deleteEvent(Long eventId);
 }

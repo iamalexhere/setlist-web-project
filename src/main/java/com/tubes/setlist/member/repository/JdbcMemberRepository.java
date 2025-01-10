@@ -15,6 +15,7 @@ import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.EventsVenues;
 import com.tubes.setlist.member.model.GenreView;
 import com.tubes.setlist.member.model.Venues;
 
@@ -131,7 +132,8 @@ public class JdbcMemberRepository implements MemberRepository {
                     resultSet.getLong("id_event"),
                     resultSet.getLong("id_venue"),
                     resultSet.getString("event_name"),
-                    resultSet.getDate("event_date").toLocalDate()
+                    resultSet.getDate("event_date").toLocalDate(),
+                    resultSet.getBoolean("is_deleted")
                 ))
             );
         } catch (EmptyResultDataAccessException e) {
@@ -143,6 +145,70 @@ public class JdbcMemberRepository implements MemberRepository {
     public void addEvents(Long idVenue, String eventName, LocalDate eventDate) {
         String sql = "INSERT INTO events (id_venue, event_name, event_date) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, idVenue, eventName, eventDate);
+    }
+
+    @Override
+    public List<EventsVenues> searchEventsByKeyword(String keyword) {
+        String sql = "SELECT s.id_event, v.id_venue, s.event_name, s.event_date, v.venue_name, v.city_name " +
+                     "FROM events s " +
+                     "JOIN venues v ON s.id_venue = v.id_venue " +
+                     "WHERE LOWER(s.event_name) LIKE LOWER(?) AND s.is_deleted = 'false' " +
+                     "OR LOWER(v.venue_name) LIKE LOWER(?) " +
+                     "OR CAST(s.event_date AS TEXT) LIKE ? ";
+    
+        String searchKeyword = "%" + keyword + "%";
+    
+        return jdbcTemplate.query(
+            sql,
+            new Object[]{searchKeyword, searchKeyword, searchKeyword},
+            (rs, rowNum) -> new EventsVenues(
+                rs.getLong("id_event"),
+                rs.getLong("id_venue"), 
+                rs.getString("event_name"),
+                rs.getDate("event_date").toLocalDate(),
+                rs.getString("venue_name"),
+                rs.getString("city_name")
+            )
+        );
+    }    
+
+    @Override
+    public List<EventsVenues> findAllEvents() {
+        String sql = """
+            SELECT id_event, events.id_venue, event_name, event_date, venue_name, city_name 
+            FROM events 
+            INNER JOIN venues ON events.id_venue = venues.id_venue
+            WHERE is_deleted = false
+        """;
+        return jdbcTemplate.query(sql, this::mapRowToEventsVenues);
+    }
+
+    @Override
+    public EventsVenues findEventsById(Long eventId) {
+        String sql = """
+            SELECT e.id_event, v.id_venue, e.event_name, e.event_date, v.venue_name, v.city_name 
+            FROM events e 
+            INNER JOIN venues v ON e.id_venue = v.id_venue
+            WHERE e.id_event = ? AND is_deleted = false
+        """;
+        List<EventsVenues> event = jdbcTemplate.query(sql, this::mapRowToEventsVenues, eventId);
+        return event.isEmpty() ? null : event.get(0);
+    }
+
+    @Override
+    public void updateEvent(Long eventId, Long idVenue, String eventName, LocalDate eventDate) {
+        String sql = """
+            UPDATE events 
+            SET event_name = ?, event_date = ?, id_venue = ?
+            WHERE id_event = ?
+        """;
+        jdbcTemplate.update(sql, eventName, eventDate, idVenue, eventId);
+    }
+
+    @Override
+    public void deleteEvent(Long eventId) {
+        String sql = "UPDATE events SET is_deleted = true WHERE id_event = ?";
+        jdbcTemplate.update(sql, eventId);
     }
 
     private GenreView mapRowToGenre(ResultSet resultset, int rowNum) throws SQLException {
@@ -172,12 +238,14 @@ public class JdbcMemberRepository implements MemberRepository {
         );
     }
 
-    private Events mapRowToEvents(ResultSet resultSet, int rowNum) throws SQLException {
-        return new Events(
+    private EventsVenues mapRowToEventsVenues(ResultSet resultSet, int rowNum) throws SQLException {
+        return new EventsVenues(
             resultSet.getLong("id_event"),
-            resultSet.getLong("id_venue"), 
+            resultSet.getLong("id_venue"),
             resultSet.getString("event_name"), 
-            resultSet.getDate("event_date").toLocalDate()
+            resultSet.getDate("event_date").toLocalDate(),
+            resultSet.getString("venue_name"),
+            resultSet.getString("city_name")
         );
     }
     

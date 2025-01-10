@@ -1132,6 +1132,9 @@ footer {
 }
 
 .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 2rem;
 }
 
@@ -1147,6 +1150,20 @@ footer {
 .search-bar input:focus {
     border-color: var(--pink);
     outline: none;
+}
+
+.search-bar button {
+    padding: 10px 15px;
+    width: 100px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #0056b3;
 }
 
 .artist-grid {

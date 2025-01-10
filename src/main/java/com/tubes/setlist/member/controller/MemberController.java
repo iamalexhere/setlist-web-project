@@ -10,14 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.EventsVenues;
 import com.tubes.setlist.member.model.GenreView;
 import com.tubes.setlist.member.model.Venues;
 import com.tubes.setlist.member.repository.MemberRepository;
@@ -91,11 +94,27 @@ public class MemberController {
     }
     
     @GetMapping("/shows")
-    public String shows(HttpSession session, Model model) {
+    public String shows(HttpSession session, @RequestParam(required = false) String keyword, Model model) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
+
+        List<EventsVenues> events;
+
+        if(keyword==null || keyword.isEmpty()) {
+            events = this.repo.findAllEvents();
+            model.addAttribute("events", events);
+            return "member/shows";
+        }
+
+        else {
+            events = this.repo.searchEventsByKeyword(keyword);
+        }
+
+        model.addAttribute("events", events);
+        model.addAttribute("keyword", keyword != null ? keyword : "");
+
         return "member/shows";
     }
     
@@ -167,5 +186,76 @@ public class MemberController {
 
         model.addAttribute("error", "The show " + "'" + showName + "'" + " is already associated with the venue " + "'" + nameVenue + "'" + ".");
         return "member/add-show";
+    }
+
+    @GetMapping("/shows/{id}/edit")
+    public String editShows(
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
+    ) {
+        if(!checkMemberAccess(session)) {
+            return "redirect/auth/login";
+        }
+        addUserAttributes(session, model);
+        EventsVenues event = this.repo.findEventsById(id);
+        List<Venues> venues = this.repo.findAllVenues();
+
+        if(event==null) {
+            return "redirect:/member/shows";
+        }
+
+        model.addAttribute("events", event);
+        model.addAttribute("venues", venues);
+
+        return "member/edit-show";
+
+    }
+
+    @PostMapping("/shows/{id}/edit")
+    public String updateShows(
+        @PathVariable Long id,
+        @RequestParam("name") String eventName,
+        @RequestParam("eventDate") LocalDate eventDate,
+        @RequestParam("venueId") Long venueId, 
+        HttpSession session,
+        Model model,
+        RedirectAttributes redirectAttributes
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        try {
+            this.repo.updateEvent(id, venueId, eventName, eventDate);
+            String venuesName = this.repo.findVenuesById(venueId).get(0).getVenueName() + " - " + this.repo.findVenuesById(venueId).get(0).getVenueCity();
+            model.addAttribute("accept", "The show " + "'" + eventName + "'" 
+            + " has been successfully updated with the new date " + "'"+ eventDate + "'" 
+            + " and venue " + "'" + venuesName + "'" + ".");
+            return "member/shows";
+        } catch (Exception e) {
+            EventsVenues event = this.repo.findEventsById(id);
+            model.addAttribute("events", event);
+            model.addAttribute("error", "An error occurred while updating the events: " + e.getMessage());
+            return "member/edit-show";
+        }
+    }
+
+    @PostMapping("/shows/{id}/delete")
+    public String deleteSong(
+        @PathVariable Long id,
+        HttpSession session
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            this.repo.deleteEvent(id);
+        } catch (Exception e) {
+            // Handle error if needed
+        }
+
+        return "redirect:/member/shows";
     }
 }

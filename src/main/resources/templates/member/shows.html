@@ -15,36 +15,46 @@
             <a th:href="@{/member/add-show}" class="btn btn-primary">Add New Show</a>
         </div>
 
-        <div class="search-bar">
-            <input type="text" placeholder="Search shows by artist, venue, or date..." id="showSearch">
+        <div th:if="${accept}" class="message-accept">
+            <p th:text="${accept}"></p>
         </div>
+        <br>
+    
+        <form th:action="@{/member/shows}" method="get">
+            <div class="search-bar">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search shows by artist, venue, or date..." id="showSearch">
+                <button type="submit" class="search-button btn-secondary" id="searchButton">Search</button>
+            </div>
+        </form>
 
-        <div class="show-grid" th:if="${not #lists.isEmpty(shows)}">
-            <div class="show-card" th:each="show : ${shows}">
+        <div class="show-grid" th:if="${not #lists.isEmpty(events)}">
+            <div class="show-card" th:each="events : ${events}">
                 <div class="show-date">
-                    <span class="day" th:text="${#temporals.format(show.date, 'dd')}">01</span>
-                    <span class="month" th:text="${#temporals.format(show.date, 'MMM')}">JAN</span>
-                    <span class="year" th:text="${#temporals.format(show.date, 'yyyy')}">2024</span>
+                    <span class="day" th:text="${#temporals.format(events.eventDate, 'dd')}">01</span>
+                    <span class="month" th:text="${#temporals.format(events.eventDate, 'MMM')}">JAN</span>
+                    <span class="year" th:text="${#temporals.format(events.eventDate, 'yyyy')}">2024</span>
                 </div>
                 <div class="show-info">
-                    <h3 th:text="${show.artist.name}">Artist Name</h3>
                     <div class="venue-info">
-                        <span class="venue" th:text="${show.venue.name}">Venue Name</span>
-                        <span class="city" th:text="${show.venue.city}">City</span>
-                    </div>
-                    <div class="show-stats">
-                        <span class="songs-count" th:text="${show.songCount + ' songs'}">20 songs</span>
-                        <span class="setlist-status" th:text="${show.setlistStatus}">Verified</span>
+                        <span class="venue" th:text="${events.eventName}">Show Name</span>
+                        <span class="venue" th:text="${events.venueName}">Venue Name</span>
+                        <span class="city" th:text="${events.cityName}">City</span>
                     </div>
                     <div class="card-actions">
-                        <a th:href="@{/member/shows/{id}/edit(id=${show.id})}" class="btn">Edit Show</a>
-                        <a th:href="@{/member/shows/{id}/setlist(id=${show.id})}" class="btn btn-primary">Manage Setlist</a>
+                        <a th:href="@{/member/shows/{id}/edit(id=${events.idEvent})}" class="btn">Edit Show</a>
+                        <a th:href="@{/member/shows/{id}/setlist(id=${events.idEvent})}" class="btn btn-primary">Manage Setlist</a>
+                        <form th:action="@{/member/shows/{id}/delete(id=${events.idVenue})}" method="post" class="inline-form">
+                            <button type="submit" style="background-color: red; color: white;" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
                     </div>
-                </div>
+                </div>
+                    
+                </div>
+                
             </div>
         </div>
 
-        <div class="empty-state" th:if="${#lists.isEmpty(shows)}">
+        <div class="empty-state" th:if="${#lists.isEmpty(events)}">
             <p>No shows found. Add your first show!</p>
             <a th:href="@{/member/add-show}" class="btn btn-primary">Add Show</a>
         </div>
