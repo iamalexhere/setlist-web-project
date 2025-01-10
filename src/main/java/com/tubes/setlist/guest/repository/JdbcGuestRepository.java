@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
+import com.tubes.setlist.guest.model.VenueView;
 
 @Repository
 public class JdbcGuestRepository implements GuestRepository {
@@ -469,6 +470,115 @@ public class JdbcGuestRepository implements GuestRepository {
         """;
         
         return jdbcTemplate.queryForList(sql, String.class, limit);
+    }
+
+    @Override
+    public List<VenueView> findAllVenues() {
+        String sql = """
+            SELECT v.id_venue, v.venue_name, v.city_name,
+                   COUNT(DISTINCT e.id_event) as event_count
+            FROM venues v
+            LEFT JOIN events e ON v.id_venue = e.id_venue
+            WHERE e.is_deleted = false OR e.is_deleted IS NULL
+            GROUP BY v.id_venue, v.venue_name, v.city_name
+            ORDER BY event_count DESC, v.city_name, v.venue_name
+        """;
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            VenueView venue = new VenueView(
+                rs.getLong("id_venue"),
+                rs.getString("venue_name"),
+                rs.getString("city_name")
+            );
+            return venue;
+        });
+    }
+
+    @Override
+    public List<VenueView> searchVenues(String query) {
+        String searchQuery = "%" + query.toLowerCase() + "%";
+        
+        String sql = """
+            SELECT v.id_venue, v.venue_name, v.city_name,
+                   COUNT(DISTINCT e.id_event) as event_count
+            FROM venues v
+            LEFT JOIN events e ON v.id_venue = e.id_venue
+            WHERE (LOWER(v.venue_name) LIKE ? OR LOWER(v.city_name) LIKE ?)
+            AND (e.is_deleted = false OR e.is_deleted IS NULL)
+            GROUP BY v.id_venue, v.venue_name, v.city_name
+            ORDER BY event_count DESC, v.city_name, v.venue_name
+        """;
+        
+        return jdbcTemplate.query(sql, 
+            (rs, rowNum) -> new VenueView(
+                rs.getLong("id_venue"),
+                rs.getString("venue_name"),
+                rs.getString("city_name")
+            ),
+            searchQuery, searchQuery
+        );
+    }
+
+    @Override
+    public VenueView findVenueById(Long id) {
+        String sql = """
+            SELECT v.id_venue, v.venue_name, v.city_name
+            FROM venues v
+            WHERE v.id_venue = ?
+        """;
+        
+        VenueView venue = jdbcTemplate.queryForObject(sql,
+            (rs, rowNum) -> new VenueView(
+                rs.getLong("id_venue"),
+                rs.getString("venue_name"),
+                rs.getString("city_name")
+            ),
+            id
+        );
+
+        if (venue != null) {
+            // Get upcoming events
+            String upcomingEventsSql = """
+                SELECT e.id_event, e.event_name, e.event_date,
+                       v.venue_name, v.city_name, e.is_deleted,
+                       string_agg(DISTINCT a.artist_name, ', ') as artists
+                FROM events e
+                JOIN venues v ON e.id_venue = v.id_venue
+                LEFT JOIN setlists s ON e.id_event = s.id_event
+                LEFT JOIN artists a ON s.id_artist = a.id_artist
+                WHERE v.id_venue = ? AND e.event_date >= CURRENT_DATE
+                AND NOT e.is_deleted
+                GROUP BY e.id_event, e.event_name, e.event_date,
+                         v.venue_name, v.city_name, e.is_deleted
+                ORDER BY e.event_date ASC
+            """;
+            
+            List<EventView> upcomingEvents = jdbcTemplate.query(upcomingEventsSql, 
+                new EventRowMapper(), id);
+            venue.setUpcomingEvents(upcomingEvents);
+
+            // Get past events
+            String pastEventsSql = """
+                SELECT e.id_event, e.event_name, e.event_date,
+                       v.venue_name, v.city_name, e.is_deleted,
+                       string_agg(DISTINCT a.artist_name, ', ') as artists
+                FROM events e
+                JOIN venues v ON e.id_venue = v.id_venue
+                LEFT JOIN setlists s ON e.id_event = s.id_event
+                LEFT JOIN artists a ON s.id_artist = a.id_artist
+                WHERE v.id_venue = ? AND e.event_date < CURRENT_DATE
+                AND NOT e.is_deleted
+                GROUP BY e.id_event, e.event_name, e.event_date,
+                         v.venue_name, v.city_name, e.is_deleted
+                ORDER BY e.event_date DESC
+            """;
+            
+            List<EventView> pastEvents = jdbcTemplate.query(pastEventsSql, 
+                new EventRowMapper(), id);
+            venue.setPastEvents(pastEvents);
+        }
+        
+        return venue;
     }
 
     private class EventRowMapper implements RowMapper<EventView> {

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
+import com.tubes.setlist.guest.model.VenueView;
 import com.tubes.setlist.guest.repository.GuestRepository;
 
 @Controller
@@ -218,5 +219,29 @@ public class GuestController {
         model.addAttribute("setlistList", setlists);
         
         return "guest/setlists";
+    }
+
+    @GetMapping("/venues")
+    public String viewVenues(
+            @RequestParam(required = false) String query,
+            Model model) {
+        List<VenueView> venues;
+        
+        if (query != null && !query.trim().isEmpty()) {
+            venues = guestRepository.searchVenues(query);
+            model.addAttribute("query", query);
+        } else {
+            venues = guestRepository.findAllVenues();
+        }
+        
+        model.addAttribute("venues", venues);
+        return "guest/venues";
+    }
+
+    @GetMapping("/venues/{id}")
+    public String viewVenue(@PathVariable Long id, Model model) {
+        VenueView venue = guestRepository.findVenueById(id);
+        model.addAttribute("venue", venue);
+        return "guest/venue-detail";
     }
 }

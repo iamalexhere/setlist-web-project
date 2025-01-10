@@ -6,6 +6,9 @@ import java.util.Map;
 
 import com.tubes.setlist.guest.model.*;
 
+/**
+ * Guest repository interface
+ */
 public interface GuestRepository {
     // Artist related queries
     List<ArtistView> findArtistsByName(String name);
@@ -33,4 +36,9 @@ public interface GuestRepository {
     
     // Random artist images
     List<String> getRandomArtistImages(int limit);
+    
+    // Venue related queries
+    List<VenueView> findAllVenues();
+    List<VenueView> searchVenues(String query);
+    VenueView findVenueById(Long id);
 }
