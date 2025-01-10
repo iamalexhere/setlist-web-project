@@ -107,12 +107,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .section-title {
     font-size: 1.5rem;
     font-weight: 600;
+    margin: 0;
 }
 
 .nav-buttons {
@@ -123,62 +124,81 @@ body {
 }
 
 .nav-button {
-    background-color: var(--surface);
-    border: none;
+    background: var(--surface);
+    border: 1px solid var(--surface-light);
     color: var(--text);
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0.8;
-    z-index: 10;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .nav-button:hover {
-    background-color: var(--surface-light);
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-.nav-button:active {
-    transform: scale(0.95);
+    background: var(--surface-light);
+    transform: translateY(-2px);
 }
 
 .nav-button:disabled {
-    opacity: 0.3;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
 }
 
-.nav-button.prev {
-    left: 0;
+.event-wrapper {
+    position: relative;
+    overflow: hidden;
+    padding: 0 1rem;
+    margin: 0 -1rem;
 }
 
-.nav-button.next {
-    right: 0;
-}
-
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+.event-slider {
+    display: flex;
     gap: 1.5rem;
-    padding: 1rem 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    position: relative;
+    padding: 1.5rem 1rem;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform;
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: pan-x;
+}
+
+.event-slider:active {
+    cursor: grabbing;
+}
+
+.event-slider.dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+}
+
+.event-slider::-webkit-scrollbar {
+    display: none;
 }
 
 .event-card {
+    flex: 0 0 400px;
     background-color: var(--surface);
     border: 1px solid var(--surface-light);
     border-radius: 1rem;
     overflow: hidden;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .event-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
 .event-image {
@@ -191,11 +211,12 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.2s;
+    transition: transform 0.5s ease;
+    backface-visibility: hidden;
 }
 
 .event-card:hover .event-image img {
-    transform: scale(1.05);
+    transform: scale(1.1);
 }
 
 .favorite-btn {

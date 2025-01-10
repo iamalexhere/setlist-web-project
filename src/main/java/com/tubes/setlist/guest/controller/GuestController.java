@@ -28,28 +28,21 @@ public class GuestController {
 
     @GetMapping({"", "/", "/dashboard"})
     public String dashboard(Model model) {
-        // Get recent events
+        // Get 4 most recent events
         List<EventView> recentEvents = guestRepository.findAllEvents().stream()
-            .limit(3)
+            .limit(4)
             .collect(Collectors.toList());
 
-        // Get recent setlists
-        List<SetlistView> recentSetlists = new ArrayList<>();
-        for (EventView event : recentEvents) {
-            recentSetlists.addAll(guestRepository.findSetlistsByEvent(event.getIdEvent()));
-        }
-        recentSetlists = recentSetlists.stream().limit(3).collect(Collectors.toList());
-
-        // Get all artists by category
+        // Get random artists by category
         Map<String, ArtistView> categoryArtists = guestRepository.getRandomArtistsByCategory(1, 0);
 
         model.addAttribute("activePage", "dashboard");
         model.addAttribute("recentEvents", recentEvents);
-        model.addAttribute("recentSetlists", recentSetlists);
         model.addAttribute("categoryArtists", categoryArtists);
         
         return "guest/index";
     }
+
 
     @GetMapping("/artists")
     public String listArtists(

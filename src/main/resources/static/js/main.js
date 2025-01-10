@@ -53,125 +53,146 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(stat);
     });
 
-    // Category Slider
-    const categoryGrid = document.querySelector('.category-grid');
-    if (!categoryGrid) return;
+    // Initialize sliders
+    function initializeSlider(sliderSelector, prevButtonSelector, nextButtonSelector) {
+        const slider = document.querySelector(sliderSelector);
+        if (!slider) return;
 
-    const prevButton = categoryGrid.parentElement.querySelector('.nav-button:first-child');
-    const nextButton = categoryGrid.parentElement.querySelector('.nav-button:last-child');
+        const prevButton = document.querySelector(prevButtonSelector);
+        const nextButton = document.querySelector(nextButtonSelector);
 
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-    let momentumID;
-    let velocity = 0;
-    const friction = 0.95;
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let momentumID;
+        let velocity = 0;
+        const friction = 0.95;
 
-    // Mouse Events
-    categoryGrid.addEventListener('mousedown', e => {
-        isDown = true;
-        categoryGrid.classList.add('dragging');
-        startX = e.pageX - categoryGrid.offsetLeft;
-        scrollLeft = categoryGrid.scrollLeft;
-        cancelMomentumTracking();
-    });
-
-    categoryGrid.addEventListener('mouseleave', () => {
-        isDown = false;
-        categoryGrid.classList.remove('dragging');
-    });
-
-    categoryGrid.addEventListener('mouseup', () => {
-        isDown = false;
-        categoryGrid.classList.remove('dragging');
-        beginMomentumTracking();
-    });
-
-    categoryGrid.addEventListener('mousemove', e => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - categoryGrid.offsetLeft;
-        const walk = (x - startX) * 2;
-        const prevScrollLeft = categoryGrid.scrollLeft;
-        categoryGrid.scrollLeft = scrollLeft - walk;
-        velocity = categoryGrid.scrollLeft - prevScrollLeft;
-    });
-
-    // Touch Events
-    categoryGrid.addEventListener('touchstart', e => {
-        isDown = true;
-        categoryGrid.classList.add('dragging');
-        startX = e.touches[0].pageX - categoryGrid.offsetLeft;
-        scrollLeft = categoryGrid.scrollLeft;
-        cancelMomentumTracking();
-    });
-
-    categoryGrid.addEventListener('touchend', () => {
-        isDown = false;
-        categoryGrid.classList.remove('dragging');
-        beginMomentumTracking();
-    });
-
-    categoryGrid.addEventListener('touchmove', e => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.touches[0].pageX - categoryGrid.offsetLeft;
-        const walk = (x - startX) * 2;
-        const prevScrollLeft = categoryGrid.scrollLeft;
-        categoryGrid.scrollLeft = scrollLeft - walk;
-        velocity = categoryGrid.scrollLeft - prevScrollLeft;
-    });
-
-    // Navigation Buttons
-    function updateButtonStates() {
-        if (prevButton && nextButton) {
-            prevButton.disabled = categoryGrid.scrollLeft <= 0;
-            nextButton.disabled = categoryGrid.scrollLeft >= categoryGrid.scrollWidth - categoryGrid.clientWidth;
+        function updateButtonStates() {
+            if (!slider || !prevButton || !nextButton) return;
+            
+            const scrollWidth = slider.scrollWidth;
+            const clientWidth = slider.clientWidth;
+            const scrollLeft = slider.scrollLeft;
+            
+            prevButton.disabled = scrollLeft <= 0;
+            nextButton.disabled = scrollLeft + clientWidth >= scrollWidth;
         }
-    }
 
-    if (prevButton) {
-        prevButton.addEventListener('click', () => {
+        // Mouse Events
+        slider.addEventListener('mousedown', e => {
+            isDown = true;
+            slider.classList.add('dragging');
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
             cancelMomentumTracking();
-            categoryGrid.scrollBy({
-                left: -categoryGrid.offsetWidth,
-                behavior: 'smooth'
-            });
         });
-    }
 
-    if (nextButton) {
-        nextButton.addEventListener('click', () => {
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.classList.remove('dragging');
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.classList.remove('dragging');
+            beginMomentumTracking();
+        });
+
+        slider.addEventListener('mousemove', e => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2;
+            const prevScrollLeft = slider.scrollLeft;
+            slider.scrollLeft = scrollLeft - walk;
+            velocity = slider.scrollLeft - prevScrollLeft;
+        });
+
+        // Touch Events
+        slider.addEventListener('touchstart', e => {
+            isDown = true;
+            slider.classList.add('dragging');
+            startX = e.touches[0].pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
             cancelMomentumTracking();
-            categoryGrid.scrollBy({
-                left: categoryGrid.offsetWidth,
-                behavior: 'smooth'
-            });
         });
-    }
 
-    categoryGrid.addEventListener('scroll', () => {
-        updateButtonStates();
-    });
+        slider.addEventListener('touchend', () => {
+            isDown = false;
+            slider.classList.remove('dragging');
+            beginMomentumTracking();
+        });
 
-    // Momentum Scrolling
-    function beginMomentumTracking() {
-        cancelMomentumTracking();
-        momentumID = requestAnimationFrame(momentumLoop);
-    }
+        slider.addEventListener('touchmove', e => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2;
+            const prevScrollLeft = slider.scrollLeft;
+            slider.scrollLeft = scrollLeft - walk;
+            velocity = slider.scrollLeft - prevScrollLeft;
+        });
 
-    function cancelMomentumTracking() {
-        cancelAnimationFrame(momentumID);
-    }
+        // Navigation Buttons
+        if (prevButton) {
+            prevButton.addEventListener('click', () => {
+                cancelMomentumTracking();
+                const firstCard = slider.querySelector('.event-card, .category-card');
+                const cardWidth = firstCard ? firstCard.offsetWidth : 0;
+                const gap = 24; // 1.5rem gap
+                slider.scrollBy({
+                    left: -(cardWidth + gap),
+                    behavior: 'smooth'
+                });
+                updateButtonStates();
+            });
+        }
 
-    function momentumLoop() {
-        categoryGrid.scrollLeft += velocity;
-        velocity *= friction;
-        if (Math.abs(velocity) > 0.1) {
+        if (nextButton) {
+            nextButton.addEventListener('click', () => {
+                cancelMomentumTracking();
+                const firstCard = slider.querySelector('.event-card, .category-card');
+                const cardWidth = firstCard ? firstCard.offsetWidth : 0;
+                const gap = 24; // 1.5rem gap
+                slider.scrollBy({
+                    left: cardWidth + gap,
+                    behavior: 'smooth'
+                });
+                updateButtonStates();
+            });
+        }
+
+        // Momentum Scrolling
+        function beginMomentumTracking() {
+            cancelMomentumTracking();
             momentumID = requestAnimationFrame(momentumLoop);
         }
+
+        function cancelMomentumTracking() {
+            cancelAnimationFrame(momentumID);
+        }
+
+        function momentumLoop() {
+            slider.scrollLeft += velocity;
+            velocity *= friction;
+            if (Math.abs(velocity) > 0.1) {
+                momentumID = requestAnimationFrame(momentumLoop);
+            }
+            updateButtonStates();
+        }
+
+        // Initial button state
+        updateButtonStates();
+
+        // Update button states on scroll
+        slider.addEventListener('scroll', updateButtonStates);
+        
+        // Update button states on window resize
+        window.addEventListener('resize', updateButtonStates);
     }
 
-    // Initial button state
-    updateButtonStates();
+    // Initialize both sliders
+    initializeSlider('.event-slider', '.event-prev', '.event-next');
+    initializeSlider('.category-grid', '.category-prev', '.category-next');
 });
