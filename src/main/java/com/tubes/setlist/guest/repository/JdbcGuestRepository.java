@@ -411,6 +411,47 @@ public class JdbcGuestRepository implements GuestRepository {
             location);
     }
 
+    @Override
+    public Map<String, ArtistView> getRandomArtistsByCategory(int page, int size) {
+        String sql = """
+            WITH RankedArtists AS (
+                SELECT 
+                    a.id_artist,
+                    a.artist_name,
+                    a.image_filename,
+                    a.image_original_filename,
+                    a.image_url,
+                    a.is_deleted,
+                    c.category_name,
+                    ROW_NUMBER() OVER (PARTITION BY c.category_name ORDER BY RANDOM()) as rn
+                FROM artists a
+                JOIN artists_categories ac ON a.id_artist = ac.id_artist
+                JOIN categories c ON ac.id_category = c.id_category
+                WHERE NOT a.is_deleted
+            )
+            SELECT * FROM RankedArtists 
+            WHERE rn = 1
+            OFFSET ? LIMIT ?
+        """;
+        
+        return jdbcTemplate.query(sql, (rs) -> {
+            Map<String, ArtistView> artistsByCategory = new HashMap<>();
+            while (rs.next()) {
+                ArtistView artist = new ArtistView(
+                    rs.getLong("id_artist"),
+                    rs.getString("artist_name"),
+                    rs.getString("image_filename"),
+                    rs.getString("image_original_filename"),
+                    rs.getString("image_url"),
+                    List.of(rs.getString("category_name")),
+                    rs.getBoolean("is_deleted")
+                );
+                artistsByCategory.put(rs.getString("category_name"), artist);
+            }
+            return artistsByCategory;
+        }, (page - 1) * size, size);
+    }
+
     private class EventRowMapper implements RowMapper<EventView> {
         @Override
         public EventView mapRow(ResultSet rs, int rowNum) throws SQLException {

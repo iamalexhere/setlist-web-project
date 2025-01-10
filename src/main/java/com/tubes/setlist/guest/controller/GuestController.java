@@ -40,9 +40,13 @@ public class GuestController {
         }
         recentSetlists = recentSetlists.stream().limit(3).collect(Collectors.toList());
 
+        // Get random artists by category
+        Map<String, ArtistView> categoryArtists = guestRepository.getRandomArtistsByCategory(1, 4);
+
         model.addAttribute("activePage", "dashboard");
         model.addAttribute("recentEvents", recentEvents);
         model.addAttribute("recentSetlists", recentSetlists);
+        model.addAttribute("categoryArtists", categoryArtists);
         
         return "guest/index";
     }

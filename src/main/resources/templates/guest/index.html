@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setlist - Your Concert Companion</title>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -81,31 +81,21 @@
                 </div>
             </div>
             <div class="category-grid">
-                <div class="category-card">
-                    <img src="https://placehold.co/400x400" alt="Category Image">
+                <div class="category-card" th:each="category : ${categoryArtists}">
+                    <img th:if="${category.value != null and category.value.imageUrl != null}" 
+                         th:src="${category.value.imageUrl}" 
+                         th:alt="${category.key + ' Category Image'}"
+                         class="category-image">
+                    <img th:unless="${category.value != null and category.value.imageUrl != null}"
+                         src="https://placehold.co/400x400" 
+                         th:alt="${category.key + ' Category Image'}"
+                         class="category-image">
                     <div class="category-overlay">
-                        <h3>Rock</h3>
-                    </div>
-                </div>
-                <div class="category-card">
-                    <img src="https://placehold.co/400x400" alt="Category Image">
-                    <div class="category-overlay">
-                        <h3>Pop</h3>
-                    </div>
-                </div>
-                <div class="category-card">
-                    <img src="https://placehold.co/400x400" alt="Category Image">
-                    <div class="category-overlay">
-                        <h3>Jazz</h3>
-                    </div>
-                </div>
-                <div class="category-card">
-                    <img src="https://placehold.co/400x400" alt="Category Image">
-                    <div class="category-overlay">
-                        <h3>Classical</h3>
+                        <h3 th:text="${category.key}">Category Name</h3>
                     </div>
                 </div>
             </div>
+
         </section>
     </main>
 

@@ -27,4 +27,7 @@ public interface GuestRepository {
     
     // Genre related queries
     Map<String, Integer> getGenreCounts();
+    
+    // Category related queries
+    Map<String, ArtistView> getRandomArtistsByCategory(int page, int size);
 }
