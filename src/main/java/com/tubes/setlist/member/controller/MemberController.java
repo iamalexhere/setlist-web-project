@@ -2,6 +2,7 @@ package com.tubes.setlist.member.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -167,6 +168,21 @@ public class MemberController {
         return repo.findSongsByArtist(artistId);
     }
 
+    @GetMapping("/setlists/{id}")
+    public String getSetlistDetail(@PathVariable Long id, Model model, HttpSession session) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        Setlist setlist = repo.findSetlistById(id);
+        if (setlist == null) {
+            return "redirect:/member/setlists";
+        }
+        
+        model.addAttribute("setlist", setlist);
+        return "member/setlist-detail";
+    }
+
     @PostMapping("/setlists/add")
     public String addSetlist(
         @RequestParam("name") String setlistName,
@@ -201,6 +217,96 @@ public class MemberController {
             model.addAttribute("events", events);
             model.addAttribute("error", "An error occurred while adding the setlist: " + e.getMessage());
             return "member/add-setlist";
+        }
+    }
+
+    @GetMapping("/setlists/{id}/edit")
+    public String editSetlist(
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Setlist setlist = repo.findSetlistById(id);
+        if (setlist == null) {
+            return "redirect:/member/setlists";
+        }
+
+        // Get list of artists for dropdown
+        List<Artists> artists = repo.findArtistsByName("");
+        model.addAttribute("artists", artists);
+
+        // Get list of events for dropdown
+        List<Events> events = repo.findAllEvents();
+        model.addAttribute("events", events);
+
+        // Get all available songs for the artist
+        List<Songs> availableSongs = repo.findSongsByArtist(setlist.getIdArtist());
+        model.addAttribute("songs", availableSongs);
+
+        // Get songs that are currently in the setlist
+        List<Long> setlistSongIds = repo.getSetlistSongs(id);
+        List<Songs> selectedSongs = availableSongs.stream()
+            .filter(song -> setlistSongIds.contains(song.getIdSong()))
+            .collect(Collectors.toList());
+        
+        // Pass both available and selected songs to the view
+        model.addAttribute("currentSongs", selectedSongs);
+        
+        // Convert songs to JSON for JavaScript
+        model.addAttribute("songsJson", availableSongs);
+
+        model.addAttribute("setlist", setlist);
+        return "member/edit-setlist";
+    }
+
+    @PostMapping("/setlists/{id}/edit")
+    public String updateSetlist(
+        @PathVariable Long id,
+        @RequestParam("name") String setlistName,
+        @RequestParam("artistId") Long artistId,
+        @RequestParam("eventId") Long eventId,
+        @RequestParam(value = "songIds", required = false) List<Long> songIds,
+        @RequestParam(value = "proof", required = false) MultipartFile proof,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+        
+        try {
+            String proofFilename = null;
+            String proofOriginalFilename = null;
+
+            if (proof != null && !proof.isEmpty()) {
+                proofFilename = fileStorageService.storeFile(proof);
+                proofOriginalFilename = proof.getOriginalFilename();
+            }
+
+            repo.updateSetlist(id, setlistName, artistId, eventId, songIds, proofFilename, proofOriginalFilename);
+            return "redirect:/member/setlists";
+        } catch (Exception e) {
+            Setlist setlist = repo.findSetlistById(id);
+            List<Artists> artists = repo.findArtistsByName("");
+            List<Events> events = repo.findAllEvents();
+            List<Songs> currentSongs = repo.findSongsByArtist(setlist.getIdArtist());
+
+            model.addAttribute("setlist", setlist);
+            model.addAttribute("artists", artists);
+            model.addAttribute("events", events);
+            model.addAttribute("songs", currentSongs);
+            model.addAttribute("currentSongs", currentSongs.stream()
+                .filter(song -> repo.getSetlistSongs(id).contains(song.getIdSong()))
+                .collect(Collectors.toList()));
+            model.addAttribute("error", "An error occurred while updating the setlist: " + e.getMessage());
+            
+            return "member/edit-setlist";
         }
     }
     

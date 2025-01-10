@@ -142,14 +142,20 @@ INSERT INTO comments (id_setlist, id_user, comment_text) VALUES
 
 -- Populate Setlists_Songs
 INSERT INTO setlists_songs (id_setlist, id_song) VALUES
-    (1, 1),
-    (1, 2),
-    (2, 3),
-    (2, 4),
-    (3, 5),
-    (3, 6),
-	(4, 7),
-    (4, 8);
+    (1, 1),  -- Sheila On 7 - Dan
+    (1, 2),  -- Sheila On 7 - Melompat Lebih Tinggi
+    (1, 3),  -- Sheila On 7 - Bertahan Di Sana
+    (1, 4),  -- Sheila On 7 - Sekali Lagi
+    (2, 16), -- Coldplay - Fix You
+    (2, 17), -- Coldplay - Yellow
+    (2, 18), -- Coldplay - Always in My Head
+    (2, 19), -- Coldplay - Magic
+    (3, 31), -- The Beatles - Hey Jude
+    (3, 32), -- The Beatles - Let It Be
+    (3, 33), -- The Beatles - Yesterday
+    (3, 34), -- The Beatles - In My Life
+    (4, 41), -- Metallica - Enter Sandman
+    (4, 42); -- Metallica - Master of Puppets
 
 -- Populate Edits
 INSERT INTO edits (id_setlist, date_added, id_user, edit_description, status) VALUES
