@@ -70,8 +70,8 @@
                             <td th:text="${user.username}">username</td>
                             <td th:text="${user.email}">email@example.com</td>
                             <td>
-                                <span class="badge" th:classappend="${user.idRole == 1 ? 'badge-admin' : 'badge-member'}"
-                                      th:text="${user.idRole == 1 ? 'Admin' : 'Member'}">Role</span>
+                                <span class="badge" th:classappend="${user.idRole == 2 ? 'badge-admin' : 'badge-member'}"
+                                      th:text="${user.idRole == 2 ? 'Admin' : 'Member'}">Role</span>
                             </td>
                             <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">01 Jan 2024</td>
                             <td>
