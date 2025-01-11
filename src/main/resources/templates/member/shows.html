@@ -15,6 +15,7 @@
     <main class="container">
         <section class="event-header">
             <h1>Manage Shows</h1>
+
             <p>Create and manage your events and setlists</p>
             <div class="action-buttons">
                 <a href="/member/shows/add" class="btn btn-accent">
@@ -52,6 +53,15 @@
             <p>Start by adding your first show!</p>
             <a href="/member/shows/add" class="btn btn-accent">Add New Show</a>
         </div>
+        <br>
+    
+        <form th:action="@{/member/shows}" method="get">
+            <div class="search-bar">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search shows by artist, venue, or date..." id="showSearch">
+                <button type="submit" class="search-button btn-secondary" id="searchButton">Search</button>
+            </div>
+        </form>
+
 
         <section class="event-grid" th:if="${not #lists.isEmpty(shows)}">
             <div class="event-card" th:each="show : ${shows}">
@@ -85,9 +95,13 @@
                             <span>Manage Setlist</span>
                         </a>
                     </div>
-                </div>
+                </div>
+                    
+                </div>
+                
             </div>
         </section>
+
 
         <!-- Pagination -->
         <div class="pagination" th:if="${totalPages > 1}">

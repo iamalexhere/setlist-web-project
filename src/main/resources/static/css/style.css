@@ -71,8 +71,8 @@
 	color: var(--accent-secondary);
 }
 
-@media (max-width: 768px) {
-	.nav-links {
+@media (max-width: 768px) {	
+.nav-links {
 		display: none;
 	}
 	
@@ -83,4 +83,3 @@
 	.left-nav {
 		width: 100%;
 	}
-}

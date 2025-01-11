@@ -15,6 +15,7 @@
     <main class="container">
         <section class="artist-header">
             <h1>Manage Artists</h1>
+
             <p>Add and manage your artists</p>
             <div class="action-buttons">
                 <a th:href="@{/member/add-artist}" class="btn btn-primary">
@@ -122,6 +123,7 @@
                th:classappend="${currentPage >= totalPages ? 'disabled' : ''}">
                 <i class="fas fa-chevron-right"></i>
             </a>
+
         </div>
     </main>
 

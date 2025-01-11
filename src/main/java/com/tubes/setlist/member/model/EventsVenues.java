@@ -7,10 +7,11 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Events {
+public class EventsVenues {
     private Long idEvent;
     private Long idVenue;
     private String eventName;
     private LocalDate eventDate;
-    private boolean isDeleted;
+    private String venueName;
+    private String cityName;
 }
