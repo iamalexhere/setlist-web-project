@@ -2,13 +2,14 @@ package com.tubes.setlist.member.controller;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.tubes.setlist.member.model.Events;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -364,7 +365,7 @@ public class MemberController {
     @PostMapping("/artists/add")
     public String memberAddArtist(
         @RequestParam("name") String artistName,
-        @RequestParam("genreName") String genreName,
+        @RequestParam("genreNames") String genreNamesStr,
         @RequestParam(value = "image", required = false) MultipartFile image,
         HttpSession session,
         Model model
@@ -377,20 +378,21 @@ public class MemberController {
         model.addAttribute("genres", categories);
 
         try {
-            List<Artists> nameArtist = this.repo.findArtistsByName(artistName);
-            Long idCategory = this.repo.findIdCategory(genreName).getId_category();
+            // Split comma-separated genre names
+            List<String> genreNames = Arrays.asList(genreNamesStr.split(","));
+            if (genreNames.isEmpty()) {
+                model.addAttribute("error", "Please select at least one genre");
+                return "member/add-artist";
+            }
 
-            // Handle existing artist case
+            List<Artists> nameArtist = this.repo.findArtistsByName(artistName);
+            Long idArtist;
+
             if (!nameArtist.isEmpty()) {
-                Long idArtist = nameArtist.get(0).getIdArtist();
-                if (!this.repo.findArtistsByNameAndGenre(artistName, genreName, 1, 1).isEmpty()) {
-                    model.addAttribute("error", "The artist '" + artistName + "' is already associated with the genre '" + genreName + "'.");
-                    return "member/add-artist";
-                } else {
-                    this.repo.addCategoriesArtist(idArtist, idCategory);
-                }
+                // Artist exists, get their ID
+                idArtist = nameArtist.get(0).getIdArtist();
             } else {
-                // Handle new artist case
+                // Create new artist
                 String imageFilename = null;
                 String originalFilename = null;
 
@@ -400,11 +402,41 @@ public class MemberController {
                 }
 
                 this.repo.addArtist(artistName, imageFilename, originalFilename);
-                Long idArtist = this.repo.findArtistsByName(artistName).get(0).getIdArtist();
-                this.repo.addCategoriesArtist(idArtist, idCategory);
+                idArtist = this.repo.findArtistsByName(artistName).get(0).getIdArtist();
             }
 
-            model.addAttribute("accept", "The artist '" + artistName + "' has been successfully associated with the genre '" + genreName + "'.");
+            // Process each genre
+            List<String> addedGenres = new ArrayList<>();
+            List<String> existingGenres = new ArrayList<>();
+
+            for (String genreName : genreNames) {
+                Long idCategory = this.repo.findIdCategory(genreName).getId_category();
+                
+                // Check if this genre is already associated
+                if (this.repo.findArtistsByNameAndGenre(artistName, genreName, 1, 1).isEmpty()) {
+                    this.repo.addCategoriesArtist(idArtist, idCategory);
+                    addedGenres.add(genreName);
+                } else {
+                    existingGenres.add(genreName);
+                }
+            }
+
+            // Prepare success/warning message
+            StringBuilder message = new StringBuilder();
+            if (!addedGenres.isEmpty()) {
+                message.append("Successfully added genres: ").append(String.join(", ", addedGenres));
+            }
+            if (!existingGenres.isEmpty()) {
+                if (message.length() > 0) message.append("\n");
+                message.append("Artist already associated with genres: ").append(String.join(", ", existingGenres));
+            }
+
+            if (!addedGenres.isEmpty()) {
+                model.addAttribute("accept", message.toString());
+            } else {
+                model.addAttribute("error", message.toString());
+            }
+            
             return "member/add-artist";
         } catch (Exception e) {
             model.addAttribute("error", "An error occurred while adding the artist: " + e.getMessage());
@@ -652,16 +684,26 @@ public class MemberController {
     @PostMapping("/artists/{id}/delete")
     public String deleteArtist(
         @PathVariable Long id,
-        HttpSession session
+        HttpSession session,
+        RedirectAttributes redirectAttributes
     ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
 
         try {
+            // Get artist name before deletion for the message
+            Artists artist = repo.findArtistById(id);
+            if (artist == null) {
+                redirectAttributes.addFlashAttribute("error", "Artist not found");
+                return "redirect:/member/artists";
+            }
+
+            String artistName = artist.getArtistName();
             repo.deleteArtist(id);
+            redirectAttributes.addFlashAttribute("success", "Artist '" + artistName + "' has been successfully deleted");
         } catch (Exception e) {
-            // Handle error if needed
+            redirectAttributes.addFlashAttribute("error", "Failed to delete artist: " + e.getMessage());
         }
 
         return "redirect:/member/artists";

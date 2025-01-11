@@ -31,6 +31,12 @@
                 <span th:text="${error}"></span>
             </div>
 
+            <!-- Success Message -->
+            <div class="alert alert-success" th:if="${accept}">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${accept}"></span>
+            </div>
+
             <form th:action="@{/member/artists/add}" method="post" enctype="multipart/form-data" class="artist-form">
                 <div class="form-group">
                     <label for="name">Artist Name <span class="required">*</span></label>
@@ -40,13 +46,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="genreName">Genre <span class="required">*</span></label>
-                    <select id="genreName" name="genreName" required class="form-control">
-                        <option value="">Select a genre</option>
-                        <option th:each="genre : ${genres}"
-                                th:value="${genre.category_name}"
-                                th:text="${genre.category_name}">Genre</option>
-                    </select>
+                    <label>Genres <span class="required">*</span></label>
+                    <div class="genre-input-container">
+                        <div class="genre-input-group">
+                            <select id="genreName" name="genreName" class="form-control">
+                                <option value="">Select a genre</option>
+                                <option th:each="genre : ${genres}"
+                                        th:value="${genre.genreName}"
+                                        th:text="${genre.genreName}">Genre</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" onclick="addGenre()">
+                                <i class="fas fa-plus"></i> Add Genre
+                            </button>
+                        </div>
+                        <div id="selectedGenres" class="selected-genres">
+                            <!-- Selected genres will be added here -->
+                        </div>
+                        <input type="hidden" id="genreNames" name="genreNames" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -77,6 +94,48 @@
     </main>
 
     <script>
+        let selectedGenres = new Set();
+
+        function addGenre() {
+            const select = document.getElementById('genreName');
+            const genre = select.value;
+            const genreName = select.options[select.selectedIndex].text;
+            
+            if (genre && !selectedGenres.has(genre)) {
+                selectedGenres.add(genre);
+                updateGenreDisplay();
+                updateHiddenInput();
+                select.value = ''; // Reset select
+            }
+        }
+
+        function removeGenre(genre) {
+            selectedGenres.delete(genre);
+            updateGenreDisplay();
+            updateHiddenInput();
+        }
+
+        function updateGenreDisplay() {
+            const container = document.getElementById('selectedGenres');
+            container.innerHTML = '';
+            
+            selectedGenres.forEach(genre => {
+                const tag = document.createElement('div');
+                tag.className = 'genre-tag';
+                tag.innerHTML = `
+                    <span>${genre}</span>
+                    <button type="button" onclick="removeGenre('${genre}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        function updateHiddenInput() {
+            document.getElementById('genreNames').value = Array.from(selectedGenres).join(',');
+        }
+
         function previewImage(event) {
             const input = event.target;
             if (input.files && input.files[0]) {
