@@ -75,6 +75,10 @@
                     </div>
                     <div class="card-actions">
                         <a th:href="@{/member/setlists/{id}/edit(id=${setlist.idSetlist})}" class="btn">Edit</a>
+                        <form th:action="@{/member/setlists/{id}/comments(id=${setlist.idSetlist})}" method="post" class="comment-form">
+                            <input type="text" name="commentText" id="commentText" class="comment-input" placeholder="Add a comment..." required>
+                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                        </form>
                         <form th:action="@{/member/setlists/{id}/delete(id=${setlist.idSetlist})}" 
                               method="post" class="inline-form">
                             <button type="submit" class="btn btn-danger" 

@@ -17,9 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
-import com.tubes.setlist.member.model.Songs;
-import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Comments;
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Songs;
 import com.tubes.setlist.member.repository.MemberRepository;
 import com.tubes.setlist.member.service.FileStorageService;
 
@@ -508,4 +509,45 @@ public class MemberController {
 
         return "redirect:/member/songs";
     }
+
+    @GetMapping("/setlists/{setlistName}/comments")
+    public String getCommentsBySetlistName(@PathVariable String setlistName, HttpSession session, Model model) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";  // Redirect ke login jika pengguna tidak terautentikasi
+        }
+
+        addUserAttributes(session, model);  // Menambahkan atribut pengguna ke model
+
+        List<Comments> comments = repo.findCommentsBySetlistName(setlistName);  // Mendapatkan komentar berdasarkan nama setlist
+        model.addAttribute("comments", comments);  // Menambahkan komentar ke model
+        model.addAttribute("setlistName", setlistName);  // Menambahkan nama setlist ke model
+
+        return "member/setlists";  // Mengembalikan tampilan untuk menampilkan komentar
+    }
+
+
+    @PostMapping("/setlists/{setlistName}/comments")
+    public String addCommentToSetlist(@PathVariable String setlistName, @RequestParam("commentText") String commentText, HttpSession session, Model model) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";  // Redirect ke login jika pengguna tidak terautentikasi
+        }
+
+        try {
+            // Menambahkan komentar baru untuk setlist
+            
+            repo.addComment(commentText);
+            
+            // Redirect kembali ke halaman komentar setlist yang sama
+            return "redirect:/setlists/" + setlistName + "/comments";
+        } catch (Exception e) {
+            List<Comments> comments = repo.findCommentsBySetlistName(setlistName);  // Mendapatkan komentar saat ini jika terjadi error
+            model.addAttribute("comments", comments);  // Menambahkan komentar ke model
+            model.addAttribute("setlistName", setlistName);  // Menambahkan nama setlist ke model
+            model.addAttribute("error", "An error occurred while adding the comment: " + e.getMessage());  // Menambahkan pesan error
+
+            return "member/setlists";  // Mengembalikan tampilan dengan error
+        }
+    }
+
+
 }

@@ -2,6 +2,7 @@ package com.tubes.setlist.member.repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,9 +14,10 @@ import org.springframework.stereotype.Repository;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
-import com.tubes.setlist.member.model.Songs;
-import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Comments;
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Songs;
 
 @Repository
 public class JdbcMemberRepository implements MemberRepository {
@@ -34,6 +36,12 @@ public class JdbcMemberRepository implements MemberRepository {
     public void addCategories(String category_name) {
         String sql = "INSERT INTO categories (category_name) VALUES (?)";
         jdbcTemplate.update(sql, category_name);        
+    }
+
+    @Override
+    public void addComment(String commentText) {
+        String sql = "INSERT INTO comments (comment_text, comment_date) VALUES (?, ?)";
+        jdbcTemplate.update(sql, commentText, LocalDateTime.now());
     }
 
     @Override
@@ -466,4 +474,31 @@ public class JdbcMemberRepository implements MemberRepository {
             resultSet.getString("artist_name")
         );
     }
+    
+    @Override
+    public List<Comments> findCommentsBySetlistName(String setlistName) {
+        String sql = """
+            SELECT c.id_comment,
+                c.comment_text,
+                c.comment_date,
+                c.id_setlist
+            FROM comments c
+            INNER JOIN setlists s ON c.id_setlist = s.id_setlist
+            WHERE LOWER(s.setlist_name) = LOWER(?)
+        """;
+
+        return jdbcTemplate.query(
+            sql,
+            (rs, rowNum) -> new Comments(
+                rs.getLong("id_comment"),
+                rs.getInt("id_setlist"),
+                rs.getInt("id_user"),
+                rs.getString("comment_text"),
+                rs.getTimestamp("comment_date") != null ? 
+                    rs.getTimestamp("comment_date").toLocalDateTime() : null
+            ),
+            setlistName
+        );
+    }
+
 }

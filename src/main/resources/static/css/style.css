@@ -2774,3 +2774,14 @@ select.form-control {
 .message-accept {
     color: green;
 }
+
+.comment-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.comment-form button {
+    margin-top: 10px;
+}

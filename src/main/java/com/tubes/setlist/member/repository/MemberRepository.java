@@ -5,12 +5,15 @@ import java.util.Map;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
-import com.tubes.setlist.member.model.Songs;
-import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Comments;
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Songs;
+
 public interface MemberRepository {
     void addArtist(String artist_name, String imageFilename, String imageOriginalFilename);
     void addCategories(String category_name);
+    void addComment (String comment);
     void addCategoriesArtist(Long id_artist, Long id_category);
 
     List<Artists> findArtistsByName(String name);
@@ -41,4 +44,6 @@ public interface MemberRepository {
 
     // Add new method for events
     List<Events> findAllEvents();
+
+    List<Comments> findCommentsBySetlistName(String setlists );
 }
