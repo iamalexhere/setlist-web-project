@@ -1028,3 +1028,108 @@
         justify-content: center;
     }
 }
+
+.edit-suggestions-section,
+.comments-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.edit-suggestions-section h2,
+.comments-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.edit-form,
+.comment-form {
+    margin-bottom: 2rem;
+}
+
+.edit-form textarea,
+.comment-form textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin-bottom: 1rem;
+}
+
+.edit-form button,
+.comment-form button {
+    float: right;
+}
+
+.edit-item,
+.comment-item {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.edit-item:last-child,
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+.edit-meta,
+.comment-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.edit-date,
+.comment-date {
+    color: #888;
+}
+
+.edit-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    text-transform: capitalize;
+}
+
+.edit-status[th\:text='pending'] {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.edit-status[th\:text='approved'] {
+    background: #d4edda;
+    color: #155724;
+}
+
+.edit-status[th\:text='rejected'] {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.edit-text,
+.comment-text {
+    margin: 0;
+    line-height: 1.5;
+    color: #333;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* Clear fix for floating buttons */
+.edit-form::after,
+.comment-form::after {
+    content: "";
+    display: table;
+    clear: both;
+}

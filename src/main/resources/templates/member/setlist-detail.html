@@ -56,6 +56,51 @@
             </div>
         </section>
 
+        <!-- Edit Suggestions Section -->
+        <section class="edit-suggestions-section">
+            <h2>Edit Suggestions</h2>
+            <div class="edit-form">
+                <form th:action="@{/member/setlists/{id}/edits(id=${setlist.idSetlist})}" method="post">
+                    <textarea name="editDescription" rows="3" placeholder="Suggest an edit for this setlist..." required></textarea>
+                    <button type="submit" class="btn btn-primary">Submit Suggestion</button>
+                </form>
+            </div>
+            <div class="edit-suggestions" th:if="${not #lists.isEmpty(edits)}">
+                <div class="edit-item" th:each="edit : ${edits}">
+                    <div class="edit-meta">
+                        <span class="edit-date" th:text="${#temporals.format(edit.dateAdded, 'MMMM d, yyyy')}">January 1, 2024</span>
+                        <span class="edit-status" th:text="${edit.status}">pending</span>
+                    </div>
+                    <p class="edit-text" th:text="${edit.editDescription}">Edit suggestion text</p>
+                </div>
+            </div>
+            <div class="empty-state" th:if="${#lists.isEmpty(edits)}">
+                <p>No edit suggestions yet</p>
+            </div>
+        </section>
+
+        <!-- Comments Section -->
+        <section class="comments-section">
+            <h2>Comments</h2>
+            <div class="comment-form">
+                <form th:action="@{/member/setlists/{id}/comments(id=${setlist.idSetlist})}" method="post">
+                    <textarea name="commentText" rows="3" placeholder="Leave a comment..." required></textarea>
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+            </div>
+            <div class="comments" th:if="${not #lists.isEmpty(comments)}">
+                <div class="comment-item" th:each="comment : ${comments}">
+                    <div class="comment-meta">
+                        <span class="comment-date" th:text="${#temporals.format(comment.commentDate, 'MMMM d, yyyy h:mm a')}">January 1, 2024 3:30 PM</span>
+                    </div>
+                    <p class="comment-text" th:text="${comment.commentText}">Comment text</p>
+                </div>
+            </div>
+            <div class="empty-state" th:if="${#lists.isEmpty(comments)}">
+                <p>No comments yet</p>
+            </div>
+        </section>
+
         <!-- Empty State -->
         <div class="empty-state" th:if="${#lists.isEmpty(setlist.songs)}">
             <h3>No Songs Added</h3>
