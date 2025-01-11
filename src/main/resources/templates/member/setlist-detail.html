@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setlist Details - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/setlist.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main>
+        <section class="setlist-detail-header">
+            <div class="container">
+                <h1 th:text="${setlist.eventName}">Event Name</h1>
+                <div class="event-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span th:text="${setlist.artistName}">Artist Name</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="far fa-calendar"></i>
+                        <span th:text="${#temporals.format(setlist.eventDate, 'MMMM d, yyyy')}">January 1, 2024</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span th:text="${setlist.venueName + ', ' + setlist.venueCity}">Venue Name, City</span>
+                    </div>
+                </div>
+                <div class="setlist-actions">
+                    <a th:href="@{/member/setlists/{id}/edit(id=${setlist.id})}" class="btn btn-accent">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit Setlist</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="setlist-content">
+                <div class="setlist-status" th:if="${setlist.status != null}">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Status: </span>
+                    <span th:text="${setlist.status}" class="status-badge">Published</span>
+                </div>
+
+                <div class="song-list">
+                    <h2>Songs</h2>
+                    <div class="empty-state" th:if="${#lists.isEmpty(setlist.songs)}">
+                        <h3>No Songs Added</h3>
+                        <p>This setlist doesn't have any songs yet.</p>
+                        <a th:href="@{/member/setlists/{id}/edit(id=${setlist.id})}" class="btn">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Songs</span>
+                        </a>
+                    </div>
+
+                    <div class="song-grid" th:unless="${#lists.isEmpty(setlist.songs)}">
+                        <div class="song-item" th:each="song, songStat : ${setlist.songs}">
+                            <div class="song-number" th:text="${songStat.count}">1</div>
+                            <div class="song-info">
+                                <h3 th:text="${song.title}">Song Title</h3>
+                                <p th:if="${song.albumName}" th:text="${song.albumName}">Album Name</p>
+                                <div class="song-duration" th:if="${song.duration}">
+                                    <i class="fas fa-clock"></i>
+                                    <span th:text="${song.duration}">3:45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setlist-notes" th:if="${setlist.notes}">
+                    <h2>Additional Notes</h2>
+                    <div class="notes-content" th:text="${setlist.notes}">
+                        Setlist notes content...
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

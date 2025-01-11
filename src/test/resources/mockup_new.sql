@@ -35,14 +35,14 @@ INSERT INTO categories (category_name) VALUES
     ('Acoustic');
 
 -- Populate Artists
-INSERT INTO artists (artist_name) VALUES
-    ('Sheila On 7'),
-    ('Coldplay'),
-    ('The Beatles'),
-    ('Metallica'),
-    ('Nirvana'),
-    ('Radiohead'),
-    ('John Mayer');
+INSERT INTO artists (artist_name, image_url) VALUES
+    ('Sheila On 7', 'https://picsum.photos/200/300'),
+    ('Coldplay', 'https://picsum.photos/200/300'),
+    ('The Beatles', 'https://picsum.photos/200/300'),
+    ('Metallica', 'https://picsum.photos/200/300'),
+    ('Nirvana', 'https://picsum.photos/200/300'),
+    ('Radiohead', 'https://picsum.photos/200/300'),
+    ('John Mayer', 'https://picsum.photos/200/300');
 
 -- Populate Artists_Categories
 INSERT INTO artists_categories (id_artist, id_category) VALUES

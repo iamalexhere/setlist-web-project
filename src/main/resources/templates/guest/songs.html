@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Songs - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/songs.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+        <section class="songs-header">
+            <h1 th:if="${artist != null}" th:text="${artist.artistName + '\'s Songs'}">Artist's Songs</h1>
+            <h1 th:unless="${artist != null}">Songs</h1>
+            <p>Discover and explore songs from your favorite artists</p>
+        </section>
+
+        <section class="songs-filters">
+            <form id="filterForm" th:action="@{/guest/songs}" method="get" class="filter-form">
+                <div class="search-group">
+                    <input type="text" name="query" th:value="${query}"
+                           class="search-input" placeholder="Search songs or artists...">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(songs)}">
+            <h3>No Songs Found</h3>
+            <p th:if="${query != null}">Try adjusting your search criteria</p>
+            <p th:unless="${query != null}">There are no songs available yet</p>
+            <a th:href="@{/guest/songs}" class="btn">
+                <i class="fas fa-music"></i>
+                <span>View All Songs</span>
+            </a>
+        </div>
+
+        <!-- Songs Grid -->
+        <div class="songs-grid" th:unless="${#lists.isEmpty(songs)}">
+            <div class="song-card" th:each="song : ${songs}">
+                <div class="song-info">
+                    <h3 class="song-name" th:text="${song.songName}">Song Name</h3>
+                    <a th:href="@{/guest/artists/{id}(id=${song.idArtist})}" 
+                       class="artist-link">
+                        <i class="fas fa-user"></i>
+                        <span th:text="${song.artistName}">Artist Name</span>
+                    </a>
+                </div>
+                <div class="song-actions">
+                    <a th:href="@{/guest/artists/{id}/setlists(id=${song.idArtist})}" 
+                       class="view-setlists">
+                        <i class="fas fa-list"></i>
+                        <span>View Setlists</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simple Pagination -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 1}" 
+               th:href="@{/guest/songs(page=${currentPage - 1}, query=${query})}"
+               class="pagination-btn">
+                <i class="fas fa-chevron-left"></i>
+                Previous
+            </a>
+            
+            <span class="pagination-info">
+                Page <span th:text="${currentPage}">1</span> of <span th:text="${totalPages}">1</span>
+            </span>
+            
+            <a th:if="${currentPage < totalPages}" 
+               th:href="@{/guest/songs(page=${currentPage + 1}, query=${query})}"
+               class="pagination-btn">
+                Next
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

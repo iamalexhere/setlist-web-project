@@ -4,43 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Artists - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/artist.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
-    
-    <main class="content-container">
-        <div class="page-header">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+        <section class="artist-header">
             <h1>Manage Artists</h1>
-            <a th:href="@{/member/add-artist}" class="btn btn-primary">Add New Artist</a>
+
+            <p>Add and manage your artists</p>
+            <div class="action-buttons">
+                <a th:href="@{/member/add-artist}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Artist
+                </a>
+            </div>
+        </section>
+
+        <section class="artist-filters">
+            <form id="filterForm" th:action="@{/member/artists}" method="get" class="filter-form">
+                <div class="filter-group">
+                    <label for="genre">Genre:</label>
+                    <select id="genre" name="genre" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Genres</option>
+                        <option th:each="entry : ${genreCounts}" 
+                                th:value="${entry.key}" 
+                                th:text="${entry.key + ' (' + entry.value + ')'}"
+                                th:selected="${entry.key == selectedGenre}">Genre</option>
+                    </select>
+                </div>
+                <div class="search-artists">
+                    <input type="text" name="name" th:value="${searchQuery}"
+                           placeholder="Search artists..." class="artist-search">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(artists)}">
+            <h3>No Artists Found</h3>
+            <p th:if="${hasSearch}">Try adjusting your search criteria or browse all artists</p>
+            <p th:unless="${hasSearch}">There are no artists in the database yet</p>
+            <a th:href="@{/member/add-artist}" class="btn btn-primary">Add Artist</a>
         </div>
 
-        <div class="search-bar">
-            <input type="text" placeholder="Search artists..." id="artistSearch">
-        </div>
-
-        <div class="artist-grid" th:if="${not #lists.isEmpty(artists)}">
+        <!-- Artist Grid -->
+        <section class="artist-grid" th:if="${not #lists.isEmpty(artists)}">
             <div class="artist-card" th:each="artist : ${artists}">
-                <img th:src="${artist.imageUrl}" alt="Artist Image" class="artist-image">
-                <div class="artist-info">
-                    <h3 th:text="${artist.name}">Artist Name</h3>
-                    <p class="genre" th:text="${artist.genre}">Genre</p>
-                    <div class="stats">
-                        <span th:text="${artist.showCount + ' shows'}">0 shows</span>
-                        <span th:text="${artist.setlistCount + ' setlists'}">0 setlists</span>
+                <div class="artist-image">
+                    <img th:if="${artist.imageUrl != null}" 
+                         th:src="${artist.imageUrl}" 
+                         th:alt="${artist.artistName + ' Image'}">
+                    <img th:unless="${artist.imageUrl != null}"
+                         src="https://placehold.co/400x400" 
+                         th:alt="${artist.artistName + ' Image'}">
+                    <div class="manage-buttons">
+                        <a th:href="@{/member/artists/{id}/edit(id=${artist.idArtist})}" 
+                           class="manage-btn edit-btn" title="Edit Artist">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a th:href="@{/member/artists/{id}/shows(id=${artist.idArtist})}" 
+                           class="manage-btn shows-btn" title="View Shows">
+                            <i class="fas fa-music"></i>
+                        </a>
+                        <form th:action="@{/member/artists/{id}/delete(id=${artist.idArtist})}" 
+                              method="post" 
+                              class="delete-form"
+                              onsubmit="return confirm('Are you sure you want to delete this artist?');">
+                            <button type="submit" class="manage-btn delete-btn" title="Delete Artist">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     </div>
-                    <div class="card-actions">
-                        <a th:href="@{/member/artists/{id}/edit(id=${artist.id})}" class="btn">Edit</a>
-                        <a th:href="@{/member/artists/{id}/shows(id=${artist.id})}" class="btn">View Shows</a>
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name" th:text="${artist.artistName}">Artist Name</h3>
+                    <p class="artist-genre" th:text="${#strings.listJoin(artist.categories, ', ')}">Genre</p>
+                    <div class="artist-actions">
+                        <a th:href="@{/member/artists/{id}/edit(id=${artist.idArtist})}" 
+                           class="action-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit</span>
+                        </a>
+                        <form th:action="@{/member/artists/{id}/delete(id=${artist.idArtist})}" 
+                              method="post" 
+                              class="delete-form"
+                              onsubmit="return confirm('Are you sure you want to delete this artist?');">
+                            <button type="submit" class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i>
+                                <span>Delete</span>
+                            </button>
+                        </form>
+                        <a th:href="@{/member/artists/{id}/shows(id=${artist.idArtist})}" 
+                           class="action-btn shows-btn">
+                            <i class="fas fa-music"></i>
+                            <span>Shows</span>
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="empty-state" th:if="${#lists.isEmpty(artists)}">
-            <p>No artists found. Add your first artist!</p>
-            <a th:href="@{/member/add-artist}" class="btn btn-primary">Add Artist</a>
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:href="@{/member/artists(page=${currentPage - 1}, name=${searchQuery}, genre=${selectedGenre})}" 
+               class="page-btn prev-page"
+               th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <span class="page-info" th:text="${currentPage + ' of ' + totalPages}">Page 1 of 10</span>
+            <a th:href="@{/member/artists(page=${currentPage + 1}, name=${searchQuery}, genre=${selectedGenre})}" 
+               class="page-btn next-page"
+               th:classappend="${currentPage >= totalPages ? 'disabled' : ''}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
         </div>
     </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>

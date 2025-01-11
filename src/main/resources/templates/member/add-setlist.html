@@ -3,164 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Setlist - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Create Setlist - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/setlist.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
-    
-    <main class="form-container">
-        <div class="form-card">
-            <h1>Add New Setlist</h1>
-            
-            <form th:action="@{/member/setlists/add}" method="post" enctype="multipart/form-data" class="form">
-                <div class="form-group">
-                    <label for="show">Select Show</label>
-                    <select id="show" name="showId" class="form-control" required>
-                        <option value="">Select a Show</option>
-                        <option th:each="show : ${shows}" 
-                                th:value="${show.id}" 
-                                th:text="${show.artist.name + ' - ' + show.venue.name + ' (' + #temporals.format(show.date, 'dd MMM yyyy') + ')'}">
-                            Show Details
-                        </option>
-                    </select>
-                </div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-                <div class="song-list-container">
-                    <h2>Songs</h2>
-                    
-                    <!-- Search Bar -->
-                    <div class="search-container">
-                        <input type="text" id="songSearch" class="form-control" placeholder="Search for songs...">
-                        <div id="searchResults" class="search-results"></div>
+    <main class="container">
+        <section class="setlist-header">
+            <h1>Create New Setlist</h1>
+            <p>Add a setlist for your show</p>
+        </section>
+
+        <section class="form-section">
+            <div class="form-card">
+                <form th:action="@{/member/setlists/add}" method="post" class="event-form">
+                    <div class="form-group">
+                        <label for="show">
+                            <i class="fas fa-calendar-alt"></i>
+                            Select Show
+                        </label>
+                        <select id="show" name="showId" required>
+                            <option value="">Choose a show...</option>
+                            <option th:each="show : ${shows}" 
+                                    th:value="${show.id}" 
+                                    th:text="${show.artist.name + ' - ' + #temporals.format(show.date, 'MMM d, yyyy')}">
+                                Artist - Show Date
+                            </option>
+                        </select>
                     </div>
 
-                    <!-- Selected Songs List -->
-                    <div id="selectedSongs" class="selected-songs">
-                        <!-- Songs will be added here -->
+                    <div class="form-group">
+                        <label for="status">
+                            <i class="fas fa-flag"></i>
+                            Status
+                        </label>
+                        <select id="status" name="status" required>
+                            <option value="DRAFT">Draft</option>
+                            <option value="PUBLISHED">Published</option>
+                        </select>
                     </div>
 
-                    <!-- Hidden input to store song data -->
-                    <input type="hidden" id="songData" name="songData">
-                </div>
+                    <div class="song-section">
+                        <h3>Songs</h3>
+                        <div id="songList">
+                            <div class="song-entry">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>
+                                            <i class="fas fa-music"></i>
+                                            Song Title
+                                        </label>
+                                        <input type="text" name="songs[0].title" required
+                                               placeholder="Enter song title">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <i class="fas fa-compact-disc"></i>
+                                            Album
+                                        </label>
+                                        <input type="text" name="songs[0].albumName"
+                                               placeholder="Enter album name">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>
+                                            <i class="fas fa-clock"></i>
+                                            Duration
+                                        </label>
+                                        <input type="text" name="songs[0].duration"
+                                               placeholder="e.g. 3:45">
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" class="btn-remove" onclick="removeSong(this)">
+                                            <i class="fas fa-trash"></i>
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addSong()" class="btn-secondary">
+                            <i class="fas fa-plus"></i>
+                            Add Another Song
+                        </button>
+                    </div>
 
-                <div class="form-group">
-                    <label for="notes">Additional Notes</label>
-                    <textarea id="notes" name="notes" rows="4" class="form-control"></textarea>
-                </div>
+                    <div class="form-group">
+                        <label for="notes">
+                            <i class="fas fa-pencil-alt"></i>
+                            Additional Notes
+                        </label>
+                        <textarea id="notes" name="notes" rows="4" 
+                                  placeholder="Add any additional notes about the setlist..."></textarea>
+                    </div>
 
-                <div class="form-group">
-                    <label for="proof">Upload Proof (Optional)</label>
-                    <input type="file" id="proof" name="proof" accept="image/*" class="form-control">
-                    <small class="form-help">Upload a photo of the setlist, ticket, or other proof. Maximum size: 5MB</small>
-                </div>
-
-                <div class="form-actions">
-                    <a href="/member/setlists" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Add Setlist</button>
-                </div>
-            </form>
-        </div>
+                    <div class="form-actions">
+                        <a th:href="@{/member/setlists}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-accent">
+                            <i class="fas fa-save"></i>
+                            Create Setlist
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
     </main>
 
-    <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            const songSearch = document.getElementById('songSearch');
-            const searchResults = document.getElementById('searchResults');
-            const selectedSongs = document.getElementById('selectedSongs');
-            const songData = document.getElementById('songData');
-            let selectedSongsList = [];
-            let searchTimeout;
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
 
-            // Search songs as user types
-            songSearch.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                const query = this.value.trim();
-                
-                if (query.length < 2) {
-                    searchResults.innerHTML = '';
-                    searchResults.style.display = 'none';
-                    return;
-                }
+    <script th:src="@{/js/main.js}"></script>
+    <script>
+        let songCount = 1;
 
-                searchTimeout = setTimeout(() => {
-                    // Simulate API call - replace with actual API endpoint
-                    fetch(`/api/songs/search?q=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(songs => {
-                            searchResults.innerHTML = '';
-                            if (songs.length === 0) {
-                                searchResults.innerHTML = '<div class="no-results">No songs found</div>';
-                            } else {
-                                songs.forEach(song => {
-                                    const div = document.createElement('div');
-                                    div.className = 'search-result-item';
-                                    div.innerHTML = `
-                                        <div class="song-info">
-                                            <span class="song-title">${song.title}</span>
-                                            <span class="song-duration">${song.duration}</span>
-                                        </div>
-                                    `;
-                                    div.addEventListener('click', () => addSong(song));
-                                    searchResults.appendChild(div);
-                                });
-                            }
-                            searchResults.style.display = 'block';
-                        });
-                }, 300);
-            });
+        function addSong() {
+            const songList = document.getElementById('songList');
+            const songEntry = document.createElement('div');
+            songEntry.className = 'song-entry';
+            songEntry.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-music"></i>
+                            Song Title
+                        </label>
+                        <input type="text" name="songs[${songCount}].title" required
+                               placeholder="Enter song title">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-compact-disc"></i>
+                            Album
+                        </label>
+                        <input type="text" name="songs[${songCount}].albumName"
+                               placeholder="Enter album name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-clock"></i>
+                            Duration
+                        </label>
+                        <input type="text" name="songs[${songCount}].duration"
+                               placeholder="e.g. 3:45">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn-remove" onclick="removeSong(this)">
+                            <i class="fas fa-trash"></i>
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+            songList.appendChild(songEntry);
+            songCount++;
+        }
 
-            // Hide search results when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!searchResults.contains(e.target) && e.target !== songSearch) {
-                    searchResults.style.display = 'none';
-                }
-            });
-
-            // Add song to selected list
-            function addSong(song) {
-                if (selectedSongsList.some(s => s.id === song.id)) {
-                    return; // Song already added
-                }
-
-                selectedSongsList.push(song);
-                updateSelectedSongsList();
-                searchResults.style.display = 'none';
-                songSearch.value = '';
-                updateSongData();
-            }
-
-            // Remove song from selected list
-            function removeSong(songId) {
-                selectedSongsList = selectedSongsList.filter(s => s.id !== songId);
-                updateSelectedSongsList();
-                updateSongData();
-            }
-
-            // Update the display of selected songs
-            function updateSelectedSongsList() {
-                selectedSongs.innerHTML = '';
-                selectedSongsList.forEach((song, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'selected-song-item';
-                    div.innerHTML = `
-                        <div class="song-number">${index + 1}</div>
-                        <div class="song-info">
-                            <span class="song-title">${song.title}</span>
-                            <span class="song-duration">${song.duration}</span>
-                        </div>
-                        <button type="button" class="btn btn-icon remove-song" title="Remove Song">×</button>
-                    `;
-                    div.querySelector('.remove-song').addEventListener('click', () => removeSong(song.id));
-                    selectedSongs.appendChild(div);
-                });
-            }
-
-            // Update hidden input with song data
-            function updateSongData() {
-                songData.value = JSON.stringify(selectedSongsList);
-            }
-        });
+        function removeSong(button) {
+            button.closest('.song-entry').remove();
+        }
     </script>
 </body>
 </html>

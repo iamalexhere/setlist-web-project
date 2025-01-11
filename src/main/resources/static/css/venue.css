@@ -1,0 +1,560 @@
+/* Venue Header Section */
+.venue-header {
+    background: linear-gradient(to bottom, var(--surface-light), var(--surface));
+    padding: 5rem 0 4rem;
+    margin-top: -2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.venue-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.venue-header p {
+    color: var(--subtext);
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Search Section */
+.venue-search-section {
+    margin: 2.5rem 0;
+}
+
+.venue-search-form {
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.venue-search-input {
+    flex: 1;
+    background: var(--background);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.875rem 1.25rem;
+    color: var(--text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.venue-search-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.search-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary);
+    color: var(--background);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+/* Venue Grid */
+.venue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.venue-card {
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.venue-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.venue-info {
+    padding: 2rem;
+}
+
+.venue-main {
+    margin-bottom: 1.5rem;
+}
+
+.venue-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.venue-location {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--subtext);
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.venue-location span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.venue-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.view-venue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: var(--primary-light);
+    color: var(--text);
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    gap: 0.5rem;
+}
+
+.view-venue:hover {
+    background: var(--primary);
+    color: var(--background);
+}
+
+.view-venue i {
+    transition: transform 0.3s ease;
+}
+
+.view-venue:hover i {
+    transform: translateX(4px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 2rem 0;
+}
+
+.empty-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    font-size: 1.75rem;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: var(--subtext);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary);
+    color: var(--background);
+    padding: 0.875rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .venue-header h1 {
+        font-size: 2.25rem;
+    }
+
+    .venue-header p {
+        font-size: 1.1rem;
+    }
+
+    .venue-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-group {
+        flex-direction: column;
+    }
+
+    .search-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Venue Detail Header */
+.venue-detail-header {
+    background: linear-gradient(to bottom, var(--surface-light), var(--surface));
+    padding: 6rem 0 4rem;
+    margin-top: -2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.venue-detail-info {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.venue-detail-info h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1.75rem;
+    line-height: 1.2;
+}
+
+.venue-detail-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--subtext);
+    font-size: 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.875rem 1.75rem;
+    border-radius: 2rem;
+    transition: all 0.3s ease;
+}
+
+.venue-detail-location:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.venue-detail-location i {
+    color: var(--primary);
+    font-size: 1.1em;
+}
+
+/* Events Section */
+.events-section {
+    padding: 5rem 0;
+}
+
+.events-section:first-of-type {
+    padding-top: 4rem;
+}
+
+.events-section:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.events-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.section-description {
+    color: var(--subtext);
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Event Grid */
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.event-card {
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.event-info {
+    padding: 2rem;
+}
+
+.event-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary-light);
+    color: var(--text);
+    padding: 0.625rem 1.25rem;
+    border-radius: 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.event-card:hover .event-date {
+    background: var(--primary);
+    transform: translateY(-2px);
+}
+
+.event-info h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-artists {
+    margin-bottom: 1.75rem;
+    min-height: 2.5rem;
+}
+
+.artist-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+
+.artist-tag {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    padding: 0.5rem 1.125rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.artist-tag:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.view-event {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    width: 100%;
+    background: var(--primary-light);
+    color: var(--text);
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.view-event:hover {
+    background: var(--primary);
+    color: var(--background);
+}
+
+.view-event i {
+    transition: transform 0.3s ease;
+}
+
+.view-event:hover i {
+    transform: translateX(4px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    background: var(--surface);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 2rem 0;
+}
+
+.empty-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+}
+
+.empty-state h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: var(--subtext);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: var(--primary);
+    color: var(--background);
+    padding: 0.875rem 1.75rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.btn-primary i {
+    transition: transform 0.3s ease;
+}
+
+.btn-primary:hover i {
+    transform: translateX(4px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .venue-detail-header {
+        padding: 4rem 0 3rem;
+    }
+
+    .venue-detail-info h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .venue-detail-location {
+        font-size: 1.1rem;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .events-section {
+        padding: 3rem 0;
+    }
+
+    .events-section h2 {
+        font-size: 1.75rem;
+    }
+
+    .event-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .empty-state {
+        padding: 3rem 1.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .venue-detail-info h1 {
+        font-size: 2rem;
+    }
+
+    .venue-detail-location {
+        font-size: 1rem;
+        padding: 0.625rem 1.25rem;
+    }
+
+    .event-info {
+        padding: 1.5rem;
+    }
+
+    .event-info h3 {
+        font-size: 1.25rem;
+    }
+}

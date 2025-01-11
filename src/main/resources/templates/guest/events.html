@@ -4,85 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/events.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb">
-        <ol>
-            <li>Events</li>
-        </ol>
-    </nav>
+    <main class="container">
+        <section class="event-header">
+            <h1>Events</h1>
+            <p>Find setlists from festivals and special events worldwide</p>
+        </section>
 
-    <div class="hero event-hero">
-        <h1>Discover Events</h1>
-        <p>Find setlists from festivals and special events worldwide</p>
-        
-        <!-- Search Form -->
-        <div class="search-container">
-            <form th:action="@{/guest/events}" method="get" class="search-form">
-                <div class="search-filters">
-                    <input type="text" name="query" th:value="${query}" 
-                           class="search-box" placeholder="Search for events...">
-                    
-                    <div class="date-filters">
-                        <input type="date" name="startDate" th:value="${startDate != null ? #temporals.format(startDate, 'yyyy-MM-dd') : ''}"
+        <section class="event-filters">
+            <form th:action="@{/guest/events}" method="get" class="filter-form">
+                <div class="filter-group">
+                    <div class="search-events">
+                        <input type="text" name="query" th:value="${query}"
+                               placeholder="Search events..." class="event-search">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="date-group">
+                        <input type="date" name="startDate" 
+                               th:value="${startDate != null ? #temporals.format(startDate, 'yyyy-MM-dd') : ''}"
                                class="date-input" placeholder="Start Date">
-                        <input type="date" name="endDate" th:value="${endDate != null ? #temporals.format(endDate, 'yyyy-MM-dd') : ''}"
+                        <input type="date" name="endDate" 
+                               th:value="${endDate != null ? #temporals.format(endDate, 'yyyy-MM-dd') : ''}"
                                class="date-input" placeholder="End Date">
                     </div>
-                    
-                    <input type="text" name="location" th:value="${location}"
-                           class="location-input" placeholder="Enter city...">
-                    
-                    <button type="submit" class="search-button">Search</button>
-                    <a th:href="@{/guest/events}" class="clear-button">Clear</a>
+                    <div class="location-group">
+                        <input type="text" name="location" th:value="${location}"
+                               placeholder="Enter city..." class="location-input">
+                    </div>
                 </div>
             </form>
-        </div>
-    </div>
+        </section>
 
-    <!-- Event List -->
-    <section class="events-section" th:if="${not #lists.isEmpty(events)}">
-        <div class="event-grid">
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(events)}">
+            <h3>No Events Found</h3>
+            <p>Try adjusting your search criteria or browse all events</p>
+            <a th:href="@{/guest/events}" class="btn">View All Events</a>
+        </div>
+
+        <section class="event-grid" th:if="${not #lists.isEmpty(events)}">
             <div class="event-card" th:each="event : ${events}">
-                <div class="event-content">
-                    <div class="event-date" 
-                         th:text="${#temporals.format(event.eventDate, 'MMM dd, yyyy')}">
-                        Jan 1, 2024
+                <div class="event-info">
+                    <div class="event-date">
+                        <i class="far fa-calendar"></i>
+                        <span th:text="${#temporals.format(event.eventDate, 'EEE, MMM d, yyyy')}">Jan 1, 2024</span>
                     </div>
-                    <h3>
-                        <a th:href="@{/guest/events/{id}(id=${event.idEvent})}" 
-                           th:text="${event.eventName}">Event Name</a>
-                    </h3>
-                    <p class="event-location">
-                        <span th:text="${event.venueName}">Venue Name</span>,
-                        <span th:text="${event.cityName}">City Name</span>
+                    <h3 th:text="${event.eventName}">Event Name</h3>
+                    <p class="venue-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span th:text="${event.venueName + ', ' + event.cityName}">Venue Name</span>
                     </p>
                     <div class="event-artists" th:if="${not #lists.isEmpty(event.artists)}">
-                        <p class="artists-label">Performing Artists:</p>
                         <div class="artist-tags">
-                            <span class="artist-tag" 
-                                  th:each="artist : ${event.artists}" 
-                                  th:text="${artist}">Artist Name</span>
+                            <span class="artist-tag" th:each="artist : ${event.artists}" th:text="${artist}">
+                                Artist Name
+                            </span>
                         </div>
                     </div>
+                    <a th:href="@{/guest/events/{id}(id=${event.idEvent})}" class="btn view-event">View Details</a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- No Results Message -->
-    <section class="no-results" th:if="${#lists.isEmpty(events)}">
-        <div class="no-results-message">
-            <h2>No events found</h2>
-            <p>Try adjusting your search criteria</p>
-            <a th:href="@{/guest/events}" class="clear-search">Clear Search</a>
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:href="@{/guest/events(page=${currentPage - 1}, query=${query}, startDate=${startDate}, endDate=${endDate}, location=${location})}" 
+               class="page-btn prev-page"
+               th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <span class="page-info" th:text="${currentPage + ' of ' + totalPages}">Page 1 of 10</span>
+            <a th:href="@{/guest/events(page=${currentPage + 1}, query=${query}, startDate=${startDate}, endDate=${endDate}, location=${location})}" 
+               class="page-btn next-page"
+               th:classappend="${currentPage >= totalPages ? 'disabled' : ''}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
         </div>
-    </section>
+    </main>
 
     <footer>
         <p>&copy; 2024 Setlist. All rights reserved.</p>

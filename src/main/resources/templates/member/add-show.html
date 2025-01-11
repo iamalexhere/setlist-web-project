@@ -4,77 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Show - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/events.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     
-    <main class="form-container">
-        <div class="form-card">
+    <main class="container">
+        <section class="event-header">
             <h1>Add New Show</h1>
-            
-            <form th:action="@{/member/shows/add}" method="post" class="form">
-                <div th:if="${error}" class="message-error">
-                    <p th:text="${error}"></p>
-                </div>
-                <br>
 
-                <div th:if="${accept}" class="message-accept">
-                    <p th:text="${accept}"></p>
-                </div>
-                <br>
-                
-                <div class="form-group">
-                    <label for="showName">Show Name</label>
-                    <input type="text" id="showName" name="showName" class="form-control">
-                </div>
+            <p>Create a new show and manage its setlist</p>
+        </section>
 
-                <div class="form-group">
-                    <label for="artist">Artist</label>
-                    <select id="artist" name="artistId" class="form-control" required>
-                        <option value="" disabled selected>Select Artist</option>
-                        <option th:each="artists : ${artist}" 
-                                th:value="${artists.idArtist}" 
-                                th:text="${artists.artistName}">Artist Name</option>
-                    </select>
-                </div>
+        <section class="form-section">
+            <div class="form-card">
+                <form th:action="@{/member/shows/add}" method="post" class="event-form">
+                    <div class="form-group">
+                        <label for="artist">
+                            <i class="fas fa-user"></i>
+                            Artist
+                        </label>
+                        <select id="artist" name="artistId" required>
+                            <option value="">Select Artist</option>
+                            <option th:each="artist : ${artists}" 
+                                    th:value="${artist.id}" 
+                                    th:text="${artist.name}">Artist Name</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="venue">Venue</label>
-                    <select id="venue" name="venueId" class="form-control" required>
-                        <option value="" disabled selected>Select Venue</option>
-                        <option th:each="venue : ${venues}" 
-                                th:value="${venue.idVenue}" 
-                                th:text="${venue.venueName + ' - ' + venue.venueCity}">Venue Name - City</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="venue">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Venue
+                        </label>
+                        <select id="venue" name="venueId" required>
+                            <option value="">Select Venue</option>
+                            <option th:each="venue : ${venues}" 
+                                    th:value="${venue.id}" 
+                                    th:text="${venue.name + ' - ' + venue.city}">Venue Name - City</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="date">Show Date</label>
-                    <input type="date" id="date" name="date" class="form-control" required>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">
+                                <i class="fas fa-calendar"></i>
+                                Show Date
+                            </label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
 
-                <div class="form-group">
-                    <label for="time">Show Time</label>
-                    <input type="time" id="time" name="time" class="form-control" required>
-                </div>
+                        <div class="form-group">
+                            <label for="time">
+                                <i class="fas fa-clock"></i>
+                                Show Time
+                            </label>
+                            <input type="time" id="time" name="time" required>
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="tourName">Tour Name (Optional)</label>
-                    <input type="text" id="tourName" name="tourName" class="form-control">
-                </div>
+                    <div class="form-group">
+                        <label for="tourName">
+                            <i class="fas fa-route"></i>
+                            Tour Name (Optional)
+                        </label>
+                        <input type="text" id="tourName" name="tourName" placeholder="Enter tour name...">
+                    </div>
 
-                <div class="form-group">
-                    <label for="description">Additional Notes</label>
-                    <textarea id="description" name="description" rows="4" class="form-control"></textarea>
-                </div>
+                    <div class="form-group">
+                        <label for="description">
+                            <i class="fas fa-pencil-alt"></i>
+                            Additional Notes
+                        </label>
+                        <textarea id="description" name="description" rows="4" 
+                                  placeholder="Add any additional notes about the show..."></textarea>
+                    </div>
 
-                <div class="form-actions">
-                    <a href="/member/shows" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Add Show</button>
-                </div>
-            </form>
-        </div>
+                    <div class="form-actions">
+                        <a th:href="@{/member/shows}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-accent">
+                            <i class="fas fa-plus"></i>
+                            Add Show
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
     </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>
