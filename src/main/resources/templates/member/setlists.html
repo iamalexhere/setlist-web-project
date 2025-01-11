@@ -58,7 +58,7 @@
         <div class="setlist-grid" th:unless="${#lists.isEmpty(setlists)}">
             <div class="setlist-card" th:each="setlist : ${setlists}">
                 <div class="setlist-info">
-                    <div class="event-name" th:text="${setlist.eventName}">Event Name</div>
+                    <div class="event-name" th:text="${setlist.setlistName}">Setlist Name</div>
                     <div class="event-date">
                         <i class="far fa-calendar"></i>
                         <span th:text="${#temporals.format(setlist.eventDate, 'MMMM d, yyyy')}">January 1, 2024</span>
