@@ -42,6 +42,7 @@ public interface MemberRepository {
   Optional<Events> searchEvents(Long venueId, String showName, LocalDate date);
   List<EventsVenues> searchEventsByKeyword(String keyword);
   List<EventsVenues> findAllEvents();
+  List<EventsVenues> findFilteredEvents(String query, LocalDate startDate, LocalDate endDate);
   EventsVenues findEventsById(Long eventId);
   void updateEvent(Long eventId, Long idVenue, String eventName, LocalDate eventDate);
   void deleteEvent(Long eventId);
@@ -68,4 +69,3 @@ public interface MemberRepository {
   void updateArtist(Long id, String artistName, String imageFilename, String imageOriginalFilename);
   void deleteArtist(Long id);
 }
-

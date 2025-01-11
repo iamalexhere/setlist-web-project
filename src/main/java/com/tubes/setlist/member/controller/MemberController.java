@@ -335,7 +335,7 @@ public class MemberController {
         }
         addUserAttributes(session, model);
 
-        List<EventsVenues> events = this.repo.findAllEvents();
+        List<EventsVenues> events = this.repo.findFilteredEvents(query, startDate, endDate);
         
         model.addAttribute("shows", events);
         model.addAttribute("query", query);
