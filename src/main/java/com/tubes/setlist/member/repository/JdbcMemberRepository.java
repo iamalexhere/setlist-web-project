@@ -17,6 +17,8 @@ import org.springframework.stereotype.Repository;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
+import com.tubes.setlist.member.model.Comment;
+import com.tubes.setlist.member.model.Edit;
 import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.model.EventsVenues;
 import com.tubes.setlist.member.model.GenreView;
@@ -480,7 +482,7 @@ public class JdbcMemberRepository implements MemberRepository {
         String sql = """
             SELECT s.id_event, v.id_venue, s.event_name, s.event_date, v.venue_name, v.city_name 
             FROM events s 
-            JOIN venues v ON s.id_venue = v.id_venue 
+            JOIN venues v ON s.id_venue = v.id_venue
             WHERE (LOWER(s.event_name) LIKE LOWER(?) AND NOT s.is_deleted)
             OR LOWER(v.venue_name) LIKE LOWER(?) 
             OR CAST(s.event_date AS TEXT) LIKE ?
@@ -730,6 +732,85 @@ public class JdbcMemberRepository implements MemberRepository {
             rs.getDate("event_date").toLocalDate(),
             rs.getBoolean("is_deleted")
         ), artistId);
+    }
+
+    @Override
+    public List<Comment> findCommentsBySetlistId(Long idSetlist) {
+        String sql = "SELECT * FROM comments WHERE id_setlist = ? ORDER BY comment_date DESC";
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new Comment(
+                        rs.getLong("id_comment"),
+                        rs.getLong("id_setlist"),
+                        rs.getLong("id_user"),
+                        rs.getString("comment_text"),
+                        rs.getTimestamp("comment_date").toLocalDateTime()
+                ),
+                idSetlist
+        );
+    }
+
+    @Override
+    public Comment saveComment(Comment comment) {
+        String sql = """
+            INSERT INTO comments (id_setlist, id_user, comment_text, comment_date) 
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP) 
+            RETURNING id_comment, comment_date
+        """;
+        return jdbcTemplate.queryForObject(sql,
+                (rs, rowNum) -> {
+                    comment.setIdComment(rs.getLong("id_comment"));
+                    comment.setCommentDate(rs.getTimestamp("comment_date").toLocalDateTime());
+                    return comment;
+                },
+                comment.getIdSetlist(),
+                comment.getIdUser(),
+                comment.getCommentText()
+        );
+    }
+
+    @Override
+    public void deleteComment(Long idComment) {
+        String sql = "DELETE FROM comments WHERE id_comment = ?";
+        jdbcTemplate.update(sql, idComment);
+    }
+
+    @Override
+    public List<Edit> findEditsBySetlistId(Long idSetlist) {
+        String sql = "SELECT * FROM edits WHERE id_setlist = ? ORDER BY date_added DESC";
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new Edit(
+                        rs.getLong("id_setlist"),
+                        rs.getDate("date_added").toLocalDate(),
+                        rs.getLong("id_user"),
+                        rs.getString("edit_description"),
+                        rs.getString("status")
+                ),
+                idSetlist
+        );
+    }
+
+    @Override
+    public Edit saveEdit(Edit edit) {
+        String sql = """
+            INSERT INTO edits (id_setlist, id_user, edit_description, date_added, status) 
+            VALUES (?, ?, ?, CURRENT_DATE, 'pending')
+            RETURNING date_added
+        """;
+        LocalDate dateAdded = jdbcTemplate.queryForObject(sql,
+                (rs, rowNum) -> rs.getDate("date_added").toLocalDate(),
+                edit.getIdSetlist(),
+                edit.getIdUser(),
+                edit.getEditDescription()
+        );
+        edit.setDateAdded(dateAdded);
+        edit.setStatus("pending");
+        return edit;
+    }
+
+    @Override
+    public void updateEditStatus(Long idSetlist, LocalDate dateAdded, String status) {
+        String sql = "UPDATE edits SET status = ? WHERE id_setlist = ? AND date_added = ?";
+        jdbcTemplate.update(sql, status, idSetlist, dateAdded);
     }
 
 }

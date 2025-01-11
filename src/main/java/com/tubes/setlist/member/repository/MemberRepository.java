@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
+import com.tubes.setlist.member.model.Comment;
+import com.tubes.setlist.member.model.Edit;
 import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.model.EventsVenues;
 import com.tubes.setlist.member.model.GenreView;
@@ -68,4 +70,14 @@ public interface MemberRepository {
   Artists findArtistById(Long id);
   void updateArtist(Long id, String artistName, String imageFilename, String imageOriginalFilename);
   void deleteArtist(Long id);
+
+  // Comment related methods
+  List<Comment> findCommentsBySetlistId(Long idSetlist);
+  Comment saveComment(Comment comment);
+  void deleteComment(Long idComment);
+
+  // Edit related methods
+  List<Edit> findEditsBySetlistId(Long idSetlist);
+  Edit saveEdit(Edit edit);
+  void updateEditStatus(Long idSetlist, LocalDate dateAdded, String status);
 }
