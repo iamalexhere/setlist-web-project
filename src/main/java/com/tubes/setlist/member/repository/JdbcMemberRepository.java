@@ -365,31 +365,20 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     @Override
-    public void addSetlist(String name, Long artistId, Long eventId, 
-                          List<Long> songIds, String proofFilename, 
-                          String proofOriginalFilename) {
-        // Insert setlist
-        String sql = """
-            INSERT INTO setlists (id_artist, id_event, setlist_name, 
-                                proof_filename, proof_original_filename, proof_url)
-            VALUES (?, ?, ?, ?, ?, ?)
-            RETURNING id_setlist
-        """;
+    public Long addSetlist(String name, Long artistId, Long eventId, List<Long> songIds, String proofFilename, String proofOriginalFilename) {
+        String sql = "INSERT INTO setlists (id_artist, id_event, setlist_name, proof_filename, proof_original_filename, proof_url) VALUES (?, ?, ?, ?, ?, ?) RETURNING id_setlist";
+        String proofUrl = proofFilename != null ? "/images/setlists/" + proofFilename : null;
+        Long setlistId = jdbcTemplate.queryForObject(sql, Long.class, artistId, eventId, name, proofFilename, proofOriginalFilename, proofUrl);
         
-        String proofUrl = proofFilename != null ? 
-            "/images/setlists/" + proofFilename : null;
-        
-        Long setlistId = jdbcTemplate.queryForObject(sql, Long.class,
-            artistId, eventId, name, proofFilename, proofOriginalFilename, proofUrl);
-        
-        // Insert setlist songs
         if (songIds != null && !songIds.isEmpty()) {
             String songsSql = "INSERT INTO setlists_songs (id_setlist, id_song) VALUES (?, ?)";
             for (Long songId : songIds) {
                 jdbcTemplate.update(songsSql, setlistId, songId);
             }
         }
+        return setlistId;
     }
+
 
     @Override
     public void updateSetlist(Long id, String name, Long artistId, Long eventId, 

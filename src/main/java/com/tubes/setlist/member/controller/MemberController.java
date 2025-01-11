@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.Edit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -218,7 +219,13 @@ public class MemberController {
                 proofOriginalFilename = proof.getOriginalFilename();
             }
 
-            repo.addSetlist(setlistName, artistId, eventId, songIds, proofFilename, proofOriginalFilename);
+            // Add setlist
+            Long setlistId = repo.addSetlist(setlistName, artistId, eventId, songIds, proofFilename, proofOriginalFilename);
+            
+            // Add edit record for draft status
+            Long userId = (Long) session.getAttribute("userId");
+            repo.saveEdit(new Edit(setlistId, null, userId, "Initial draft creation", "draft"));
+
             return "redirect:/member/setlists";
         } catch (Exception e) {
             // Repopulate dropdowns in case of error
@@ -230,6 +237,7 @@ public class MemberController {
             return "member/add-setlist";
         }
     }
+
 
     @GetMapping("/setlists/{id}/edit")
     public String editSetlist(
