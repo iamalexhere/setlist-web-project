@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,13 +22,17 @@ import com.tubes.setlist.member.model.GenreView;
 import com.tubes.setlist.member.model.Venues;
 import com.tubes.setlist.member.model.Songs;
 import com.tubes.setlist.member.model.Setlist;
-import com.tubes.setlist.member.model.Events;
 
 @Repository
 public class JdbcMemberRepository implements MemberRepository {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Override
+    public void addArtist(String artist_name) {
+        addArtist(artist_name, null, null);
+    }
 
     @Override
     public void addArtist(String artist_name, String imageFilename, String imageOriginalFilename) {
@@ -178,9 +183,9 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     @Override
-    public List<Categories> findAllGenre() {
-        String sql = "SELECT * FROM categories";
-        return jdbcTemplate.query(sql, this::mapRowToCategories);
+    public List<GenreView> findAllGenre() {
+        String sql = "SELECT category_name FROM categories";
+        return jdbcTemplate.query(sql, this::mapRowToGenre);
     }
 
     @Override
@@ -444,20 +449,21 @@ public class JdbcMemberRepository implements MemberRepository {
 
     @Override
     public Optional<Events> searchEvents(Long venueId, String showName, LocalDate date) {
-        String sql = "SELECT * FROM events WHERE id_venue = ? AND event_name = ? AND event_date = ?";
+        String sql = "SELECT * FROM events WHERE id_venue = ? AND event_name = ? AND event_date = ? AND NOT is_deleted";
         try {
-            return jdbcTemplate.queryForObject(
+            List<Events> results = jdbcTemplate.query(
                 sql,
-                new Object[]{venueId, showName, date},
-                (resultSet, rowNum) -> Optional.of(new Events(
-                    resultSet.getLong("id_event"),
-                    resultSet.getLong("id_venue"),
-                    resultSet.getString("event_name"),
-                    resultSet.getDate("event_date").toLocalDate(),
-                    resultSet.getBoolean("is_deleted")
-                ))
+                (rs, rowNum) -> new Events(
+                    rs.getLong("id_event"),
+                    rs.getLong("id_venue"),
+                    rs.getString("event_name"),
+                    rs.getDate("event_date").toLocalDate(),
+                    rs.getBoolean("is_deleted")
+                ),
+                venueId, showName, date
             );
-        } catch (EmptyResultDataAccessException e) {
+            return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
@@ -470,18 +476,19 @@ public class JdbcMemberRepository implements MemberRepository {
 
     @Override
     public List<EventsVenues> searchEventsByKeyword(String keyword) {
-        String sql = "SELECT s.id_event, v.id_venue, s.event_name, s.event_date, v.venue_name, v.city_name " +
-                     "FROM events s " +
-                     "JOIN venues v ON s.id_venue = v.id_venue " +
-                     "WHERE LOWER(s.event_name) LIKE LOWER(?) AND s.is_deleted = 'false' " +
-                     "OR LOWER(v.venue_name) LIKE LOWER(?) " +
-                     "OR CAST(s.event_date AS TEXT) LIKE ? ";
-    
+        String sql = """
+            SELECT s.id_event, v.id_venue, s.event_name, s.event_date, v.venue_name, v.city_name 
+            FROM events s 
+            JOIN venues v ON s.id_venue = v.id_venue 
+            WHERE (LOWER(s.event_name) LIKE LOWER(?) AND NOT s.is_deleted)
+            OR LOWER(v.venue_name) LIKE LOWER(?) 
+            OR CAST(s.event_date AS TEXT) LIKE ?
+        """;
+
         String searchKeyword = "%" + keyword + "%";
-    
+
         return jdbcTemplate.query(
             sql,
-            new Object[]{searchKeyword, searchKeyword, searchKeyword},
             (rs, rowNum) -> new EventsVenues(
                 rs.getLong("id_event"),
                 rs.getLong("id_venue"), 
@@ -489,19 +496,37 @@ public class JdbcMemberRepository implements MemberRepository {
                 rs.getDate("event_date").toLocalDate(),
                 rs.getString("venue_name"),
                 rs.getString("city_name")
-            )
+            ),
+            searchKeyword, searchKeyword, searchKeyword
         );
-    }    
+    }
 
     @Override
     public List<EventsVenues> findAllEvents() {
         String sql = """
-            SELECT id_event, events.id_venue, event_name, event_date, venue_name, city_name 
-            FROM events 
-            INNER JOIN venues ON events.id_venue = venues.id_venue
-            WHERE is_deleted = false
+            SELECT DISTINCT e.id_event, e.id_venue, e.event_name, e.event_date, 
+                   v.venue_name, v.city_name,
+                   a.artist_name,
+                   (SELECT COUNT(*) FROM setlists_songs ss 
+                    JOIN setlists s ON ss.id_setlist = s.id_setlist 
+                    WHERE s.id_event = e.id_event) as song_count
+            FROM events e 
+            INNER JOIN venues v ON e.id_venue = v.id_venue
+            LEFT JOIN setlists s ON e.id_event = s.id_event
+            LEFT JOIN artists a ON s.id_artist = a.id_artist
+            WHERE e.is_deleted = false
+            ORDER BY e.event_date DESC
         """;
-        return jdbcTemplate.query(sql, this::mapRowToEventsVenues);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new EventsVenues(
+            rs.getLong("id_event"),
+            rs.getLong("id_venue"),
+            rs.getString("event_name"),
+            rs.getDate("event_date").toLocalDate(),
+            rs.getString("venue_name"),
+            rs.getString("city_name"),
+            rs.getString("artist_name"),
+            rs.getInt("song_count")
+        ));
     }
 
     @Override
@@ -534,22 +559,10 @@ public class JdbcMemberRepository implements MemberRepository {
 
     private GenreView mapRowToGenre(ResultSet resultset, int rowNum) throws SQLException {
         return new GenreView(
-            resultset.getString("category_name"));
-
-    public List<Events> findAllEvents() {
-        String sql = """
-            SELECT * FROM events 
-            WHERE NOT is_deleted 
-            ORDER BY event_date DESC
-        """;
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Events(
-            rs.getLong("id_event"),
-            rs.getLong("id_venue"),
-            rs.getString("event_name"),
-            rs.getDate("event_date").toLocalDate(),
-            rs.getBoolean("is_deleted")
-        ));
+            resultset.getString("category_name")
+        );
     }
+
 
     @Override
     public void deleteArtist(Long id) {

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
+import com.tubes.setlist.member.model.GenreView;
 
 @SpringBootTest
 @Sql({"/schema.sql", "/mockup_new.sql"})
@@ -157,13 +158,13 @@ public class JdbcMemberRepositoryTest {
     @Test
     public void testFindAllGenre() {
         // When
-        List<Categories> genres = memberRepository.findAllGenre();
+        List<GenreView> genres = memberRepository.findAllGenre();
 
         // Then
         assertFalse(genres.isEmpty());
         assertTrue(genres.stream().anyMatch(genre -> 
-            genre.getCategory_name().equals("Rock")));
+            genre.getGenreName().equals("Rock")));
         assertTrue(genres.stream().anyMatch(genre -> 
-            genre.getCategory_name().equals("Pop")));
+            genre.getGenreName().equals("Pop")));
     }
 }

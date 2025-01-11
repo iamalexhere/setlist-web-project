@@ -30,8 +30,8 @@
                         <select id="artist" name="artistId" required>
                             <option value="">Select Artist</option>
                             <option th:each="artist : ${artists}" 
-                                    th:value="${artist.id}" 
-                                    th:text="${artist.name}">Artist Name</option>
+                                    th:value="${artist.idArtist}" 
+                                    th:text="${artist.artistName}">Artist Name</option>
                         </select>
                     </div>
 
@@ -43,44 +43,25 @@
                         <select id="venue" name="venueId" required>
                             <option value="">Select Venue</option>
                             <option th:each="venue : ${venues}" 
-                                    th:value="${venue.id}" 
-                                    th:text="${venue.name + ' - ' + venue.city}">Venue Name - City</option>
+                                    th:value="${venue.idVenue}" 
+                                    th:text="${venue.venueName + ' - ' + venue.cityName}">Venue Name - City</option>
                         </select>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="date">
-                                <i class="fas fa-calendar"></i>
-                                Show Date
-                            </label>
-                            <input type="date" id="date" name="date" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="time">
-                                <i class="fas fa-clock"></i>
-                                Show Time
-                            </label>
-                            <input type="time" id="time" name="time" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="eventName">
+                            <i class="fas fa-music"></i>
+                            Show Name
+                        </label>
+                        <input type="text" id="eventName" name="eventName" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="tourName">
-                            <i class="fas fa-route"></i>
-                            Tour Name (Optional)
+                        <label for="eventDate">
+                            <i class="fas fa-calendar"></i>
+                            Show Date
                         </label>
-                        <input type="text" id="tourName" name="tourName" placeholder="Enter tour name...">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">
-                            <i class="fas fa-pencil-alt"></i>
-                            Additional Notes
-                        </label>
-                        <textarea id="description" name="description" rows="4" 
-                                  placeholder="Add any additional notes about the show..."></textarea>
+                        <input type="date" id="eventDate" name="eventDate" required>
                     </div>
 
                     <div class="form-actions">
@@ -94,6 +75,7 @@
                         </button>
                     </div>
                 </form>
+
             </div>
         </section>
     </main>

@@ -53,46 +53,34 @@
             <p>Start by adding your first show!</p>
             <a href="/member/shows/add" class="btn btn-accent">Add New Show</a>
         </div>
-        <br>
-    
-        <form th:action="@{/member/shows}" method="get">
-            <div class="search-bar">
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search shows by artist, venue, or date..." id="showSearch">
-                <button type="submit" class="search-button btn-secondary" id="searchButton">Search</button>
-            </div>
-        </form>
-
-
         <section class="event-grid" th:if="${not #lists.isEmpty(shows)}">
+
+
             <div class="event-card" th:each="show : ${shows}">
                 <div class="event-info">
                     <div class="event-date">
                         <i class="far fa-calendar"></i>
-                        <span th:text="${#temporals.format(show.date, 'EEE, MMM d, yyyy')}">Jan 1, 2024</span>
+                        <span th:text="${#temporals.format(show.eventDate, 'EEE, MMM d, yyyy')}">Jan 1, 2024</span>
                     </div>
-                    <h3 th:text="${show.artist.name}">Artist Name</h3>
+                    <h3 th:text="${show.eventName}">Event Name</h3>
                     <p class="venue-info">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span th:text="${show.venue.name + ', ' + show.venue.city}">Venue Name</span>
+                        <span th:text="${show.venueName + ', ' + show.cityName}">Venue Name</span>
                     </p>
                     <div class="show-stats">
                         <span class="stats-item">
                             <i class="fas fa-music"></i>
                             <span th:text="${show.songCount + ' songs'}">20 songs</span>
                         </span>
-                        <span class="stats-item" th:if="${show.setlistStatus != null}">
-                            <i class="fas fa-check-circle"></i>
-                            <span th:text="${show.setlistStatus}">Verified</span>
-                        </span>
                     </div>
                     <div class="event-actions">
-                        <a th:href="@{/member/shows/{id}/edit(id=${show.id})}" class="action-btn">
+                        <a th:href="@{/member/shows/{id}/edit(id=${show.idEvent})}" class="action-btn">
                             <i class="fas fa-edit"></i>
                             <span>Edit</span>
                         </a>
-                        <a th:href="@{/member/shows/{id}/setlist(id=${show.id})}" class="action-btn">
+                        <a th:href="@{/member/shows/{id}/setlist(id=${show.idEvent})}" class="action-btn">
                             <i class="fas fa-list"></i>
-                            <span>Manage Setlist</span>
+                            <span>Setlist</span>
                         </a>
                     </div>
                 </div>

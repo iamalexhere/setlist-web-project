@@ -3,63 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Song - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Edit Show - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/events.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     
-    <nav class="breadcrumb">
-        <ol>
-            <li><a th:href="@{/member/shows}">Songs</a></li>
-            <li>Edit Song</li>
-        </ol>
-    </nav>
-
-    <main class="form-container">
-        <div class="form-card">
+    <main class="container">
+        <section class="event-header">
             <h1>Edit Show</h1>
-            
-            <form th:action="@{/member/shows/{id}/edit(id=${events.idEvent})}" method="post" class="form">
-                <div th:if="${error}" class="message-error">
-                    <p th:text="${error}"></p>
-                </div>
+            <p>Update show details and manage setlist</p>
+        </section>
 
-                <div th:if="${accept}" class="message-accept">
-                    <p th:text="${accept}"></p>
-                </div>
+        <section class="form-section">
+            <div class="form-card">
+                <form th:action="@{/member/shows/{id}/edit(id=${events.idEvent})}" method="post" class="event-form">
+                    <div th:if="${error}" class="message-error">
+                        <p th:text="${error}"></p>
+                    </div>
 
-                <div class="form-group">
-                    <label for="name">Show Name</label>
-                    <input type="text" id="name" name="name" class="form-control" 
-                           th:value="${events.eventName}" required>
-                </div>
+                    <div th:if="${accept}" class="message-accept">
+                        <p th:text="${accept}"></p>
+                    </div>
 
-                <div class="form-group">
-                    <label for="eventDate">Date</label>
-                    <input type="date" id="eventDate" name="eventDate" class="form-control" 
-                           th:value="${events.eventDate}" required>
-                </div>
+                    <div class="form-group">
+                        <label for="eventName">
+                            <i class="fas fa-music"></i>
+                            Show Name
+                        </label>
+                        <input type="text" id="eventName" name="eventName" 
+                               th:value="${events.eventName}" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="venue">Venue</label>
-                    <select id="venueId" name="venueId" class="form-control" required>
-                        <option th:value="${events.idVenue}" 
-                                th:text="${events.venueName + ' - ' + events.cityName}"
-                                disabled selected><option/>    
-                        <option th:each="venues : ${venues}" 
-                                th:value="${venues.idVenue}" 
-                                th:text="${venues.venueName + ' - ' + venues.venueCity}"></option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="eventDate">
+                            <i class="fas fa-calendar"></i>
+                            Show Date
+                        </label>
+                        <input type="date" id="eventDate" name="eventDate" 
+                               th:value="${events.eventDate}" required>
+                    </div>
 
-                <div class="form-actions">
-                    <a th:href="@{/member/shows}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
+                    <div class="form-group">
+                        <label for="venueId">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Venue
+                        </label>
+                        <select id="venueId" name="venueId" required>
+                            <option th:value="${events.idVenue}" 
+                                    th:text="${events.venueName + ' - ' + events.cityName}"
+                                    selected>Current Venue</option>
+                            <option th:each="venue : ${venues}" 
+                                    th:if="${venue.idVenue != events.idVenue}"
+                                    th:value="${venue.idVenue}" 
+                                    th:text="${venue.venueName + ' - ' + venue.cityName}">Venue Name - City</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/member/shows}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-accent">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
     </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>

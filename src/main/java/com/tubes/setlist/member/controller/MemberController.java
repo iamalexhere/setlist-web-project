@@ -1,13 +1,14 @@
 package com.tubes.setlist.member.controller;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.tubes.setlist.member.model.Events;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,14 +23,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.tubes.setlist.member.model.Artists;
-import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.model.EventsVenues;
 import com.tubes.setlist.member.model.GenreView;
 import com.tubes.setlist.member.model.Venues;
 import com.tubes.setlist.member.model.Categories;
 import com.tubes.setlist.member.model.Songs;
 import com.tubes.setlist.member.model.Setlist;
-import com.tubes.setlist.member.model.Events;
+
 import com.tubes.setlist.member.repository.MemberRepository;
 import com.tubes.setlist.member.service.FileStorageService;
 
@@ -113,7 +113,7 @@ public class MemberController {
         }
         addUserAttributes(session, model);
 
-        List<Categories> categories = this.repo.findAllGenre();
+        List<GenreView> categories = this.repo.findAllGenre();
 
         model.addAttribute("genres", categories);
         return "member/add-artist";
@@ -166,7 +166,7 @@ public class MemberController {
         model.addAttribute("artists", artists);
 
         // Get list of events for dropdown
-        List<Events> events = repo.findAllEvents();
+        List<EventsVenues> events = repo.findAllEvents();
         model.addAttribute("events", events);
 
         return "member/add-setlist";
@@ -222,7 +222,7 @@ public class MemberController {
         } catch (Exception e) {
             // Repopulate dropdowns in case of error
             List<Artists> artists = repo.findArtistsByName("");
-            List<Events> events = repo.findAllEvents();
+            List<EventsVenues> events = repo.findAllEvents();
             model.addAttribute("artists", artists);
             model.addAttribute("events", events);
             model.addAttribute("error", "An error occurred while adding the setlist: " + e.getMessage());
@@ -251,7 +251,7 @@ public class MemberController {
         model.addAttribute("artists", artists);
 
         // Get list of events for dropdown
-        List<Events> events = repo.findAllEvents();
+        List<EventsVenues> events = repo.findAllEvents();
         model.addAttribute("events", events);
 
         // Get all available songs for the artist
@@ -304,7 +304,7 @@ public class MemberController {
         } catch (Exception e) {
             Setlist setlist = repo.findSetlistById(id);
             List<Artists> artists = repo.findArtistsByName("");
-            List<Events> events = repo.findAllEvents();
+            List<EventsVenues> events = repo.findAllEvents();
             List<Songs> currentSongs = repo.findSongsByArtist(setlist.getIdArtist());
 
             model.addAttribute("setlist", setlist);
@@ -321,27 +321,27 @@ public class MemberController {
     }
     
     @GetMapping("/shows")
-    public String shows(HttpSession session, @RequestParam(required = false) String keyword, Model model) {
+    public String shows(
+        HttpSession session, 
+        @RequestParam(defaultValue = "") String query,
+        @RequestParam(required = false) LocalDate startDate,
+        @RequestParam(required = false) LocalDate endDate,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "9") int size,
+        Model model
+    ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
 
-        List<EventsVenues> events;
-
-        if(keyword==null || keyword.isEmpty()) {
-            events = this.repo.findAllEvents();
-            model.addAttribute("events", events);
-            return "member/shows";
-        }
-
-        else {
-            events = this.repo.searchEventsByKeyword(keyword);
-        }
-
-        model.addAttribute("events", events);
-        model.addAttribute("keyword", keyword != null ? keyword : "");
-
+        List<EventsVenues> events = this.repo.findAllEvents();
+        
+        model.addAttribute("shows", events);
+        model.addAttribute("query", query);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        
         return "member/shows";
     }
     
@@ -373,7 +373,7 @@ public class MemberController {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
-        List<Categories> categories = this.repo.findAllGenre();
+        List<GenreView> categories = this.repo.findAllGenre();
         model.addAttribute("genres", categories);
 
         try {
@@ -545,6 +545,24 @@ public class MemberController {
         return "redirect:/member/songs";
     }
 
+    @PostMapping("/shows/{id}/delete") 
+    public String deleteShow(
+        @PathVariable Long id,
+        HttpSession session
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            this.repo.deleteEvent(id);
+        } catch (Exception e) {
+            // Handle error if needed
+        }
+
+        return "redirect:/member/shows";
+    }
+
     @GetMapping("/artists/{id}/edit")
     public String editArtist(
         @PathVariable Long id,
@@ -651,27 +669,38 @@ public class MemberController {
 
     @PostMapping("/shows/add")
     public String memberAddShow(
-        @RequestParam("showName") String showName,
-        @RequestParam("artistId") String artistName,
+        @RequestParam("eventName") String eventName,
+        @RequestParam("artistId") Long artistId,
         @RequestParam("venueId") Long venueId,
-        @RequestParam("date") LocalDate date,
-        @RequestParam("time") LocalTime time,
-        @RequestParam("tourName") String tourName,
-        @RequestParam("description") String description,
+        @RequestParam("eventDate") LocalDate eventDate,
+        HttpSession session,
         Model model
     ) {
-
-        String nameVenue = this.repo.findVenuesById(venueId).get(0).getVenueName();
-        Optional<Events> searchEvent = this.repo.searchEvents(venueId, showName, date);
-
-        if(!searchEvent.isPresent()) {
-            this.repo.addEvents(venueId, showName, date);
-            model.addAttribute("accept", "The show " + "'" + showName + "'" + " has been successfully associated with the venue " + "'"+ nameVenue + "'" + ".");
-            return "member/add-show";
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
         }
 
-        model.addAttribute("error", "The show " + "'" + showName + "'" + " is already associated with the venue " + "'" + nameVenue + "'" + ".");
-        return "member/add-show";
+        try {
+            Optional<Events> existingEvent = repo.searchEvents(venueId, eventName, eventDate);
+            if (existingEvent.isPresent()) {
+                List<Artists> artists = repo.findAllArtists();
+                List<Venues> venues = repo.findAllVenues();
+                model.addAttribute("artists", artists);
+                model.addAttribute("venues", venues);
+                model.addAttribute("error", "A show with this name already exists at this venue on this date");
+                return "member/add-show";
+            }
+
+            repo.addEvents(venueId, eventName, eventDate);
+            return "redirect:/member/shows";
+        } catch (Exception e) {
+            List<Artists> artists = repo.findAllArtists();
+            List<Venues> venues = repo.findAllVenues();
+            model.addAttribute("artists", artists);
+            model.addAttribute("venues", venues);
+            model.addAttribute("error", "An error occurred: " + e.getMessage());
+            return "member/add-show";
+        }
     }
 
     @GetMapping("/shows/{id}/edit")
@@ -701,47 +730,30 @@ public class MemberController {
     @PostMapping("/shows/{id}/edit")
     public String updateShows(
         @PathVariable Long id,
-        @RequestParam("name") String eventName,
+        @RequestParam("eventName") String eventName,
         @RequestParam("eventDate") LocalDate eventDate,
-        @RequestParam("venueId") Long venueId, 
+        @RequestParam("venueId") Long venueId,
         HttpSession session,
-        Model model,
-        RedirectAttributes redirectAttributes
+        Model model
     ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
         
         try {
-            this.repo.updateEvent(id, venueId, eventName, eventDate);
-            String venuesName = this.repo.findVenuesById(venueId).get(0).getVenueName() + " - " + this.repo.findVenuesById(venueId).get(0).getVenueCity();
-            model.addAttribute("accept", "The show " + "'" + eventName + "'" 
-            + " has been successfully updated with the new date " + "'"+ eventDate + "'" 
-            + " and venue " + "'" + venuesName + "'" + ".");
-            return "member/shows";
+            repo.updateEvent(id, venueId, eventName, eventDate);
+            return "redirect:/member/shows";
         } catch (Exception e) {
-            EventsVenues event = this.repo.findEventsById(id);
+            EventsVenues event = repo.findEventsById(id);
+            List<Venues> venues = repo.findAllVenues();
             model.addAttribute("events", event);
-            model.addAttribute("error", "An error occurred while updating the events: " + e.getMessage());
+            model.addAttribute("venues", venues);
+            model.addAttribute("error", "An error occurred: " + e.getMessage());
             return "member/edit-show";
         }
     }
 
-    @PostMapping("/shows/{id}/delete")
-    public String deleteSong(
-        @PathVariable Long id,
-        HttpSession session
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
 
-        try {
-            this.repo.deleteEvent(id);
-        } catch (Exception e) {
-            // Handle error if needed
-        }
 
-        return "redirect:/member/shows";
-    }
+
 }
