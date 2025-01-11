@@ -3,545 +3,592 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports & Analytics - Admin - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Reports - Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Admin Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-sidebar-header">
-                <h1>Admin Panel</h1>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+        <section class="page-header">
+            <div class="header-content">
+                <h1>Reports & Analytics</h1>
+                <p>View platform statistics and insights</p>
             </div>
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item">
-                    <span class="icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="/admin/members" class="admin-nav-item">
-                    <span class="icon">👥</span>
-                    Members
-                </a>
-                <a href="/admin/setlists" class="admin-nav-item">
-                    <span class="icon">📝</span>
-                    Setlists
-                </a>
-                <a href="/admin/corrections" class="admin-nav-item">
-                    <span class="icon">✏️</span>
-                    Corrections
-                </a>
-                <a href="/admin/reports" class="admin-nav-item active">
-                    <span class="icon">📈</span>
-                    Reports
-                </a>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <h2>Reports & Analytics</h2>
-                <div class="admin-header-actions">
-                    <div class="date-range">
-                        <select id="timeRange" class="form-control">
-                            <option value="7">Last 7 days</option>
-                            <option value="30" selected>Last 30 days</option>
-                            <option value="90">Last 3 months</option>
-                            <option value="365">Last year</option>
-                        </select>
-                    </div>
-                    <div class="admin-profile">
-                        <span class="admin-name">Admin</span>
-                        <a href="/logout" class="btn btn-secondary">Logout</a>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Reports Grid -->
-            <div class="reports-grid">
-                <!-- Activity Timeline -->
-                <div class="report-card wide">
-                    <div class="report-header">
-                        <h3>Activity Timeline</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-text active" data-metric="setlists">Setlists</button>
-                            <button class="btn btn-text" data-metric="corrections">Corrections</button>
-                            <button class="btn btn-text" data-metric="members">New Members</button>
-                        </div>
-                    </div>
-                    <div id="timelineChart" class="chart-container"></div>
-                </div>
-
-                <!-- Top Artists -->
-                <div class="report-card">
-                    <div class="report-header">
-                        <h3>Top Artists</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-icon" title="Download CSV">📥</button>
-                        </div>
-                    </div>
-                    <div id="artistsChart" class="chart-container"></div>
-                </div>
-
-                <!-- Popular Venues -->
-                <div class="report-card">
-                    <div class="report-header">
-                        <h3>Popular Venues</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-icon" title="Download CSV">📥</button>
-                        </div>
-                    </div>
-                    <div id="venuesChart" class="chart-container"></div>
-                </div>
-
-                <!-- Member Growth -->
-                <div class="report-card wide">
-                    <div class="report-header">
-                        <h3>Member Growth</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-text active" data-view="cumulative">Cumulative</button>
-                            <button class="btn btn-text" data-view="monthly">Monthly</button>
-                        </div>
-                    </div>
-                    <div id="memberGrowthChart" class="chart-container"></div>
-                </div>
-
-                <!-- Contribution Distribution -->
-                <div class="report-card">
-                    <div class="report-header">
-                        <h3>Contribution Distribution</h3>
-                    </div>
-                    <div id="contributionChart" class="chart-container"></div>
-                </div>
-
-                <!-- Correction Success Rate -->
-                <div class="report-card">
-                    <div class="report-header">
-                        <h3>Correction Success Rate</h3>
-                    </div>
-                    <div id="correctionRateChart" class="chart-container"></div>
-                </div>
+            <div class="header-actions">
+                <button onclick="downloadAllCharts()" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Download All Charts
+                </button>
             </div>
-        </main>
-    </div>
+        </section>
+
+        <div class="reports-grid">
+            <!-- Setlists by Artist -->
+            <div class="report-card" id="setlistsChartCard">
+                <div class="report-header">
+                    <h2>Setlists by Artist</h2>
+                    <button onclick="downloadChart('setlistsChart', 'Setlists by Artist')" class="btn btn-sm btn-outline">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                <div th:if="${setlistsByArtist == null || setlistsByArtist.isEmpty()}" class="no-data">
+                    No data available
+                </div>
+                <canvas th:unless="${setlistsByArtist == null || setlistsByArtist.isEmpty()}" id="setlistsChart"></canvas>
+            </div>
+            
+            <!-- Events by Venue -->
+            <div class="report-card" id="eventsChartCard">
+                <div class="report-header">
+                    <h2>Events by Venue</h2>
+                    <button onclick="downloadChart('eventsChart', 'Events by Venue')" class="btn btn-sm btn-outline">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                <div th:if="${eventsByVenue == null || eventsByVenue.isEmpty()}" class="no-data">
+                    No data available
+                </div>
+                <canvas th:unless="${eventsByVenue == null || eventsByVenue.isEmpty()}" id="eventsChart"></canvas>
+            </div>
+            
+            <!-- Songs by Artist -->
+            <div class="report-card" id="songsChartCard">
+                <div class="report-header">
+                    <h2>Songs by Artist</h2>
+                    <button onclick="downloadChart('songsChart', 'Songs by Artist')" class="btn btn-sm btn-outline">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                <div th:if="${songsByArtist == null || songsByArtist.isEmpty()}" class="no-data">
+                    No data available
+                </div>
+                <canvas th:unless="${songsByArtist == null || songsByArtist.isEmpty()}" id="songsChart"></canvas>
+            </div>
+            
+            <!-- Monthly Setlists -->
+            <div class="report-card" id="monthlyChartCard">
+                <div class="report-header">
+                    <h2>Monthly Setlist Submissions</h2>
+                    <button onclick="downloadChart('monthlyChart', 'Monthly Setlist Submissions')" class="btn btn-sm btn-outline">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                <div th:if="${monthlySetlists == null || monthlySetlists.isEmpty()}" class="no-data">
+                    No data available
+                </div>
+                <canvas th:unless="${monthlySetlists == null || monthlySetlists.isEmpty()}" id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script th:inline="javascript">
-        // Get data from Thymeleaf
-        const timelineData = /*[[${timelineData}]]*/ [];
-        const artistData = /*[[${artistData}]]*/ [];
-        const venueData = /*[[${venueData}]]*/ [];
-        const memberGrowthData = /*[[${memberGrowthData}]]*/ [];
-        const contributionData = /*[[${contributionData}]]*/ [];
-        const correctionRateData = /*[[${correctionRateData}]]*/ [];
+        /*<![CDATA[*/
+        window.jsPDF = window.jspdf.jsPDF;
+        
+        // Get data from Thymeleaf with default empty objects
+        const setlistsByArtist = /*[[${setlistsByArtist}]]*/ {};
+        const eventsByVenue = /*[[${eventsByVenue}]]*/ {};
+        const songsByArtist = /*[[${songsByArtist}]]*/ {};
+        const monthlySetlists = /*[[${monthlySetlists}]]*/ {};
 
-        // Initialize charts when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            initTimelineChart();
-            initArtistsChart();
-            initVenuesChart();
-            initMemberGrowthChart();
-            initContributionChart();
-            initCorrectionRateChart();
-        });
+        // Initialize charts object to store chart instances
+        let charts = {};
 
-        // Activity Timeline Chart
-        function initTimelineChart() {
-            const margin = {top: 20, right: 30, bottom: 30, left: 40};
-            const width = document.getElementById('timelineChart').clientWidth - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
+        // Color schemes
+        const colorSchemes = {
+            blue: {
+                primary: '#4A90E2',
+                secondary: '#357ABD'
+            },
+            green: {
+                primary: '#2ECC71',
+                secondary: '#27AE60'
+            },
+            purple: {
+                primary: '#9B59B6',
+                secondary: '#8E44AD'
+            },
+            orange: {
+                primary: '#E67E22',
+                secondary: '#D35400'
+            }
+        };
 
-            const svg = d3.select('#timelineChart')
-                .append('svg')
-                    .attr('width', width + margin.left + margin.right)
-                    .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                    .attr('transform', `translate(${margin.left},${margin.top})`);
-
-            // Create scales
-            const x = d3.scaleTime()
-                .domain(d3.extent(timelineData, d => new Date(d.date)))
-                .range([0, width]);
-
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(timelineData, d => d.value)])
-                .range([height, 0]);
-
-            // Add axes
-            svg.append('g')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-
-            svg.append('g')
-                .call(d3.axisLeft(y));
-
-            // Create line generator
-            const line = d3.line()
-                .x(d => x(new Date(d.date)))
-                .y(d => y(d.value))
-                .curve(d3.curveMonotoneX);
-
-            // Add the line path
-            svg.append('path')
-                .datum(timelineData)
-                .attr('class', 'line')
-                .attr('d', line)
-                .attr('fill', 'none')
-                .attr('stroke', 'var(--blue)')
-                .attr('stroke-width', 2);
-
-            // Add dots
-            svg.selectAll('.dot')
-                .data(timelineData)
-                .enter().append('circle')
-                .attr('class', 'dot')
-                .attr('cx', d => x(new Date(d.date)))
-                .attr('cy', d => y(d.value))
-                .attr('r', 4)
-                .attr('fill', 'var(--blue)');
-
-            // Add hover effects
-            const tooltip = d3.select('#timelineChart')
-                .append('div')
-                .attr('class', 'tooltip')
-                .style('opacity', 0);
-
-            svg.selectAll('.dot')
-                .on('mouseover', function(event, d) {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .attr('r', 6);
-
-                    tooltip.transition()
-                        .duration(200)
-                        .style('opacity', .9);
-                    
-                    tooltip.html(`${d.date}<br/>${d.value} items`)
-                        .style('left', (event.pageX + 10) + 'px')
-                        .style('top', (event.pageY - 28) + 'px');
-                })
-                .on('mouseout', function() {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .attr('r', 4);
-
-                    tooltip.transition()
-                        .duration(500)
-                        .style('opacity', 0);
-                });
+        // Create gradient
+        function createGradient(ctx, colorScheme) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, colorScheme.primary + '80');  // 50% opacity
+            gradient.addColorStop(1, colorScheme.secondary + '20'); // 12.5% opacity
+            return gradient;
         }
 
-        // Top Artists Chart (Horizontal Bar Chart)
-        function initArtistsChart() {
-            const margin = {top: 20, right: 30, bottom: 40, left: 90};
-            const width = document.getElementById('artistsChart').clientWidth - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
+        // Chart configurations with improved styling
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 14,
+                            family: "'Plus Jakarta Sans', sans-serif",
+                            weight: '500'
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                title: {
+                    display: true,
+                    font: {
+                        size: 18,
+                        family: "'Plus Jakarta Sans', sans-serif",
+                        weight: '600'
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 30
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#000',
+                    titleFont: {
+                        size: 16,
+                        family: "'Plus Jakarta Sans', sans-serif",
+                        weight: '600'
+                    },
+                    bodyColor: '#666',
+                    bodyFont: {
+                        size: 14,
+                        family: "'Plus Jakarta Sans', sans-serif"
+                    },
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12,
+                            family: "'Plus Jakarta Sans', sans-serif"
+                        },
+                        padding: 10
+                    }
+                },
+                y: {
+                    grid: {
+                        borderDash: [2, 2],
+                        color: '#e0e0e0'
+                    },
+                    ticks: {
+                        font: {
+                            size: 12,
+                            family: "'Plus Jakarta Sans', sans-serif"
+                        },
+                        padding: 10,
+                        callback: function(value) {
+                            return value % 1 === 0 ? value : '';
+                        }
+                    },
+                    beginAtZero: true
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeOutQuart'
+            },
+            elements: {
+                line: {
+                    tension: 0.4
+                },
+                point: {
+                    radius: 6,
+                    hoverRadius: 8
+                }
+            },
+            layout: {
+                padding: {
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    left: 20
+                }
+            }
+        };
 
-            const svg = d3.select('#artistsChart')
-                .append('svg')
-                    .attr('width', width + margin.left + margin.right)
-                    .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                    .attr('transform', `translate(${margin.left},${margin.top})`);
+        // Helper function to safely initialize charts with improved styling
+        function initializeChart(elementId, type, labels, data, options = {}) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
 
-            // Create scales
-            const x = d3.scaleLinear()
-                .domain([0, d3.max(artistData, d => d.count)])
-                .range([0, width]);
+            const ctx = element.getContext('2d');
+            const colorScheme = options.colorScheme || colorSchemes.blue;
+            const gradient = createGradient(ctx, colorScheme);
 
-            const y = d3.scaleBand()
-                .domain(artistData.map(d => d.name))
-                .range([0, height])
-                .padding(0.1);
-
-            // Add axes
-            svg.append('g')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-
-            svg.append('g')
-                .call(d3.axisLeft(y));
-
-            // Add bars
-            svg.selectAll('rect')
-                .data(artistData)
-                .enter()
-                .append('rect')
-                    .attr('y', d => y(d.name))
-                    .attr('height', y.bandwidth())
-                    .attr('x', 0)
-                    .attr('width', d => x(d.count))
-                    .attr('fill', 'var(--blue)')
-                    .attr('rx', 4)
-                    .attr('ry', 4);
-
-            // Add value labels
-            svg.selectAll('.value')
-                .data(artistData)
-                .enter()
-                .append('text')
-                    .attr('class', 'value')
-                    .attr('x', d => x(d.count) + 5)
-                    .attr('y', d => y(d.name) + y.bandwidth() / 2)
-                    .attr('dy', '.35em')
-                    .text(d => d.count);
-        }
-
-        // Popular Venues Chart (Donut Chart)
-        function initVenuesChart() {
-            const width = document.getElementById('venuesChart').clientWidth;
-            const height = 300;
-            const radius = Math.min(width, height) / 2;
-
-            const svg = d3.select('#venuesChart')
-                .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                .append('g')
-                    .attr('transform', `translate(${width/2},${height/2})`);
-
-            const color = d3.scaleOrdinal()
-                .domain(venueData.map(d => d.name))
-                .range(d3.schemeCategory10);
-
-            const pie = d3.pie()
-                .value(d => d.count)
-                .sort(null);
-
-            const arc = d3.arc()
-                .innerRadius(radius * 0.6)
-                .outerRadius(radius * 0.8);
-
-            const outerArc = d3.arc()
-                .innerRadius(radius * 0.9)
-                .outerRadius(radius * 0.9);
-
-            // Add the arcs
-            const paths = svg.selectAll('path')
-                .data(pie(venueData))
-                .enter()
-                .append('path')
-                    .attr('d', arc)
-                    .attr('fill', d => color(d.data.name))
-                    .attr('stroke', 'var(--base)')
-                    .style('stroke-width', '2px');
-
-            // Add labels
-            const labels = svg.selectAll('text')
-                .data(pie(venueData))
-                .enter()
-                .append('text')
-                    .attr('dy', '.35em')
-                    .text(d => `${d.data.name} (${d.data.count})`);
-
-            function midAngle(d) {
-                return d.startAngle + (d.endAngle - d.startAngle) / 2;
+            let datasets = [];
+            if (type === 'pie') {
+                datasets = [{
+                    data: data || [],
+                    backgroundColor: [
+                        colorSchemes.blue.primary + '80',
+                        colorSchemes.green.primary + '80',
+                        colorSchemes.purple.primary + '80',
+                        colorSchemes.orange.primary + '80'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    hoverBorderColor: '#fff',
+                    hoverBorderWidth: 3,
+                    hoverOffset: 10
+                }];
+            } else {
+                datasets = [{
+                    label: options.label || '',
+                    data: data || [],
+                    backgroundColor: type === 'line' ? 'transparent' : gradient,
+                    borderColor: type === 'line' ? colorScheme.primary : 'transparent',
+                    borderWidth: type === 'line' ? 3 : 0,
+                    fill: type === 'line',
+                    pointBackgroundColor: type === 'line' ? colorScheme.primary : 'transparent',
+                    pointBorderColor: type === 'line' ? '#fff' : 'transparent',
+                    pointBorderWidth: type === 'line' ? 2 : 0,
+                    pointHoverBackgroundColor: type === 'line' ? colorScheme.secondary : 'transparent',
+                    pointHoverBorderColor: type === 'line' ? '#fff' : 'transparent',
+                    pointHoverBorderWidth: type === 'line' ? 3 : 0,
+                    pointHoverRadius: type === 'line' ? 8 : 0
+                }];
             }
 
-            labels.attr('transform', function(d) {
-                const pos = outerArc.centroid(d);
-                pos[0] = radius * (midAngle(d) < Math.PI ? 1 : -1);
-                return `translate(${pos})`;
-            })
-            .style('text-anchor', function(d) {
-                return midAngle(d) < Math.PI ? 'start' : 'end';
+            const chartData = {
+                labels: labels || [],
+                datasets: datasets
+            };
+
+            const config = { 
+                ...chartConfig, 
+                ...options,
+                plugins: {
+                    ...chartConfig.plugins,
+                    title: {
+                        ...chartConfig.plugins.title,
+                        text: options.title
+                    }
+                }
+            };
+
+            if (type === 'bar') {
+                config.scales.y.grid.display = false;
+                config.scales.x.grid.display = false;
+                config.barThickness = 'flex';
+                config.barPercentage = 0.8;
+                config.categoryPercentage = 0.7;
+            }
+
+            return new Chart(element, {
+                type: type,
+                data: chartData,
+                options: config
             });
-
-            // Add polylines
-            const polylines = svg.selectAll('polyline')
-                .data(pie(venueData))
-                .enter()
-                .append('polyline');
-
-            polylines.attr('points', function(d) {
-                const pos = outerArc.centroid(d);
-                pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
-                return [arc.centroid(d), outerArc.centroid(d), pos];
-            })
-            .style('fill', 'none')
-            .style('stroke', 'var(--text-op)')
-            .style('stroke-width', '1px');
         }
 
-        // Member Growth Chart (Area Chart)
-        function initMemberGrowthChart() {
-            const margin = {top: 20, right: 30, bottom: 30, left: 40};
-            const width = document.getElementById('memberGrowthChart').clientWidth - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
-
-            const svg = d3.select('#memberGrowthChart')
-                .append('svg')
-                    .attr('width', width + margin.left + margin.right)
-                    .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                    .attr('transform', `translate(${margin.left},${margin.top})`);
-
-            // Create scales
-            const x = d3.scaleTime()
-                .domain(d3.extent(memberGrowthData, d => new Date(d.date)))
-                .range([0, width]);
-
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(memberGrowthData, d => d.count)])
-                .range([height, 0]);
-
-            // Add axes
-            svg.append('g')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-
-            svg.append('g')
-                .call(d3.axisLeft(y));
-
-            // Create area generator
-            const area = d3.area()
-                .x(d => x(new Date(d.date)))
-                .y0(height)
-                .y1(d => y(d.count))
-                .curve(d3.curveMonotoneX);
-
-            // Add the area
-            svg.append('path')
-                .datum(memberGrowthData)
-                .attr('class', 'area')
-                .attr('d', area)
-                .attr('fill', 'var(--blue)')
-                .attr('fill-opacity', 0.2);
-
-            // Add the line
-            const line = d3.line()
-                .x(d => x(new Date(d.date)))
-                .y(d => y(d.count))
-                .curve(d3.curveMonotoneX);
-
-            svg.append('path')
-                .datum(memberGrowthData)
-                .attr('class', 'line')
-                .attr('d', line)
-                .attr('fill', 'none')
-                .attr('stroke', 'var(--blue)')
-                .attr('stroke-width', 2);
+        // Initialize charts with improved styling
+        if (setlistsByArtist && Object.keys(setlistsByArtist).length > 0) {
+            charts.setlists = initializeChart('setlistsChart', 'bar', 
+                Object.keys(setlistsByArtist),
+                Object.values(setlistsByArtist),
+                { 
+                    label: 'Number of Setlists',
+                    title: 'Setlists by Artist',
+                    colorScheme: colorSchemes.blue
+                }
+            );
         }
 
-        // Contribution Distribution Chart (Pie Chart)
-        function initContributionChart() {
-            const width = document.getElementById('contributionChart').clientWidth;
-            const height = 300;
-            const radius = Math.min(width, height) / 2;
-
-            const svg = d3.select('#contributionChart')
-                .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                .append('g')
-                    .attr('transform', `translate(${width/2},${height/2})`);
-
-            const color = d3.scaleOrdinal()
-                .domain(contributionData.map(d => d.type))
-                .range(['var(--blue)', 'var(--green)', 'var(--yellow)']);
-
-            const pie = d3.pie()
-                .value(d => d.count)
-                .sort(null);
-
-            const arc = d3.arc()
-                .innerRadius(0)
-                .outerRadius(radius * 0.8);
-
-            // Add the arcs
-            const arcs = svg.selectAll('arc')
-                .data(pie(contributionData))
-                .enter()
-                .append('g')
-                .attr('class', 'arc');
-
-            arcs.append('path')
-                .attr('d', arc)
-                .attr('fill', d => color(d.data.type))
-                .attr('stroke', 'var(--base)')
-                .style('stroke-width', '2px');
-
-            // Add labels
-            arcs.append('text')
-                .attr('transform', d => `translate(${arc.centroid(d)})`)
-                .attr('dy', '.35em')
-                .style('text-anchor', 'middle')
-                .text(d => `${d.data.type}: ${d.data.count}`);
+        if (eventsByVenue && Object.keys(eventsByVenue).length > 0) {
+            charts.events = initializeChart('eventsChart', 'pie',
+                Object.keys(eventsByVenue),
+                Object.values(eventsByVenue),
+                {
+                    title: 'Events by Venue'
+                }
+            );
         }
 
-        // Correction Success Rate Chart (Gauge Chart)
-        function initCorrectionRateChart() {
-            const width = document.getElementById('correctionRateChart').clientWidth;
-            const height = 300;
-            const radius = Math.min(width, height) / 2;
-
-            const svg = d3.select('#correctionRateChart')
-                .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                .append('g')
-                    .attr('transform', `translate(${width/2},${height/2})`);
-
-            const successRate = correctionRateData.approved / 
-                (correctionRateData.approved + correctionRateData.rejected) * 100;
-
-            const arc = d3.arc()
-                .innerRadius(radius * 0.7)
-                .outerRadius(radius * 0.9)
-                .startAngle(-Math.PI / 2);
-
-            // Background arc
-            svg.append('path')
-                .datum({endAngle: Math.PI / 2})
-                .style('fill', 'var(--surface0)')
-                .attr('d', arc);
-
-            // Foreground arc
-            const foreground = svg.append('path')
-                .datum({endAngle: -Math.PI / 2})
-                .style('fill', 'var(--green)')
-                .attr('d', arc);
-
-            // Add the percentage text
-            svg.append('text')
-                .attr('text-anchor', 'middle')
-                .attr('dy', '0.35em')
-                .style('font-size', '2em')
-                .text(`${Math.round(successRate)}%`);
-
-            // Animate the foreground arc
-            foreground.transition()
-                .duration(1000)
-                .attrTween('d', function(d) {
-                    const interpolate = d3.interpolate(d.endAngle, (-Math.PI / 2) + (Math.PI * (successRate / 100)));
-                    return function(t) {
-                        d.endAngle = interpolate(t);
-                        return arc(d);
-                    };
-                });
+        if (songsByArtist && Object.keys(songsByArtist).length > 0) {
+            charts.songs = initializeChart('songsChart', 'bar',
+                Object.keys(songsByArtist),
+                Object.values(songsByArtist),
+                { 
+                    label: 'Number of Songs',
+                    title: 'Songs by Artist',
+                    colorScheme: colorSchemes.green
+                }
+            );
         }
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            // Clear all charts
-            d3.selectAll('.chart-container svg').remove();
+        if (monthlySetlists && Object.keys(monthlySetlists).length > 0) {
+            const sortedMonths = Object.keys(monthlySetlists).sort().reverse();
+            charts.monthly = initializeChart('monthlyChart', 'line',
+                sortedMonths,
+                sortedMonths.map(month => monthlySetlists[month]),
+                {
+                    label: 'Number of Setlists',
+                    title: 'Monthly Setlist Submissions',
+                    colorScheme: colorSchemes.purple,
+                    fill: true
+                }
+            );
+        }
 
-            // Reinitialize charts
-            initTimelineChart();
-            initArtistsChart();
-            initVenuesChart();
-            initMemberGrowthChart();
-            initContributionChart();
-            initCorrectionRateChart();
-        });
+        async function downloadChart(chartId, title) {
+            const canvas = document.getElementById(chartId);
+            if (!canvas) return;
 
-        // Handle time range changes
-        document.getElementById('timeRange').addEventListener('change', function(e) {
-            // TODO: Fetch new data based on selected time range
-            // and update charts
-        });
+            // Set canvas to fixed size for better quality
+            const originalWidth = canvas.width;
+            const originalHeight = canvas.height;
+            canvas.width = 1200;
+            canvas.height = 800;
+
+            // Update chart to redraw at new size
+            const chart = Chart.getChart(chartId);
+            if (chart) {
+                chart.resize();
+            }
+
+            try {
+                const pdf = new jsPDF('l', 'px', [canvas.width, canvas.height]);
+                
+                // Add title
+                pdf.setFontSize(24);
+                pdf.text(title, 40, 40);
+
+                // Convert chart to image
+                const image = await html2canvas(canvas);
+                
+                // Add image to PDF
+                pdf.addImage(
+                    image, 
+                    'PNG', 
+                    40, // x
+                    60, // y
+                    canvas.width - 80, // width
+                    canvas.height - 100 // height
+                );
+
+                // Save PDF
+                pdf.save(`${title.toLowerCase().replace(/ /g, '_')}_chart.pdf`);
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
+
+            // Reset canvas to original size
+            canvas.width = originalWidth;
+            canvas.height = originalHeight;
+            if (chart) {
+                chart.resize();
+            }
+        }
+
+        async function downloadAllCharts() {
+            try {
+                const pdf = new jsPDF('p', 'px', 'a4');
+                const charts = document.querySelectorAll('canvas');
+                let currentPage = 1;
+
+                for (const canvas of charts) {
+                    if (currentPage > 1) {
+                        pdf.addPage();
+                    }
+
+                    // Get chart title
+                    const card = canvas.closest('.report-card');
+                    const title = card.querySelector('h2').textContent;
+
+                    // Set fixed size for better quality
+                    const originalWidth = canvas.width;
+                    const originalHeight = canvas.height;
+                    canvas.width = 1000;
+                    canvas.height = 600;
+
+                    // Update chart
+                    const chart = Chart.getChart(canvas.id);
+                    if (chart) {
+                        chart.resize();
+                    }
+
+                    // Add title
+                    pdf.setFontSize(20);
+                    pdf.text(title, 40, 40);
+
+                    // Convert chart to image
+                    const image = await html2canvas(canvas);
+
+                    // Add image to PDF
+                    pdf.addImage(
+                        image,
+                        'PNG',
+                        40, // x
+                        60, // y
+                        pdf.internal.pageSize.getWidth() - 80, // width
+                        pdf.internal.pageSize.getHeight() - 100 // height
+                    );
+
+                    // Reset canvas
+                    canvas.width = originalWidth;
+                    canvas.height = originalHeight;
+                    if (chart) {
+                        chart.resize();
+                    }
+
+                    currentPage++;
+                }
+
+                // Save PDF
+                pdf.save('all_charts.pdf');
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
+        }
+        /*]]>*/
     </script>
+
+    <style>
+        .no-data {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            color: #6c757d;
+            font-size: 1.1rem;
+            border: 2px dashed #dee2e6;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 
+                        0 1px 3px rgba(0,0,0,0.1);
+            min-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1), 
+                        0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .report-header h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: #4A90E2;
+            color: white;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: #357ABD;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #4A90E2;
+            color: #4A90E2;
+        }
+
+        .btn-outline:hover {
+            background-color: #4A90E2;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            border-radius: 6px;
+        }
+
+        .header-actions {
+            margin-top: 24px;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 32px;
+            margin-top: 32px;
+            padding: 0 16px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .reports-grid {
+                grid-template-columns: 1fr;
+                padding: 0 8px;
+            }
+
+            canvas {
+                height: 250px !important;
+            }
+        }
+    </style>
 </body>
 </html>

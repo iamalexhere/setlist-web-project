@@ -3,197 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Setlists - Admin - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Setlist Management - Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Admin Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-sidebar-header">
-                <h1>Admin Panel</h1>
-            </div>
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item">
-                    <span class="icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="/admin/members" class="admin-nav-item">
-                    <span class="icon">👥</span>
-                    Members
-                </a>
-                <a href="/admin/setlists" class="admin-nav-item active">
-                    <span class="icon">📝</span>
-                    Setlists
-                </a>
-                <a href="/admin/corrections" class="admin-nav-item">
-                    <span class="icon">✏️</span>
-                    Corrections
-                </a>
-                <a href="/admin/reports" class="admin-nav-item">
-                    <span class="icon">📈</span>
-                    Reports
-                </a>
-            </nav>
-        </aside>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <h2>Manage Setlists</h2>
-                <div class="admin-header-actions">
+    <main class="container">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="header-content">
+                <h1>Setlist Management</h1>
+                <p>Review and manage setlists</p>
+            </div>
+        </section>
+
+        <!-- Setlist Statistics -->
+        <section class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-list"></i>
+                    <div class="stat-content">
+                        <h3>Total Setlists</h3>
+                        <p class="stat-number" th:text="${setlistStats.totalSetlists}">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="stat-content">
+                        <h3>Pending Review</h3>
+                        <p class="stat-number" th:text="${setlistStats.pendingSetlists}">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="stat-content">
+                        <h3>Approved Today</h3>
+                        <p class="stat-number" th:text="${setlistStats.approvedToday}">0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Setlist List -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Setlist Review</h2>
+                <div class="section-actions">
                     <div class="search-box">
-                        <input type="text" id="setlistSearch" placeholder="Search setlists..." class="form-control">
+                        <input type="text" id="setlistSearch" placeholder="Search setlists...">
+                        <i class="fas fa-search"></i>
                     </div>
-                    <div class="admin-profile">
-                        <span class="admin-name">Admin</span>
-                        <a href="/logout" class="btn btn-secondary">Logout</a>
+                    <div class="filter-group">
+                        <select id="statusFilter" class="form-select">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
                     </div>
-                </div>
-            </header>
-
-            <!-- Filters -->
-            <div class="filter-bar">
-                <div class="filter-group">
-                    <label>Status:</label>
-                    <select class="form-control" id="statusFilter">
-                        <option value="">All</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Sort by:</label>
-                    <select class="form-control" id="sortBy">
-                        <option value="date">Date</option>
-                        <option value="artist">Artist</option>
-                        <option value="venue">Venue</option>
-                    </select>
                 </div>
             </div>
 
-            <!-- Setlists Grid -->
-            <div class="setlists-grid">
-                <div class="setlist-card" th:each="setlist : ${setlists}">
-                    <div class="setlist-header">
-                        <div class="setlist-meta">
-                            <h3 th:text="${setlist.artist}">Taylor Swift</h3>
-                            <p th:text="${setlist.venue + ' - ' + setlist.date}">Singapore National Stadium - 02 Mar 2024</p>
-                        </div>
-                        <span th:class="'status-badge ' + ${setlist.status}" th:text="${setlist.status}">Pending</span>
-                    </div>
-                    
-                    <div class="setlist-content">
-                        <div class="setlist-info">
-                            <p><strong>Tour:</strong> <span th:text="${setlist.tour}">Eras Tour</span></p>
-                            <p><strong>Songs:</strong> <span th:text="${setlist.songCount + ' songs'}">23 songs</span></p>
-                            <p><strong>Added by:</strong> <span th:text="${setlist.submitter}">johndoe</span></p>
-                            <p><strong>Submitted:</strong> <span th:text="${#temporals.format(setlist.submittedAt, 'dd MMM yyyy HH:mm')}">01 Jan 2024 14:30</span></p>
-                        </div>
-                        
-                        <div class="setlist-proof" th:if="${setlist.proof}">
-                            <img th:src="${setlist.proof}" alt="Setlist Proof">
-                        </div>
-                    </div>
-
-                    <div class="setlist-actions">
-                        <a th:href="@{/admin/setlists/{id}(id=${setlist.id})}" class="btn btn-secondary">View Details</a>
-                        <div class="action-buttons" th:if="${setlist.status == 'pending'}">
-                            <button class="btn btn-primary" th:onclick="'approveSetlist(' + ${setlist.id} + ')'">Approve</button>
-                            <button class="btn btn-danger" th:onclick="'rejectSetlist(' + ${setlist.id} + ')'">Reject</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Artist</th>
+                            <th>Event</th>
+                            <th>Venue</th>
+                            <th>Date</th>
+                            <th>Submitted By</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="setlist : ${setlists}">
+                            <td th:text="${setlist.artistName}">Artist Name</td>
+                            <td th:text="${setlist.eventName}">Event Name</td>
+                            <td th:text="${setlist.venue}">Venue Name</td>
+                            <td th:text="${#temporals.format(setlist.eventDate, 'dd MMM yyyy')}">01 Jan 2024</td>
+                            <td th:text="${setlist.submittedBy}">username</td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${setlist.status == 'PENDING' ? 'badge-warning' : 
+                                                      setlist.status == 'APPROVED' ? 'badge-success' : 'badge-danger'}"
+                                      th:text="${setlist.status}">Status</span>
+                            </td>
+                            <td class="actions">
+                                <a th:href="@{/admin/setlists/{id}(id=${setlist.id})}" 
+                                   class="btn btn-primary btn-sm" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button th:if="${setlist.status == 'PENDING'}" 
+                                        class="btn btn-success btn-sm"
+                                        th:onclick="'approveSetlist(' + ${setlist.id} + ')'"
+                                        title="Approve">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button th:if="${setlist.status == 'PENDING'}" 
+                                        class="btn btn-danger btn-sm"
+                                        th:onclick="'rejectSetlist(' + ${setlist.id} + ')'"
+                                        title="Reject">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- Pagination -->
-            <div class="pagination">
-                <button class="btn btn-secondary" th:disabled="${currentPage == 1}">Previous</button>
-                <span class="pagination-info" th:text="${currentPage + ' of ' + totalPages}">1 of 5</span>
-                <button class="btn btn-secondary" th:disabled="${currentPage == totalPages}">Next</button>
+            <div class="pagination" th:if="${totalPages > 1}">
+                <button class="btn btn-secondary" 
+                        th:disabled="${currentPage == 1}"
+                        th:onclick="'changePage(' + ${currentPage - 1} + ')'">
+                    Previous
+                </button>
+                <span class="page-info" th:text="${currentPage + ' of ' + totalPages}">1 of 5</span>
+                <button class="btn btn-secondary" 
+                        th:disabled="${currentPage == totalPages}"
+                        th:onclick="'changePage(' + ${currentPage + 1} + ')'">
+                    Next
+                </button>
             </div>
-        </main>
-    </div>
+        </section>
+    </main>
 
-    <!-- Setlist Action Modal -->
-    <div id="actionModal" class="modal">
-        <div class="modal-content">
-            <h3>Confirm Action</h3>
-            <p id="modalMessage">Are you sure you want to approve this setlist?</p>
-            <div class="form-group">
-                <label for="actionReason">Reason/Notes:</label>
-                <textarea id="actionReason" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="confirmAction()">Confirm</button>
-            </div>
-        </div>
-    </div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
+    <script th:src="@{/js/dashboard.js}"></script>
     <script>
-        // Setlist management functions
         function approveSetlist(setlistId) {
-            showModal('approve', setlistId);
+            if (confirm('Are you sure you want to approve this setlist?')) {
+                fetch(`/admin/setlists/${setlistId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to approve setlist');
+                    }
+                });
+            }
         }
 
         function rejectSetlist(setlistId) {
-            showModal('reject', setlistId);
+            if (confirm('Are you sure you want to reject this setlist?')) {
+                fetch(`/admin/setlists/${setlistId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to reject setlist');
+                    }
+                });
+            }
         }
 
-        function showModal(action, setlistId) {
-            const modal = document.getElementById('actionModal');
-            const message = document.getElementById('modalMessage');
-            
-            modal.dataset.action = action;
-            modal.dataset.setlistId = setlistId;
-            
-            message.textContent = action === 'approve' 
-                ? 'Are you sure you want to approve this setlist?' 
-                : 'Are you sure you want to reject this setlist?';
-            
-            modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('actionModal');
-            modal.style.display = 'none';
-            document.getElementById('actionReason').value = '';
-        }
-
-        function confirmAction() {
-            const modal = document.getElementById('actionModal');
-            const action = modal.dataset.action;
-            const setlistId = modal.dataset.setlistId;
-            const reason = document.getElementById('actionReason').value;
-
-            fetch(`/admin/setlists/${setlistId}/${action}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ reason: reason })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                }
-            });
-
-            closeModal();
+        function changePage(page) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('page', page);
+            window.location.href = currentUrl.toString();
         }
 
         // Search and filter functionality
         document.getElementById('setlistSearch').addEventListener('input', function(e) {
-            // Implement search functionality
+            const searchText = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const artist = row.cells[0].textContent.toLowerCase();
+                const event = row.cells[1].textContent.toLowerCase();
+                const venue = row.cells[2].textContent.toLowerCase();
+                const visible = artist.includes(searchText) || 
+                              event.includes(searchText) || 
+                              venue.includes(searchText);
+                row.style.display = visible ? '' : 'none';
+            });
         });
 
         document.getElementById('statusFilter').addEventListener('change', function(e) {
-            // Implement status filtering
-        });
-
-        document.getElementById('sortBy').addEventListener('change', function(e) {
-            // Implement sorting
+            const status = e.target.value.toUpperCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            if (status === 'ALL') {
+                rows.forEach(row => row.style.display = '');
+                return;
+            }
+            
+            rows.forEach(row => {
+                const rowStatus = row.cells[5].textContent.trim().toUpperCase();
+                row.style.display = rowStatus === status ? '' : 'none';
+            });
         });
     </script>
 </body>

@@ -3,220 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Corrections - Admin - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Correction Management - Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Admin Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-sidebar-header">
-                <h1>Admin Panel</h1>
-            </div>
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item">
-                    <span class="icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="/admin/members" class="admin-nav-item">
-                    <span class="icon">👥</span>
-                    Members
-                </a>
-                <a href="/admin/setlists" class="admin-nav-item">
-                    <span class="icon">📝</span>
-                    Setlists
-                </a>
-                <a href="/admin/corrections" class="admin-nav-item active">
-                    <span class="icon">✏️</span>
-                    Corrections
-                </a>
-                <a href="/admin/reports" class="admin-nav-item">
-                    <span class="icon">📈</span>
-                    Reports
-                </a>
-            </nav>
-        </aside>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <h2>Manage Corrections</h2>
-                <div class="admin-header-actions">
+    <main class="container">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="header-content">
+                <h1>Correction Management</h1>
+                <p>Review and manage setlist corrections</p>
+            </div>
+        </section>
+
+        <!-- Correction Statistics -->
+        <section class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-edit"></i>
+                    <div class="stat-content">
+                        <h3>Total Corrections</h3>
+                        <p class="stat-number" th:text="${correctionStats.totalCorrections}">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="stat-content">
+                        <h3>Pending Review</h3>
+                        <p class="stat-number" th:text="${correctionStats.pendingCorrections}">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="stat-content">
+                        <h3>Approved Today</h3>
+                        <p class="stat-number" th:text="${correctionStats.approvedToday}">0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Corrections List -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Correction Review</h2>
+                <div class="section-actions">
                     <div class="search-box">
-                        <input type="text" id="correctionSearch" placeholder="Search corrections..." class="form-control">
+                        <input type="text" id="correctionSearch" placeholder="Search corrections...">
+                        <i class="fas fa-search"></i>
                     </div>
-                    <div class="admin-profile">
-                        <span class="admin-name">Admin</span>
-                        <a href="/logout" class="btn btn-secondary">Logout</a>
+                    <div class="filter-group">
+                        <select id="statusFilter" class="form-select">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
                     </div>
-                </div>
-            </header>
-
-            <!-- Filters -->
-            <div class="filter-bar">
-                <div class="filter-group">
-                    <label>Status:</label>
-                    <select class="form-control" id="statusFilter">
-                        <option value="">All</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Sort by:</label>
-                    <select class="form-control" id="sortBy">
-                        <option value="date">Date</option>
-                        <option value="setlist">Setlist</option>
-                        <option value="submitter">Submitter</option>
-                    </select>
                 </div>
             </div>
 
-            <!-- Corrections List -->
-            <div class="corrections-list">
+            <div class="corrections-grid">
                 <div class="correction-card" th:each="correction : ${corrections}">
                     <div class="correction-header">
-                        <div class="correction-meta">
-                            <h3>
-                                <a th:href="@{/admin/setlists/{id}(id=${correction.setlistId})}" 
-                                   th:text="${correction.artist + ' - ' + correction.venue}">
-                                    Taylor Swift - Singapore National Stadium
-                                </a>
-                            </h3>
-                            <p th:text="${correction.date}">02 Mar 2024</p>
-                        </div>
-                        <span th:class="'status-badge ' + ${correction.status}" th:text="${correction.status}">Pending</span>
+                        <h3 class="correction-title" th:text="${correction.setlist.artistName + ' - ' + correction.setlist.eventName}">
+                            Artist - Event
+                        </h3>
+                        <span class="badge" 
+                              th:classappend="${correction.status == 'PENDING' ? 'badge-warning' : 
+                                              correction.status == 'APPROVED' ? 'badge-success' : 'badge-danger'}"
+                              th:text="${correction.status}">Status</span>
                     </div>
-
                     <div class="correction-content">
                         <div class="correction-details">
-                            <div class="correction-field">
-                                <h4>Changes Requested:</h4>
-                                <ul class="changes-list">
-                                    <li th:each="change : ${correction.changes}" class="change-item">
-                                        <div class="change-type" th:text="${change.type}">Song Order</div>
-                                        <div class="change-description">
-                                            <div class="old-value" th:text="'Old: ' + ${change.oldValue}">Old: Love Story (#5)</div>
-                                            <div class="new-value" th:text="'New: ' + ${change.newValue}">New: Love Story (#3)</div>
+                            <p class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <span>Submitted by: </span>
+                                <strong th:text="${correction.submittedBy}">username</strong>
+                            </p>
+                            <p class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>Submitted on: </span>
+                                <strong th:text="${#temporals.format(correction.submittedAt, 'dd MMM yyyy HH:mm')}">
+                                    01 Jan 2024 12:00
+                                </strong>
+                            </p>
+                        </div>
+                        <div class="correction-changes">
+                            <h4>Proposed Changes</h4>
+                            <div class="changes-list">
+                                <div class="change-item" th:each="change : ${correction.changes}">
+                                    <div class="change-field" th:text="${change.field}">Field</div>
+                                    <div class="change-values">
+                                        <div class="old-value">
+                                            <span>Old:</span>
+                                            <span th:text="${change.oldValue}">Old value</span>
                                         </div>
-                                    </li>
-                                </ul>
-                            </div>
-                            
-                            <div class="correction-field">
-                                <h4>Reason:</h4>
-                                <p th:text="${correction.reason}">Based on the official tour book and video evidence.</p>
-                            </div>
-
-                            <div class="correction-field" th:if="${correction.proof}">
-                                <h4>Proof:</h4>
-                                <div class="proof-images">
-                                    <img th:src="${correction.proof}" alt="Correction Proof">
+                                        <div class="new-value">
+                                            <span>New:</span>
+                                            <span th:text="${change.newValue}">New value</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="correction-submitter">
-                            <p><strong>Submitted by:</strong> <span th:text="${correction.submitter}">johndoe</span></p>
-                            <p><strong>Submitted:</strong> <span th:text="${#temporals.format(correction.submittedAt, 'dd MMM yyyy HH:mm')}">01 Jan 2024 14:30</span></p>
+                        <div class="correction-notes" th:if="${correction.notes}">
+                            <h4>Notes</h4>
+                            <p th:text="${correction.notes}">Correction notes</p>
                         </div>
                     </div>
-
-                    <div class="correction-actions" th:if="${correction.status == 'pending'}">
-                        <button class="btn btn-primary" th:onclick="'approveCorrection(' + ${correction.id} + ')'">Approve</button>
-                        <button class="btn btn-danger" th:onclick="'rejectCorrection(' + ${correction.id} + ')'">Reject</button>
+                    <div class="correction-actions" th:if="${correction.status == 'PENDING'}">
+                        <button class="btn btn-success" th:onclick="'approveCorrection(' + ${correction.id} + ')'">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn btn-danger" th:onclick="'rejectCorrection(' + ${correction.id} + ')'">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- Pagination -->
-            <div class="pagination">
-                <button class="btn btn-secondary" th:disabled="${currentPage == 1}">Previous</button>
-                <span class="pagination-info" th:text="${currentPage + ' of ' + totalPages}">1 of 5</span>
-                <button class="btn btn-secondary" th:disabled="${currentPage == totalPages}">Next</button>
+            <div class="pagination" th:if="${totalPages > 1}">
+                <button class="btn btn-secondary" 
+                        th:disabled="${currentPage == 1}"
+                        th:onclick="'changePage(' + ${currentPage - 1} + ')'">
+                    Previous
+                </button>
+                <span class="page-info" th:text="${currentPage + ' of ' + totalPages}">1 of 5</span>
+                <button class="btn btn-secondary" 
+                        th:disabled="${currentPage == totalPages}"
+                        th:onclick="'changePage(' + ${currentPage + 1} + ')'">
+                    Next
+                </button>
             </div>
-        </main>
-    </div>
+        </section>
+    </main>
 
-    <!-- Correction Action Modal -->
-    <div id="actionModal" class="modal">
-        <div class="modal-content">
-            <h3>Confirm Action</h3>
-            <p id="modalMessage">Are you sure you want to approve this correction?</p>
-            <div class="form-group">
-                <label for="actionReason">Reason/Notes:</label>
-                <textarea id="actionReason" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="confirmAction()">Confirm</button>
-            </div>
-        </div>
-    </div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
+    <script th:src="@{/js/dashboard.js}"></script>
     <script>
-        // Correction management functions
         function approveCorrection(correctionId) {
-            showModal('approve', correctionId);
+            if (confirm('Are you sure you want to approve this correction?')) {
+                fetch(`/admin/corrections/${correctionId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to approve correction');
+                    }
+                });
+            }
         }
 
         function rejectCorrection(correctionId) {
-            showModal('reject', correctionId);
+            if (confirm('Are you sure you want to reject this correction?')) {
+                fetch(`/admin/corrections/${correctionId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to reject correction');
+                    }
+                });
+            }
         }
 
-        function showModal(action, correctionId) {
-            const modal = document.getElementById('actionModal');
-            const message = document.getElementById('modalMessage');
-            
-            modal.dataset.action = action;
-            modal.dataset.correctionId = correctionId;
-            
-            message.textContent = action === 'approve' 
-                ? 'Are you sure you want to approve this correction?' 
-                : 'Are you sure you want to reject this correction?';
-            
-            modal.style.display = 'flex';
+        function changePage(page) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('page', page);
+            window.location.href = currentUrl.toString();
         }
 
-        function closeModal() {
-            const modal = document.getElementById('actionModal');
-            modal.style.display = 'none';
-            document.getElementById('actionReason').value = '';
-        }
-
-        function confirmAction() {
-            const modal = document.getElementById('actionModal');
-            const action = modal.dataset.action;
-            const correctionId = modal.dataset.correctionId;
-            const reason = document.getElementById('actionReason').value;
-
-            fetch(`/admin/corrections/${correctionId}/${action}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ reason: reason })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                }
-            });
-
-            closeModal();
-        }
-
-        // Search and filter functionality
+        // Search functionality
         document.getElementById('correctionSearch').addEventListener('input', function(e) {
-            // Implement search functionality
+            const searchText = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.correction-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.correction-title').textContent.toLowerCase();
+                const submittedBy = card.querySelector('.correction-details').textContent.toLowerCase();
+                const visible = title.includes(searchText) || submittedBy.includes(searchText);
+                card.style.display = visible ? '' : 'none';
+            });
         });
 
+        // Filter functionality
         document.getElementById('statusFilter').addEventListener('change', function(e) {
-            // Implement status filtering
-        });
-
-        document.getElementById('sortBy').addEventListener('change', function(e) {
-            // Implement sorting
+            const status = e.target.value.toUpperCase();
+            const cards = document.querySelectorAll('.correction-card');
+            
+            if (status === 'ALL') {
+                cards.forEach(card => card.style.display = '');
+                return;
+            }
+            
+            cards.forEach(card => {
+                const badge = card.querySelector('.badge');
+                const cardStatus = badge.textContent.trim().toUpperCase();
+                card.style.display = cardStatus === status ? '' : 'none';
+            });
         });
     </script>
 </body>
