@@ -62,13 +62,25 @@
                     <input type="hidden" name="status" value="draft">
 
                     <div class="form-group">
-                        <label for="songs">
+                        <label>
                             <i class="fas fa-music"></i>
-                            Select Songs
+                            Songs
                         </label>
-                        <select id="songs" name="songIds" multiple required>
-                            <!-- Songs will be loaded dynamically -->
-                        </select>
+                        <div class="song-selection">
+                            <select id="songSelect" class="song-dropdown">
+                                <option value="">Select a song...</option>
+                            </select>
+                            <button type="button" onclick="addSelectedSong()" class="btn-secondary">
+                                <i class="fas fa-plus"></i>
+                                Add Song
+                            </button>
+                        </div>
+                        <div id="selectedSongs" class="selected-songs">
+                            <!-- Selected songs will appear here -->
+                        </div>
+                        <div id="songInputs">
+                            <!-- Hidden inputs for selected songs -->
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -100,42 +112,109 @@
 
     <script th:src="@{/js/main.js}"></script>
     <script>
+        let songsList = [];
+
         function loadSongs() {
             const artistId = document.getElementById('artist').value;
-            const songsSelect = document.getElementById('songs');
-            songsSelect.innerHTML = '<option value="">Loading songs...</option>';
+            const songSelect = document.getElementById('songSelect');
+            songSelect.innerHTML = '<option value="">Loading songs...</option>';
 
             if (artistId) {
                 fetch(`/member/api/songs/by-artist/${artistId}`)
                     .then(response => response.json())
                     .then(songs => {
-                        songsSelect.innerHTML = songs.map(song => 
-                            `<option value="${song.idSong}">${song.songName}</option>`
-                        ).join('');
+                        songsList = songs;
+                        songSelect.innerHTML = '<option value="">Select a song...</option>' +
+                            songs.map(song => 
+                                `<option value="${song.idSong}">${song.songName}</option>`
+                            ).join('');
                     })
                     .catch(error => {
                         console.error('Error loading songs:', error);
-                        songsSelect.innerHTML = '<option value="">Error loading songs</option>';
+                        songSelect.innerHTML = '<option value="">Error loading songs</option>';
                     });
             } else {
-                songsSelect.innerHTML = '<option value="">Select an artist first</option>';
+                songSelect.innerHTML = '<option value="">Select an artist first</option>';
             }
+        }
+
+        function addSelectedSong() {
+            const songSelect = document.getElementById('songSelect');
+            const selectedSongId = songSelect.value;
+            if (!selectedSongId) return;
+
+            const song = songsList.find(s => s.idSong == selectedSongId);
+            if (!song) return;
+
+            const selectedSongs = document.getElementById('selectedSongs');
+            const songInputs = document.getElementById('songInputs');
+
+            // Check if song is already added
+            if (document.querySelector(`input[value="${song.idSong}"]`)) {
+                alert('This song is already in the setlist');
+                return;
+            }
+
+            // Add song display
+            const songElement = document.createElement('div');
+            songElement.className = 'song-item';
+            songElement.innerHTML = `
+                <span>${song.songName}</span>
+                <button type="button" onclick="removeSong(this, ${song.idSong})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            selectedSongs.appendChild(songElement);
+
+            // Add hidden input
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'songIds';
+            input.value = song.idSong;
+            songInputs.appendChild(input);
+
+            // Reset select
+            songSelect.value = '';
+        }
+
+        function removeSong(button, songId) {
+            // Remove display element
+            button.closest('.song-item').remove();
+            // Remove hidden input
+            document.querySelector(`input[value="${songId}"]`).remove();
         }
     </script>
     <style>
-        select[multiple] {
-            min-height: 200px;
+        .song-selection {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .song-dropdown {
+            flex: 1;
             padding: 8px;
         }
 
-        select[multiple] option {
+        .selected-songs {
+            margin-top: 10px;
+        }
+
+        .song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 8px;
-            margin: 2px 0;
+            margin: 4px 0;
+            background: #f5f5f5;
             border-radius: 4px;
         }
 
-        select[multiple] option:hover {
-            background-color: #f0f0f0;
+        .song-item button {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
         }
     </style>
 

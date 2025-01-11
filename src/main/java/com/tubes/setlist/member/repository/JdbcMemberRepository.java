@@ -501,16 +501,23 @@ public class JdbcMemberRepository implements MemberRepository {
     @Override
     public List<EventsVenues> findFilteredEvents(String query, LocalDate startDate, LocalDate endDate) {
         StringBuilder sql = new StringBuilder();
+        sql.append("WITH event_artists AS (");
+        sql.append("    SELECT e.id_event, ");
+        sql.append("           string_agg(DISTINCT a.artist_name, ', ') as artists, ");
+        sql.append("           COUNT(DISTINCT ss.id_song) as song_count ");
+        sql.append("    FROM events e ");
+        sql.append("    LEFT JOIN setlists s ON e.id_event = s.id_event ");
+        sql.append("    LEFT JOIN artists a ON s.id_artist = a.id_artist ");
+        sql.append("    LEFT JOIN setlists_songs ss ON s.id_setlist = ss.id_setlist ");
+        sql.append("    GROUP BY e.id_event ");
+        sql.append(") ");
         sql.append("SELECT DISTINCT e.id_event, e.id_venue, e.event_name, e.event_date, ");
         sql.append("v.venue_name, v.city_name, ");
-        sql.append("a.artist_name, ");
-        sql.append("(SELECT COUNT(*) FROM setlists_songs ss ");
-        sql.append("JOIN setlists s ON ss.id_setlist = s.id_setlist ");
-        sql.append("WHERE s.id_event = e.id_event) as song_count ");
+        sql.append("ea.artists as artist_name, ");
+        sql.append("COALESCE(ea.song_count, 0) as song_count ");
         sql.append("FROM events e ");
         sql.append("INNER JOIN venues v ON e.id_venue = v.id_venue ");
-        sql.append("LEFT JOIN setlists s ON e.id_event = s.id_event ");
-        sql.append("LEFT JOIN artists a ON s.id_artist = a.id_artist ");
+        sql.append("LEFT JOIN event_artists ea ON e.id_event = ea.id_event ");
         sql.append("WHERE e.is_deleted = false ");
 
         List<Object> params = new ArrayList<>();
