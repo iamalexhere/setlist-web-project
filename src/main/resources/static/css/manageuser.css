@@ -1,0 +1,255 @@
+/* User Management Page Styles */
+:root {
+    --background: #1e1e2e;
+    --text: #cdd6f4;
+    --subtext: #bac2de;
+    --overlay: #6c7086;
+    --surface: #313244;
+    --surface-light: #45475a;
+    --accent: #89b4fa;
+    --accent-secondary: #f5c2e7;
+}
+
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--background);
+    color: var(--text);
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-content h1 {
+    color: var(--text);
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.header-content p {
+    color: var(--subtext);
+    font-size: 1rem;
+}
+
+/* Statistics Cards */
+.stats-overview {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    background: var(--surface-light);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-right: 1rem;
+}
+
+.stat-content h3 {
+    color: var(--subtext);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number {
+    color: var(--text);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* User List Section */
+.content-section {
+    background: var(--surface);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    color: var(--text);
+    font-size: 1.2rem;
+}
+
+/* Search Box */
+.search-box {
+    position: relative;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    background: var(--surface-light);
+    border-radius: 5px;
+    border: 1px solid var(--overlay);
+    transition: all 0.2s ease;
+}
+
+.search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.1);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+}
+
+.search-box input::placeholder {
+    color: var(--subtext);
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    color: var(--overlay);
+    pointer-events: none;
+}
+
+.search-box:hover {
+    border-color: var(--accent);
+}
+
+/* Table Styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    background: var(--surface-light);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--overlay);
+    color: var(--subtext);
+}
+
+.data-table tr:hover {
+    background: var(--surface-light);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge-admin {
+    background: var(--accent);
+    color: var(--background);
+}
+
+.badge-member {
+    background: var(--accent-secondary);
+    color: var(--background);
+}
+
+.badge-active {
+    background: var(--accent);
+    color: var(--background);
+}
+
+.badge-blocked {
+    background: #e74c3c;
+    color: var(--text);
+}
+
+/* Action Buttons */
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: var(--text);
+}
+
+.btn-success {
+    background: var(--accent);
+    color: var(--background);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .search-box {
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

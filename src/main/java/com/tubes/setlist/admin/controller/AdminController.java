@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,6 +54,10 @@ public class AdminController {
         }
         addUserAttributes(session, model);
         
+        // Add user statistics
+        model.addAttribute("userStats", adminRepository.getUserStatistics());
+        
+        // Add user list
         List<UserManagement> users = adminRepository.getAllUsers();
         model.addAttribute("users", users);
         
