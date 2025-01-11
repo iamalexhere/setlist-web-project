@@ -1,152 +1,192 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Edit Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Setlist - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/setlist.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="member-page">
-    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
-    
-    <main class="main-content">
-        <div class="content-wrapper">
-            <h1>Edit Setlist</h1>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-            <form th:action="@{/member/setlists/{id}/edit(id=${setlist.idSetlist})}" 
-                  method="post" 
-                  enctype="multipart/form-data" 
-                  class="form">
-                  
-                <div th:if="${error}" class="message-error">
-                    <p th:text="${error}"></p>
+    <main>
+        <section class="setlist-detail-header">
+            <div class="container">
+                <h1>Edit Setlist</h1>
+                <div class="event-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-music"></i>
+                        <span th:text="${setlist.setlistName}">Setlist Name</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span th:text="${setlist.artistName}">Artist Name</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span th:text="${setlist.eventName + ' (' + #temporals.format(setlist.eventDate, 'MMM d, yyyy') + ')'}">Event Name</span>
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="form-group">
-                    <label for="name">Setlist Name</label>
-                    <input type="text" id="name" name="name" 
-                           class="form-control" 
-                           th:value="${setlist.setlistName}" required>
-                </div>
+        <section class="container">
+            <div class="setlist-content">
+                <form th:action="@{/member/setlists/{id}/edit(id=${setlist.idSetlist})}" method="post" class="event-form">
+                    <div class="form-group">
+                        <label for="name">
+                            <i class="fas fa-signature"></i>
+                            Setlist Name
+                        </label>
+                        <input type="text" id="name" name="name" 
+                               th:value="${setlist.setlistName}" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="artistId">Artist</label>
-                    <select id="artistId" name="artistId" class="form-control" required>
-                        <option value="" disabled>Select an artist</option>
-                        <option th:each="artist : ${artists}" 
-                                th:value="${artist.idArtist}" 
-                                th:text="${artist.artistName}"
-                                th:selected="${artist.idArtist == setlist.idArtist}">
-                        </option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="artistId">
+                            <i class="fas fa-user"></i>
+                            Artist
+                        </label>
+                        <select id="artistId" name="artistId" required>
+                            <option value="">Select Artist</option>
+                            <option th:each="artist : ${artists}" 
+                                    th:value="${artist.idArtist}" 
+                                    th:text="${artist.artistName}"
+                                    th:selected="${artist.idArtist == setlist.idArtist}">
+                                Artist Name
+                            </option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="eventId">Event</label>
-                    <select id="eventId" name="eventId" class="form-control" required>
-                        <option value="" disabled>Select an event</option>
-                        <option th:each="event : ${events}" 
-                                th:value="${event.idEvent}" 
-                                th:text="${event.eventName + ' (' + #temporals.format(event.eventDate, 'dd MMM yyyy') + ')'}"
-                                th:selected="${event.idEvent == setlist.idEvent}">
-                        </option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="eventId">
+                            <i class="fas fa-calendar-alt"></i>
+                            Event
+                        </label>
+                        <select id="eventId" name="eventId" required>
+                            <option value="">Select Event</option>
+                            <option th:each="event : ${events}" 
+                                    th:value="${event.idEvent}" 
+                                    th:text="${event.eventName + ' (' + #temporals.format(event.eventDate, 'MMM d, yyyy') + ')'}"
+                                    th:selected="${event.idEvent == setlist.idEvent}">
+                                Event Name
+                            </option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label>Songs</label>
-                    <div id="songList" class="song-list" th:data-songs="${currentSongs}">
-                        <div class="song-field" th:each="song : ${currentSongs}">
-                            <div class="song-input-group">
-                                <select name="songIds" class="form-control" required>
-                                    <option th:each="s : ${songs}" 
-                                            th:value="${s.idSong}"
-                                            th:text="${s.songName}"
-                                            th:selected="${s.idSong == song.idSong}">
-                                    </option>
-                                </select>
-                                <button type="button" class="btn btn-danger" 
-                                        onclick="removeSong(this)">Remove</button>
+                    <div class="song-section">
+                        <h3>
+                            <i class="fas fa-music"></i>
+                            Songs
+                        </h3>
+                        <div id="songList">
+                            <div class="song-entry" th:each="song, songStat : ${currentSongs}">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>
+                                            <i class="fas fa-music"></i>
+                                            Song
+                                        </label>
+                                        <select th:name="'songIds[' + ${songStat.index} + ']'" required>
+                                            <option value="">Select Song</option>
+                                            <option th:each="s : ${songs}" 
+                                                    th:value="${s.idSong}"
+                                                    th:text="${s.songName}"
+                                                    th:selected="${s.idSong == song.idSong}">
+                                                Song Name
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" class="btn-remove" onclick="removeSong(this)">
+                                            <i class="fas fa-trash"></i>
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <button type="button" onclick="addSong()" class="btn-secondary">
+                            <i class="fas fa-plus"></i>
+                            Add Another Song
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-secondary" 
-                            onclick="addSongField()">Add Song</button>
-                </div>
 
-                <div class="form-group">
-                    <label for="proof">Setlist Proof</label>
-                    <input type="file" id="proof" name="proof" 
-                           class="form-control" accept="image/*">
-                    <small class="form-text">Upload a new photo to replace the existing one (optional)</small>
-                    <div th:if="${setlist.proofUrl}" class="current-proof">
-                        <p>Current proof image:</p>
-                        <img th:src="${setlist.proofUrl}" alt="Current setlist proof">
+                    <div class="form-group">
+                        <label for="proof">
+                            <i class="fas fa-image"></i>
+                            Setlist Proof
+                        </label>
+                        <input type="file" id="proof" name="proof" accept="image/*">
+                        <small class="form-text text-muted">Upload a new photo to replace the existing one (optional)</small>
+                        <div th:if="${setlist.proofUrl}" class="current-proof">
+                            <p>Current proof image:</p>
+                            <img th:src="${setlist.proofUrl}" alt="Current setlist proof">
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-actions">
-                    <a th:href="@{/member/setlists}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
+                    <div class="form-actions">
+                        <a th:href="@{/member/setlists}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-accent">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
     </main>
 
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
     <script th:inline="javascript">
-        // Get initial songs data
-        let songIndex = /*[[${currentSongs.size()}]]*/ 0;
-        const initialSongs = /*[[${songsJson}]]*/ [];
-        
-        // Set initial songs data
-        document.getElementById('songList').dataset.songs = JSON.stringify(initialSongs);
+        let songCount = /*[[${currentSongs.size()}]]*/ 0;
+        const songs = /*[[${songs}]]*/ [];
 
-        document.getElementById('artistId').addEventListener('change', function() {
-            const artistId = this.value;
-            if (artistId) {
-                loadSongs(artistId);
-            }
-        });
-
-        function loadSongs(artistId) {
-            fetch(`/member/api/songs/by-artist/${artistId}`)
-                .then(response => response.json())
-                .then(songs => {
-                    document.getElementById('songList').dataset.songs = JSON.stringify(songs);
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        function addSongField() {
+        function addSong() {
             const songList = document.getElementById('songList');
-            const songs = JSON.parse(songList.dataset.songs || '[]');
-            
-            if (songs.length === 0) {
-                alert('Please select an artist first');
-                return;
-            }
-
-            const songField = document.createElement('div');
-            songField.className = 'song-field';
+            const songEntry = document.createElement('div');
+            songEntry.className = 'song-entry';
             
             let songOptions = songs.map(song => 
                 `<option value="${song.idSong}">${song.songName}</option>`
             ).join('');
 
-            songField.innerHTML = `
-                <div class="song-input-group">
-                    <select name="songIds" class="form-control" required>
-                        <option value="" disabled selected>Select a song</option>
-                        ${songOptions}
-                    </select>
-                    <button type="button" class="btn btn-danger" 
-                            onclick="removeSong(this)">Remove</button>
+            songEntry.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-music"></i>
+                            Song
+                        </label>
+                        <select name="songIds[${songCount}]" required>
+                            <option value="">Select Song</option>
+                            ${songOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn-remove" onclick="removeSong(this)">
+                            <i class="fas fa-trash"></i>
+                            Remove
+                        </button>
+                    </div>
                 </div>
             `;
-            songList.appendChild(songField);
-            songIndex++;
+            songList.appendChild(songEntry);
+            songCount++;
         }
 
         function removeSong(button) {
-            button.closest('.song-field').remove();
+            button.closest('.song-entry').remove();
         }
     </script>
 </body>
