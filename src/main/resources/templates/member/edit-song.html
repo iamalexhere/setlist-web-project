@@ -4,50 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Song - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/songs.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
-    
-    <nav class="breadcrumb">
-        <ol>
-            <li><a th:href="@{/member/songs}">Songs</a></li>
-            <li>Edit Song</li>
-        </ol>
-    </nav>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <main class="form-container">
-        <div class="form-card">
+    <main class="container">
+        <section class="songs-header">
             <h1>Edit Song</h1>
-            
+            <p>Update song details</p>
+        </section>
+
+        <div class="form-container">
             <form th:action="@{/member/songs/{id}/edit(id=${song.idSong})}" method="post" class="form">
-                <div th:if="${error}" class="message-error">
-                    <p th:text="${error}"></p>
+                <div th:if="${error}" class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:text="${error}"></span>
                 </div>
 
-                <div th:if="${accept}" class="message-accept">
-                    <p th:text="${accept}"></p>
+                <div th:if="${accept}" class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span th:text="${accept}"></span>
                 </div>
 
                 <div class="form-group">
                     <label for="name">Song Name</label>
-                    <input type="text" id="name" name="name" class="form-control" 
-                           th:value="${song.songName}" required>
+                    <div class="input-group">
+                        <i class="fas fa-music"></i>
+                        <input type="text" 
+                               id="name" 
+                               name="name" 
+                               class="form-input" 
+                               th:value="${song.songName}"
+                               required>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="artistName">Artist</label>
-                    <input type="text" id="artistName" class="form-control" 
-                           th:value="${song.artistName}" readonly>
+                    <label for="artistId">Artist</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <select id="artistId" 
+                                name="artistId" 
+                                class="form-input" 
+                                required>
+                            <option th:each="artist : ${artists}" 
+                                    th:value="${artist.idArtist}" 
+                                    th:text="${artist.artistName}"
+                                    th:selected="${artist.idArtist == song.idArtist}">
+                            </option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-actions">
-                    <a th:href="@{/member/songs}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a th:href="@{/member/songs}" class="action-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Songs</span>
+                    </a>
+                    <button type="submit" class="action-btn edit-btn">
+                        <i class="fas fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
                 </div>
             </form>
         </div>
     </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>

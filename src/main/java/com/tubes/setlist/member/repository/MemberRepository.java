@@ -43,4 +43,5 @@ public interface MemberRepository {
     
     Artists findArtistById(Long id);
     void updateArtist(Long id, String artistName, String imageFilename, String imageOriginalFilename);
+    void deleteArtist(Long id);
 }

@@ -4,92 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artist Shows - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/artist.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb">
-        <ol>
-            <li><a th:href="@{/member/artists}">Artists</a></li>
-            <li>Artist Shows</li>
-        </ol>
-    </nav>
-
-    <div class="hero artist-hero">
-        <h1 th:text="${artist.artistName + ' Shows'}">Artist Shows</h1>
-        <p>List of events and setlists for this artist</p>
-    </div>
-
-    <!-- Events Section -->
-    <section class="upcoming-events">
-        <h2 class="section-title">Events</h2>
-        
-        <!-- Empty State for Events -->
-        <div class="empty-state" th:if="${#lists.isEmpty(events)}">
-            <h3>No Events Found</h3>
-            <p>There are no events scheduled for this artist yet</p>
-        </div>
-        
-        <!-- Event List -->
-        <div class="event-list" th:if="${not #lists.isEmpty(events)}">
-            <div class="event-card" th:each="event : ${events}">
-                <div class="event-date">
-                    <span class="day" th:text="${#temporals.format(event.eventDate, 'dd')}">01</span>
-                    <span class="month" th:text="${#temporals.format(event.eventDate, 'MMM')}">JAN</span>
-                    <span class="year" th:text="${#temporals.format(event.eventDate, 'yyyy')}">2024</span>
-                </div>
-                <div class="event-details">
-                    <h3 th:text="${event.eventName}">Event Name</h3>
+    <main class="container">
+        <section class="artist-header">
+            <div class="artist-profile">
+                <img th:if="${artist.imageUrl != null}" 
+                     th:src="${artist.imageUrl}" 
+                     th:alt="${artist.artistName + ' Image'}"
+                     class="artist-profile-image">
+                <img th:unless="${artist.imageUrl != null}"
+                     src="https://placehold.co/400x400" 
+                     th:alt="${artist.artistName + ' Image'}"
+                     class="artist-profile-image">
+                <div class="artist-profile-info">
+                    <h1 th:text="${artist.artistName}">Artist Name</h1>
+                    <p class="artist-genre" th:text="${#strings.listJoin(artist.categories, ', ')}">Genre</p>
                 </div>
             </div>
-        </div>
-    </section>
+            <div class="action-buttons">
+                <a th:href="@{/member/artists}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Artists
+                </a>
+            </div>
+        </section>
 
-    <!-- Setlists Section -->
-    <section class="all-setlists">
-        <h2 class="section-title">All Setlists</h2>
-        
-        <!-- Empty State -->
-        <div class="empty-state" th:if="${#lists.isEmpty(setlists)}">
-            <h3>No Setlists Found</h3>
-            <p>There are no setlists for this artist yet</p>
-        </div>
-        
-        <!-- Setlist Grid -->
-        <div class="setlist-grid" th:if="${not #lists.isEmpty(setlists)}">
-            <div class="setlist-card" th:each="setlist : ${setlists}">
-                <div class="setlist-info">
-                    <h3 class="setlist-name" th:text="${setlist.setlistName}"></h3>
-                    <p class="event-name" th:text="${setlist.eventName}"></p>
-                    <p class="event-date" th:text="${#temporals.format(setlist.eventDate, 'dd MMMM yyyy')}"></p>
-                    <div class="card-actions">
-                        <a th:href="@{/member/setlists/{id}(id=${setlist.idSetlist})}" class="btn">View Detail</a>
+        <!-- Events Section -->
+        <section class="shows-section">
+            <div class="section-header">
+                <h2>Events</h2>
+            </div>
+            
+            <!-- Empty State for Events -->
+            <div class="empty-state" th:if="${#lists.isEmpty(events)}">
+                <i class="fas fa-calendar-times"></i>
+                <h3>No Events Found</h3>
+                <p>There are no events scheduled for this artist yet</p>
+            </div>
+            
+            <!-- Event List -->
+            <div class="event-grid" th:if="${not #lists.isEmpty(events)}">
+                <div class="event-card" th:each="event : ${events}">
+                    <div class="event-date">
+                        <span class="month" th:text="${#temporals.format(event.eventDate, 'MMM')}">JAN</span>
+                        <span class="day" th:text="${#temporals.format(event.eventDate, 'dd')}">01</span>
+                        <span class="year" th:text="${#temporals.format(event.eventDate, 'yyyy')}">2024</span>
+                    </div>
+                    <div class="event-info">
+                        <h3 class="event-name" th:text="${event.eventName}">Event Name</h3>
+                        <div class="event-actions">
+                            <a th:href="@{/member/add-setlist(eventId=${event.idEvent},artistId=${artist.idArtist})}" 
+                               class="action-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Setlist</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Pagination -->
-        <div class="pagination" th:if="${totalPages > 1}">
-            <a th:if="${currentPage > 1}" 
-               th:href="@{/member/artists/{id}/shows(id=${artist.idArtist}, page=${currentPage - 1})}" 
-               class="page-link">&laquo; Previous</a>
+        <!-- Setlists Section -->
+        <section class="shows-section">
+            <div class="section-header">
+                <h2>Setlists</h2>
+            </div>
             
-            <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
-                <a th:if="${pageNum != currentPage}" 
-                   th:href="@{/member/artists/{id}/shows(id=${artist.idArtist}, page=${pageNum})}" 
-                   class="page-link" th:text="${pageNum}">1</a>
-                <span th:if="${pageNum == currentPage}" 
-                      class="page-link active" th:text="${pageNum}">1</span>
-            </th:block>
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${#lists.isEmpty(setlists)}">
+                <i class="fas fa-music"></i>
+                <h3>No Setlists Found</h3>
+                <p>There are no setlists for this artist yet</p>
+            </div>
             
-            <a th:if="${currentPage < totalPages}" 
-               th:href="@{/member/artists/{id}/shows(id=${artist.idArtist}, page=${currentPage + 1})}" 
-               class="page-link">Next &raquo;</a>
-        </div>
-    </section>
+            <!-- Setlist Grid -->
+            <div class="setlist-grid" th:if="${not #lists.isEmpty(setlists)}">
+                <div class="setlist-card" th:each="setlist : ${setlists}">
+                    <div class="setlist-info">
+                        <h3 class="setlist-name" th:text="${setlist.setlistName}">Setlist Name</h3>
+                        <p class="event-name" th:text="${setlist.eventName}">Event Name</p>
+                        <p class="event-date">
+                            <i class="fas fa-calendar"></i>
+                            <span th:text="${#temporals.format(setlist.eventDate, 'dd MMMM yyyy')}">Date</span>
+                        </p>
+                        <div class="setlist-songs" th:if="${not #lists.isEmpty(setlist.songs)}">
+                            <p class="song-count">
+                                <i class="fas fa-music"></i>
+                                <span th:text="${#lists.size(setlist.songs) + ' songs'}">0 songs</span>
+                            </p>
+                        </div>
+                        <div class="setlist-actions">
+                            <a th:href="@{/member/setlists/{id}(id=${setlist.idSetlist})}" 
+                               class="action-btn">
+                                <i class="fas fa-eye"></i>
+                                <span>View Details</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" th:if="${totalPages > 1}">
+                <a th:href="@{/member/artists/{id}/shows(id=${artist.idArtist},page=${currentPage - 1})}" 
+                   class="page-btn prev-page"
+                   th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span class="page-info" th:text="${currentPage + ' of ' + totalPages}">Page 1 of 10</span>
+                <a th:href="@{/member/artists/{id}/shows(id=${artist.idArtist},page=${currentPage + 1})}" 
+                   class="page-btn next-page"
+                   th:classappend="${currentPage >= totalPages ? 'disabled' : ''}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>

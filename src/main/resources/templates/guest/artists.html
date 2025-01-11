@@ -4,113 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artists - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/artist.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Include navbar fragment -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb">
-        <ol>
-            <li>Artists</li>
-        </ol>
-    </nav>
+    <main class="container">
+        <section class="artist-header">
+            <h1>Artists</h1>
+            <p>Discover and follow your favorite artists</p>
+        </section>
 
-    <div class="hero artist-hero">
-        <h1>Discover Artists</h1>
-        <p>Find setlists from your favorite performers</p>
-        <div class="search-container">
-            <form th:action="@{/guest/artists}" method="get" class="search-form">
-                <div class="search-input-group">
-                    <input type="text" name="name" class="search-box" 
-                           th:value="${searchQuery}" 
-                           placeholder="Search for artists...">
-                    <input type="hidden" name="genre" th:value="${selectedGenre}">
-                    <button type="submit" class="search-button">Search</button>
-                    <a th:if="${hasSearch}" th:href="@{/guest/artists}" class="clear-button">Clear</a>
+        <section class="artist-filters">
+            <form id="filterForm" th:action="@{/guest/artists}" method="get" class="filter-form">
+                <div class="filter-group">
+                    <label for="genre">Genre:</label>
+                    <select id="genre" name="genre" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Genres</option>
+                        <option th:each="genre : ${genreCounts.keySet()}" 
+                                th:value="${genre}" 
+                                th:text="${genre + ' (' + genreCounts.get(genre) + ')'}"
+                                th:selected="${genre == selectedGenre}">Genre</option>
+                    </select>
+                </div>
+                <div class="search-artists">
+                    <input type="text" name="name" th:value="${searchQuery}"
+                           placeholder="Search artists..." class="artist-search"
+                           onkeyup="handleSearch(event)">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </div>
             </form>
-        </div>
-    </div>
+        </section>
 
-    <!-- <section class="featured-artists">
-        <h2 class="section-title">Featured Artists</h2>
-        <div class="artist-grid">
-            <div class="artist-card" th:each="artist : ${featuredArtists}">
-                <div class="artist-image">
-                    <img th:src="${artist.imageUrl}" th:alt="${artist.artistName}">
-                </div>
-                <h3 th:text="${artist.artistName}">Artist Name</h3>
-                <p class="artist-categories">
-                    <span th:each="category, iterStat : ${artist.categories}" 
-                          th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
-                </p>
-                <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="view-artist">View Setlists</a>
-            </div>
-        </div>
-    </section> -->
-
-    <section class="artist-categories">
-        <div class="section-header">
-            <h2 class="section-title">Browse by Genre</h2>
-            <a th:if="${!#strings.isEmpty(selectedGenre)}" 
-               th:href="@{/guest/artists(name=${searchQuery})}" 
-               class="clear-genre">Clear Genre Filter</a>
-        </div>
-        <div class="category-grid">
-            <a th:href="@{/guest/artists(genre=${entry.key}, name=${searchQuery})}" 
-               th:each="entry : ${genreCounts}"
-               class="category-card" 
-               th:classappend="${entry.key == selectedGenre ? 'active' : ''}"
-               th:style="${'background-color: var(--' + (#strings.toLowerCase(entry.key)) + ')'}">
-                <h3 th:text="${entry.key}">Genre</h3>
-                <span class="count" th:text="${entry.value + ' artists'}">0 artists</span>
-            </a>
-        </div>
-    </section>
-
-    <section class="all-artists">
-        <h2 class="section-title" th:text="${hasSearch ? 
-            ('Search Results' + (!#strings.isEmpty(selectedGenre) ? ' in ' + selectedGenre : '')) : 
-            'All Artists'}">All Artists</h2>
-        
         <!-- Empty State -->
         <div class="empty-state" th:if="${#lists.isEmpty(searchedArtists)}">
             <h3>No Artists Found</h3>
             <p th:if="${hasSearch}">Try adjusting your search criteria or browse all artists</p>
             <p th:unless="${hasSearch}">There are no artists in the database yet</p>
-        </div>
-        
-        <!-- Artist Grid -->
-        <div class="artist-grid" th:if="${not #lists.isEmpty(searchedArtists)}">
-            <div class="artist-card" th:each="artist : ${searchedArtists}">
-                <div class="artist-image">
-                    <img th:src="${artist.imageUrl}" th:alt="${artist.artistName}">
-                </div>
-                <h3 th:text="${artist.artistName}">Artist Name</h3>
-                <p class="artist-categories">
-                    <span th:each="category, iterStat : ${artist.categories}" 
-                          th:text="${category + (iterStat.last ? '' : ', ')}">Category</span>
-                </p>
-                <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="view-artist">View Setlists</a>
-            </div>
+            <a th:href="@{/guest/artists}" class="btn">View All Artists</a>
         </div>
 
-        <!-- Pagination -->
+        <section class="artist-grid" th:if="${not #lists.isEmpty(searchedArtists)}">
+            <div class="artist-card" th:each="artist : ${searchedArtists}">
+                <div class="artist-image">
+                    <img th:if="${artist.imageUrl != null}" 
+                         th:src="${artist.imageUrl}" 
+                         th:alt="${artist.artistName + ' Image'}">
+                    <img th:unless="${artist.imageUrl != null}"
+                         src="https://placehold.co/400x400" 
+                         th:alt="${artist.artistName + ' Image'}">
+                    <button class="follow-btn">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name" th:text="${artist.artistName}">Artist Name</h3>
+                    <p class="artist-genre" th:text="${#strings.listJoin(artist.categories, ', ')}">Genre</p>
+                    <a th:href="@{/guest/artists/{id}(id=${artist.idArtist})}" class="btn view-artist">View Profile</a>
+                </div>
+            </div>
+        </section>
+
         <div class="pagination" th:if="${totalPages > 1}">
             <a th:href="@{/guest/artists(page=${currentPage - 1}, name=${searchQuery}, genre=${selectedGenre})}" 
-               th:class="${currentPage <= 1 ? 'disabled' : ''}">&laquo; Previous</a>
-            
-            <span th:each="i : ${#numbers.sequence(1, totalPages)}">
-                <a th:href="@{/guest/artists(page=${i}, name=${searchQuery}, genre=${selectedGenre})}" 
-                   th:text="${i}"
-                   th:class="${i == currentPage ? 'active' : ''}">1</a>
-            </span>
-            
+               class="page-btn prev-page"
+               th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <span class="page-info" th:text="${currentPage + ' of ' + totalPages}">Page 1 of 10</span>
             <a th:href="@{/guest/artists(page=${currentPage + 1}, name=${searchQuery}, genre=${selectedGenre})}" 
-               th:class="${currentPage >= totalPages ? 'disabled' : ''}">Next &raquo;</a>
+               class="page-btn next-page"
+               th:classappend="${currentPage >= totalPages ? 'disabled' : ''}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
         </div>
-    </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
 </body>
 </html>

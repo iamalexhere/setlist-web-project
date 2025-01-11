@@ -14,26 +14,20 @@
 
     <main class="container">
         <section class="songs-header">
-            <h1>Manage Songs</h1>
-            <p>Add and manage songs from your favorite artists</p>
-            <div class="header-actions">
-                <a th:href="@{/member/add-song}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    <span>Add New Song</span>
-                </a>
-            </div>
+            <h1 th:if="${artist != null}" th:text="${artist.artistName + '\'s Songs'}">Artist's Songs</h1>
+            <h1 th:unless="${artist != null}">Songs</h1>
+            <p>Discover and explore songs from your favorite artists</p>
         </section>
 
         <section class="songs-filters">
-            <form id="filterForm" th:action="@{/member/songs}" method="get" class="filter-form">
+            <form id="filterForm" th:action="@{/guest/songs}" method="get" class="filter-form">
                 <div class="search-group">
-                    <input type="text" name="name" th:value="${searchQuery}"
+                    <input type="text" name="query" th:value="${query}"
                            class="search-input" placeholder="Search songs or artists...">
                     <button type="submit" class="search-btn">
                         <i class="fas fa-search"></i>
                         <span>Search</span>
                     </button>
-                    <a th:if="${hasSearch}" th:href="@{/member/songs}" class="clear-button">Clear</a>
                 </div>
             </form>
         </section>
@@ -41,11 +35,11 @@
         <!-- Empty State -->
         <div class="empty-state" th:if="${#lists.isEmpty(songs)}">
             <h3>No Songs Found</h3>
-            <p th:if="${hasSearch}">Try adjusting your search criteria or browse all songs</p>
-            <p th:unless="${hasSearch}">There are no songs in the database yet</p>
-            <a th:href="@{/member/add-song}" class="btn">
-                <i class="fas fa-plus"></i>
-                <span>Add New Song</span>
+            <p th:if="${query != null}">Try adjusting your search criteria</p>
+            <p th:unless="${query != null}">There are no songs available yet</p>
+            <a th:href="@{/guest/songs}" class="btn">
+                <i class="fas fa-music"></i>
+                <span>View All Songs</span>
             </a>
         </div>
 
@@ -54,31 +48,26 @@
             <div class="song-card" th:each="song : ${songs}">
                 <div class="song-info">
                     <h3 class="song-name" th:text="${song.songName}">Song Name</h3>
-                    <p class="artist-name" th:text="${song.artistName}">Artist Name</p>
+                    <a th:href="@{/guest/artists/{id}(id=${song.idArtist})}" 
+                       class="artist-link">
+                        <i class="fas fa-user"></i>
+                        <span th:text="${song.artistName}">Artist Name</span>
+                    </a>
                 </div>
                 <div class="song-actions">
-                    <a th:href="@{/member/songs/{id}/edit(id=${song.idSong})}" 
-                       class="action-btn edit-btn">
-                        <i class="fas fa-edit"></i>
-                        <span>Edit</span>
+                    <a th:href="@{/guest/artists/{id}/setlists(id=${song.idArtist})}" 
+                       class="view-setlists">
+                        <i class="fas fa-list"></i>
+                        <span>View Setlists</span>
                     </a>
-                    <form th:action="@{/member/songs/{id}/delete(id=${song.idSong})}" 
-                          method="post" 
-                          class="inline-form"
-                          onsubmit="return confirm('Are you sure you want to delete this song?');">
-                        <button type="submit" class="action-btn delete-btn">
-                            <i class="fas fa-trash"></i>
-                            <span>Delete</span>
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
 
-        <!-- Pagination -->
+        <!-- Simple Pagination -->
         <div class="pagination" th:if="${totalPages > 1}">
             <a th:if="${currentPage > 1}" 
-               th:href="@{/member/songs(page=${currentPage - 1}, name=${searchQuery})}"
+               th:href="@{/guest/songs(page=${currentPage - 1}, query=${query})}"
                class="pagination-btn">
                 <i class="fas fa-chevron-left"></i>
                 Previous
@@ -89,7 +78,7 @@
             </span>
             
             <a th:if="${currentPage < totalPages}" 
-               th:href="@{/member/songs(page=${currentPage + 1}, name=${searchQuery})}"
+               th:href="@{/guest/songs(page=${currentPage + 1}, query=${query})}"
                class="pagination-btn">
                 Next
                 <i class="fas fa-chevron-right"></i>

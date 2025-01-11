@@ -61,7 +61,7 @@ public class MemberController {
         @RequestParam(defaultValue = "") String name,
         @RequestParam(required = false) String genre,
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "4") int size
+        @RequestParam(defaultValue = "6") int size
     ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
@@ -79,13 +79,13 @@ public class MemberController {
         int totalPages = (int) Math.ceil((double) totalArtists / size);
         
         // Ensure page is within bounds
-        page = Math.max(1, Math.min(page, Math.max(1, totalPages)));
+        page = Math.max(1, Math.min(page, totalPages));
         
-        // Now get just the page we need
-        List<Artists> paginatedArtists = repo.findArtistsByNameAndGenre(name, genre, page, size);
+        // Get paginated artists
+        List<Artists> artists = repo.findArtistsByNameAndGenre(name, genre, page, size);
 
         // Add all necessary attributes to model
-        model.addAttribute("artists", paginatedArtists);
+        model.addAttribute("artists", artists);
         model.addAttribute("genreCounts", genreCounts);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
@@ -385,7 +385,7 @@ public class MemberController {
         Model model,
         @RequestParam(defaultValue = "") String name,
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "8") int size
+        @RequestParam(defaultValue = "12") int size
     ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
@@ -465,6 +465,9 @@ public class MemberController {
             return "redirect:/member/songs";
         }
 
+        // Get list of artists for dropdown
+        List<Artists> artists = repo.findArtistsByName("");
+        model.addAttribute("artists", artists);
         model.addAttribute("song", song);
         return "member/edit-song";
     }
@@ -593,5 +596,23 @@ public class MemberController {
         model.addAttribute("totalPages", totalPages);
         
         return "member/artist-shows";
+    }
+
+    @PostMapping("/artists/{id}/delete")
+    public String deleteArtist(
+        @PathVariable Long id,
+        HttpSession session
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            repo.deleteArtist(id);
+        } catch (Exception e) {
+            // Handle error if needed
+        }
+
+        return "redirect:/member/artists";
     }
 }

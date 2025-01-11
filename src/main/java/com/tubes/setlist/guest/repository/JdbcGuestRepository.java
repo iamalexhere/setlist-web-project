@@ -15,6 +15,8 @@ import org.springframework.stereotype.Repository;
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
+import com.tubes.setlist.guest.model.SongView;
+import com.tubes.setlist.guest.model.VenueView;
 
 @Repository
 public class JdbcGuestRepository implements GuestRepository {
@@ -99,11 +101,16 @@ public class JdbcGuestRepository implements GuestRepository {
     public List<EventView> findEventsByArtist(Long artistId) {
         String sql = """
             SELECT DISTINCT e.id_event, e.event_name, e.event_date, 
-                   v.venue_name, v.city_name, e.is_deleted
+                   v.venue_name, v.city_name, e.is_deleted,
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
             JOIN setlists s ON e.id_event = s.id_event
+            LEFT JOIN setlists s2 ON e.id_event = s2.id_event
+            LEFT JOIN artists a ON s2.id_artist = a.id_artist
             WHERE s.id_artist = ?
+            GROUP BY e.id_event, e.event_name, e.event_date, 
+                     v.venue_name, v.city_name, e.is_deleted
             ORDER BY e.event_date DESC
         """;
         
@@ -132,11 +139,16 @@ public class JdbcGuestRepository implements GuestRepository {
     @Override
     public EventView findEventById(Long id) {
         String sql = """
-            SELECT e.id_event, e.event_name, e.event_date, 
-                   v.venue_name, v.city_name, e.is_deleted
+            SELECT e.id_event, e.event_name, e.event_date,
+                   v.venue_name, v.city_name, e.is_deleted,
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
+            LEFT JOIN setlists s ON e.id_event = s.id_event
+            LEFT JOIN artists a ON s.id_artist = a.id_artist
             WHERE e.id_event = ?
+            GROUP BY e.id_event, e.event_name, e.event_date,
+                     v.venue_name, v.city_name, e.is_deleted
         """;
         
         return jdbcTemplate.queryForObject(sql, new EventRowMapper(), id);
@@ -331,7 +343,7 @@ public class JdbcGuestRepository implements GuestRepository {
         String sql = """
             SELECT e.id_event, e.event_name, e.event_date, v.venue_name, v.city_name,
                    e.is_deleted,
-                   string_agg(DISTINCT a.artist_name, ', ') as performing_artists
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
             LEFT JOIN setlists s ON e.id_event = s.id_event
@@ -350,8 +362,8 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
                 rs.getBoolean("is_deleted"),
-                rs.getString("performing_artists") != null ? 
-                    List.of(rs.getString("performing_artists").split(", ")) : 
+                rs.getString("artists") != null ? 
+                    List.of(rs.getString("artists").split(", ")) : 
                     List.of()
             )
         );
@@ -364,7 +376,7 @@ public class JdbcGuestRepository implements GuestRepository {
         String sql = """
             SELECT e.id_event, e.event_name, e.event_date, v.venue_name, v.city_name,
                    e.is_deleted,
-                   string_agg(DISTINCT a.artist_name, ', ') as performing_artists
+                   string_agg(DISTINCT a.artist_name, ', ') as artists
             FROM events e
             JOIN venues v ON e.id_venue = v.id_venue
             LEFT JOIN setlists s ON e.id_event = s.id_event
@@ -395,8 +407,8 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
                 rs.getBoolean("is_deleted"),
-                rs.getString("performing_artists") != null ? 
-                    List.of(rs.getString("performing_artists").split(", ")) : 
+                rs.getString("artists") != null ? 
+                    List.of(rs.getString("artists").split(", ")) : 
                     List.of()
             ),
             searchQuery,
@@ -404,6 +416,170 @@ public class JdbcGuestRepository implements GuestRepository {
             startDate,
             endDate,
             location);
+    }
+
+    @Override
+    public Map<String, ArtistView> getRandomArtistsByCategory(int page, int size) {
+        String sql = """
+            WITH RankedArtists AS (
+                SELECT 
+                    a.id_artist,
+                    a.artist_name,
+                    a.image_filename,
+                    a.image_original_filename,
+                    a.image_url,
+                    a.is_deleted,
+                    c.category_name,
+                    ROW_NUMBER() OVER (PARTITION BY c.category_name ORDER BY RANDOM()) as rn
+                FROM artists a
+                JOIN artists_categories ac ON a.id_artist = ac.id_artist
+                JOIN categories c ON ac.id_category = c.id_category
+                WHERE NOT a.is_deleted
+            )
+            SELECT * FROM RankedArtists 
+            WHERE rn = 1
+            ORDER BY category_name
+        """;
+        
+        return jdbcTemplate.query(sql, (rs) -> {
+            Map<String, ArtistView> artistsByCategory = new HashMap<>();
+            while (rs.next()) {
+                ArtistView artist = new ArtistView(
+                    rs.getLong("id_artist"),
+                    rs.getString("artist_name"),
+                    rs.getString("image_filename"),
+                    rs.getString("image_original_filename"),
+                    rs.getString("image_url"),
+                    List.of(rs.getString("category_name")),
+                    rs.getBoolean("is_deleted")
+                );
+                artistsByCategory.put(rs.getString("category_name"), artist);
+            }
+            return artistsByCategory;
+        });
+    }
+
+    @Override
+    public List<String> getRandomArtistImages(int limit) {
+        String sql = """
+            SELECT image_url 
+            FROM artists 
+            WHERE image_url IS NOT NULL 
+            AND NOT is_deleted 
+            ORDER BY RANDOM() 
+            LIMIT ?
+        """;
+        
+        return jdbcTemplate.queryForList(sql, String.class, limit);
+    }
+
+    @Override
+    public List<VenueView> findAllVenues() {
+        String sql = """
+            SELECT v.id_venue, v.venue_name, v.city_name,
+                   COUNT(DISTINCT e.id_event) as event_count
+            FROM venues v
+            LEFT JOIN events e ON v.id_venue = e.id_venue
+            WHERE e.is_deleted = false OR e.is_deleted IS NULL
+            GROUP BY v.id_venue, v.venue_name, v.city_name
+            ORDER BY event_count DESC, v.city_name, v.venue_name
+        """;
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            VenueView venue = new VenueView(
+                rs.getLong("id_venue"),
+                rs.getString("venue_name"),
+                rs.getString("city_name")
+            );
+            return venue;
+        });
+    }
+
+    @Override
+    public List<VenueView> searchVenues(String query) {
+        String searchQuery = "%" + query.toLowerCase() + "%";
+        
+        String sql = """
+            SELECT v.id_venue, v.venue_name, v.city_name,
+                   COUNT(DISTINCT e.id_event) as event_count
+            FROM venues v
+            LEFT JOIN events e ON v.id_venue = e.id_venue
+            WHERE (LOWER(v.venue_name) LIKE ? OR LOWER(v.city_name) LIKE ?)
+            AND (e.is_deleted = false OR e.is_deleted IS NULL)
+            GROUP BY v.id_venue, v.venue_name, v.city_name
+            ORDER BY event_count DESC, v.city_name, v.venue_name
+        """;
+        
+        return jdbcTemplate.query(sql, 
+            (rs, rowNum) -> new VenueView(
+                rs.getLong("id_venue"),
+                rs.getString("venue_name"),
+                rs.getString("city_name")
+            ),
+            searchQuery, searchQuery
+        );
+    }
+
+    @Override
+    public VenueView findVenueById(Long id) {
+        String sql = """
+            SELECT v.id_venue, v.venue_name, v.city_name
+            FROM venues v
+            WHERE v.id_venue = ?
+        """;
+        
+        VenueView venue = jdbcTemplate.queryForObject(sql,
+            (rs, rowNum) -> new VenueView(
+                rs.getLong("id_venue"),
+                rs.getString("venue_name"),
+                rs.getString("city_name")
+            ),
+            id
+        );
+
+        if (venue != null) {
+            // Get upcoming events
+            String upcomingEventsSql = """
+                SELECT e.id_event, e.event_name, e.event_date,
+                       v.venue_name, v.city_name, e.is_deleted,
+                       string_agg(DISTINCT a.artist_name, ', ') as artists
+                FROM events e
+                JOIN venues v ON e.id_venue = v.id_venue
+                LEFT JOIN setlists s ON e.id_event = s.id_event
+                LEFT JOIN artists a ON s.id_artist = a.id_artist
+                WHERE v.id_venue = ? AND e.event_date >= CURRENT_DATE
+                AND NOT e.is_deleted
+                GROUP BY e.id_event, e.event_name, e.event_date,
+                         v.venue_name, v.city_name, e.is_deleted
+                ORDER BY e.event_date ASC
+            """;
+            
+            List<EventView> upcomingEvents = jdbcTemplate.query(upcomingEventsSql, 
+                new EventRowMapper(), id);
+            venue.setUpcomingEvents(upcomingEvents);
+
+            // Get past events
+            String pastEventsSql = """
+                SELECT e.id_event, e.event_name, e.event_date,
+                       v.venue_name, v.city_name, e.is_deleted,
+                       string_agg(DISTINCT a.artist_name, ', ') as artists
+                FROM events e
+                JOIN venues v ON e.id_venue = v.id_venue
+                LEFT JOIN setlists s ON e.id_event = s.id_event
+                LEFT JOIN artists a ON s.id_artist = a.id_artist
+                WHERE v.id_venue = ? AND e.event_date < CURRENT_DATE
+                AND NOT e.is_deleted
+                GROUP BY e.id_event, e.event_name, e.event_date,
+                         v.venue_name, v.city_name, e.is_deleted
+                ORDER BY e.event_date DESC
+            """;
+            
+            List<EventView> pastEvents = jdbcTemplate.query(pastEventsSql, 
+                new EventRowMapper(), id);
+            venue.setPastEvents(pastEvents);
+        }
+        
+        return venue;
     }
 
     private class EventRowMapper implements RowMapper<EventView> {
@@ -415,8 +591,56 @@ public class JdbcGuestRepository implements GuestRepository {
                 rs.getDate("event_date").toLocalDate(),
                 rs.getString("venue_name"),
                 rs.getString("city_name"),
-                rs.getBoolean("is_deleted")
+                rs.getBoolean("is_deleted"),
+                rs.getString("artists") != null ? 
+                    List.of(rs.getString("artists").split(", ")) : 
+                    List.of()
             );
         }
+    }
+
+    @Override
+    public List<SongView> findSongsByArtist(Long idArtist) {
+        String sql = """
+            SELECT s.id_song, s.id_artist, a.artist_name, s.song_name
+            FROM songs s
+            JOIN artists a ON s.id_artist = a.id_artist
+            WHERE s.id_artist = ?
+            ORDER BY s.song_name
+        """;
+        return jdbcTemplate.query(sql, this::mapToSongView, idArtist);
+    }
+
+    @Override
+    public List<SongView> searchSongs(String query) {
+        String sql = """
+            SELECT s.id_song, s.id_artist, a.artist_name, s.song_name
+            FROM songs s
+            JOIN artists a ON s.id_artist = a.id_artist
+            WHERE LOWER(s.song_name) LIKE LOWER(?) OR LOWER(a.artist_name) LIKE LOWER(?)
+            ORDER BY s.song_name
+        """;
+        String searchPattern = "%" + query + "%";
+        return jdbcTemplate.query(sql, this::mapToSongView, searchPattern, searchPattern);
+    }
+
+    @Override
+    public SongView findSongById(Long idSong) {
+        String sql = """
+            SELECT s.id_song, s.id_artist, a.artist_name, s.song_name
+            FROM songs s
+            JOIN artists a ON s.id_artist = a.id_artist
+            WHERE s.id_song = ?
+        """;
+        return jdbcTemplate.queryForObject(sql, this::mapToSongView, idSong);
+    }
+
+    private SongView mapToSongView(ResultSet rs, int rowNum) throws SQLException {
+        return new SongView(
+            rs.getLong("id_song"),
+            rs.getLong("id_artist"),
+            rs.getString("artist_name"),
+            rs.getString("song_name")
+        );
     }
 }
