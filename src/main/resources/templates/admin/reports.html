@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics & Reports - Admin Dashboard</title>
+    <title>Reports - Admin Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -13,356 +13,170 @@
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="container">
-        <!-- Page Header -->
         <section class="page-header">
             <div class="header-content">
-                <h1>Analytics & Reports</h1>
-                <p>Platform statistics and insights</p>
+                <h1>Reports & Analytics</h1>
+                <p>View platform statistics and insights</p>
             </div>
         </section>
 
-        <!-- Overview Statistics -->
-        <section class="stats-overview">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fas fa-users"></i>
-                    <div class="stat-content">
-                        <h3>Total Users</h3>
-                        <p class="stat-number" th:text="${stats.totalUsers}">0</p>
-                        <p class="stat-change" th:text="${stats.userGrowth + '%'}">+5%</p>
-                    </div>
+        <!-- Debug info -->
+        <div style="display: none;">
+            <p th:text="${'Debug - Setlists by Artist: ' + setlistsByArtist}"></p>
+            <p th:text="${'Debug - Events by Venue: ' + eventsByVenue}"></p>
+            <p th:text="${'Debug - Songs by Artist: ' + songsByArtist}"></p>
+            <p th:text="${'Debug - Monthly Setlists: ' + monthlySetlists}"></p>
+        </div>
+
+        <div class="reports-grid">
+            <!-- Setlists by Artist -->
+            <div class="report-card">
+                <h2>Setlists by Artist</h2>
+                <div th:if="${setlistsByArtist == null || setlistsByArtist.isEmpty()}" class="no-data">
+                    No data available
                 </div>
-                <div class="stat-card">
-                    <i class="fas fa-music"></i>
-                    <div class="stat-content">
-                        <h3>Total Artists</h3>
-                        <p class="stat-number" th:text="${stats.totalArtists}">0</p>
-                        <p class="stat-change" th:text="${stats.artistGrowth + '%'}">+3%</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-list"></i>
-                    <div class="stat-content">
-                        <h3>Total Setlists</h3>
-                        <p class="stat-number" th:text="${stats.totalSetlists}">0</p>
-                        <p class="stat-change" th:text="${stats.setlistGrowth + '%'}">+8%</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-edit"></i>
-                    <div class="stat-content">
-                        <h3>Total Corrections</h3>
-                        <p class="stat-number" th:text="${stats.totalCorrections}">0</p>
-                        <p class="stat-change" th:text="${stats.correctionGrowth + '%'}">+2%</p>
-                    </div>
-                </div>
+                <canvas th:unless="${setlistsByArtist == null || setlistsByArtist.isEmpty()}" id="setlistsChart"></canvas>
             </div>
-        </section>
-
-        <!-- Charts Section -->
-        <section class="charts-section">
-            <div class="chart-grid">
-                <!-- User Growth Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>User Growth</h3>
-                        <div class="chart-actions">
-                            <select id="userGrowthPeriod" class="form-select">
-                                <option value="7">Last 7 Days</option>
-                                <option value="30">Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="userGrowthChart"></canvas>
-                    </div>
+            
+            <!-- Events by Venue -->
+            <div class="report-card">
+                <h2>Events by Venue</h2>
+                <div th:if="${eventsByVenue == null || eventsByVenue.isEmpty()}" class="no-data">
+                    No data available
                 </div>
-
-                <!-- Content Growth Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>Content Growth</h3>
-                        <div class="chart-actions">
-                            <select id="contentGrowthPeriod" class="form-select">
-                                <option value="7">Last 7 Days</option>
-                                <option value="30">Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="contentGrowthChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- User Activity Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>User Activity</h3>
-                        <div class="chart-actions">
-                            <select id="activityPeriod" class="form-select">
-                                <option value="24">Last 24 Hours</option>
-                                <option value="7">Last 7 Days</option>
-                                <option value="30">Last 30 Days</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="userActivityChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Top Artists Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>Top Artists</h3>
-                        <div class="chart-actions">
-                            <select id="topArtistsPeriod" class="form-select">
-                                <option value="7">Last 7 Days</option>
-                                <option value="30">Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="topArtistsChart"></canvas>
-                    </div>
-                </div>
+                <canvas th:unless="${eventsByVenue == null || eventsByVenue.isEmpty()}" id="eventsChart"></canvas>
             </div>
-        </section>
-
-        <!-- Detailed Reports -->
-        <section class="content-section">
-            <div class="section-header">
-                <h2 class="section-title">Detailed Reports</h2>
-                <div class="section-actions">
-                    <button id="downloadReport" class="btn btn-primary">
-                        <i class="fas fa-download"></i> Download Report
-                    </button>
+            
+            <!-- Songs by Artist -->
+            <div class="report-card">
+                <h2>Songs by Artist</h2>
+                <div th:if="${songsByArtist == null || songsByArtist.isEmpty()}" class="no-data">
+                    No data available
                 </div>
+                <canvas th:unless="${songsByArtist == null || songsByArtist.isEmpty()}" id="songsChart"></canvas>
             </div>
-
-            <div class="report-grid">
-                <!-- User Activity Report -->
-                <div class="report-card">
-                    <h3>User Activity</h3>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Action</th>
-                                <th>Count</th>
-                                <th>Change</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="activity : ${userActivity}">
-                                <td th:text="${activity.action}">Setlist Creation</td>
-                                <td th:text="${activity.count}">150</td>
-                                <td>
-                                    <span class="change-indicator" 
-                                          th:classappend="${activity.change >= 0 ? 'positive' : 'negative'}"
-                                          th:text="${activity.change + '%'}">+5%</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            
+            <!-- Monthly Setlists -->
+            <div class="report-card">
+                <h2>Monthly Setlist Submissions</h2>
+                <div th:if="${monthlySetlists == null || monthlySetlists.isEmpty()}" class="no-data">
+                    No data available
                 </div>
-
-                <!-- Content Report -->
-                <div class="report-card">
-                    <h3>Content Overview</h3>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Content Type</th>
-                                <th>Total</th>
-                                <th>This Month</th>
-                                <th>Change</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="content : ${contentOverview}">
-                                <td th:text="${content.type}">Artists</td>
-                                <td th:text="${content.total}">500</td>
-                                <td th:text="${content.thisMonth}">50</td>
-                                <td>
-                                    <span class="change-indicator" 
-                                          th:classappend="${content.change >= 0 ? 'positive' : 'negative'}"
-                                          th:text="${content.change + '%'}">+10%</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <canvas th:unless="${monthlySetlists == null || monthlySetlists.isEmpty()}" id="monthlyChart"></canvas>
             </div>
-        </section>
+        </div>
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
 
-    <script th:src="@{/js/dashboard.js}"></script>
     <script th:inline="javascript">
-        // Chart.js Configurations
-        const userGrowthData = /*[[${userGrowthData}]]*/ {};
-        const contentGrowthData = /*[[${contentGrowthData}]]*/ {};
-        const userActivityData = /*[[${userActivityData}]]*/ {};
-        const topArtistsData = /*[[${topArtistsData}]]*/ {};
+        /*<![CDATA[*/
+        
+        // Get data from Thymeleaf with default empty objects
+        const setlistsByArtist = /*[[${setlistsByArtist}]]*/ {};
+        const eventsByVenue = /*[[${eventsByVenue}]]*/ {};
+        const songsByArtist = /*[[${songsByArtist}]]*/ {};
+        const monthlySetlists = /*[[${monthlySetlists}]]*/ {};
 
-        // User Growth Chart
-        const userGrowthChart = new Chart(
-            document.getElementById('userGrowthChart'),
-            {
-                type: 'line',
-                data: {
-                    labels: userGrowthData.labels,
-                    datasets: [{
-                        label: 'New Users',
-                        data: userGrowthData.values,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
+        // Chart configurations
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
-        );
+        };
 
-        // Content Growth Chart
-        const contentGrowthChart = new Chart(
-            document.getElementById('contentGrowthChart'),
-            {
-                type: 'line',
-                data: {
-                    labels: contentGrowthData.labels,
-                    datasets: [
-                        {
-                            label: 'Setlists',
-                            data: contentGrowthData.setlists,
-                            borderColor: 'rgb(255, 99, 132)',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Artists',
-                            data: contentGrowthData.artists,
-                            borderColor: 'rgb(54, 162, 235)',
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            }
-        );
+        // Helper function to safely initialize charts
+        function initializeChart(elementId, type, labels, data, options = {}) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
 
-        // User Activity Chart
-        const userActivityChart = new Chart(
-            document.getElementById('userActivityChart'),
-            {
-                type: 'bar',
-                data: {
-                    labels: userActivityData.labels,
-                    datasets: [{
-                        label: 'Active Users',
-                        data: userActivityData.values,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgb(75, 192, 192)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            }
-        );
+            const chartData = {
+                labels: labels || [],
+                datasets: [{
+                    label: options.label || '',
+                    data: data || [],
+                    backgroundColor: options.backgroundColor || 'rgba(54, 162, 235, 0.5)',
+                    borderColor: options.borderColor,
+                    tension: options.tension
+                }]
+            };
 
-        // Top Artists Chart
-        const topArtistsChart = new Chart(
-            document.getElementById('topArtistsChart'),
-            {
-                type: 'doughnut',
-                data: {
-                    labels: topArtistsData.labels,
-                    datasets: [{
-                        data: topArtistsData.values,
-                        backgroundColor: [
-                            'rgb(255, 99, 132)',
-                            'rgb(54, 162, 235)',
-                            'rgb(255, 205, 86)',
-                            'rgb(75, 192, 192)',
-                            'rgb(153, 102, 255)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            }
-        );
-
-        // Period change handlers
-        document.getElementById('userGrowthPeriod').addEventListener('change', function(e) {
-            updateChart('userGrowth', e.target.value);
-        });
-
-        document.getElementById('contentGrowthPeriod').addEventListener('change', function(e) {
-            updateChart('contentGrowth', e.target.value);
-        });
-
-        document.getElementById('activityPeriod').addEventListener('change', function(e) {
-            updateChart('activity', e.target.value);
-        });
-
-        document.getElementById('topArtistsPeriod').addEventListener('change', function(e) {
-            updateChart('topArtists', e.target.value);
-        });
-
-        // Chart update function
-        function updateChart(chartType, period) {
-            fetch(`/admin/reports/data/${chartType}?period=${period}`)
-                .then(response => response.json())
-                .then(data => {
-                    switch(chartType) {
-                        case 'userGrowth':
-                            userGrowthChart.data.labels = data.labels;
-                            userGrowthChart.data.datasets[0].data = data.values;
-                            userGrowthChart.update();
-                            break;
-                        case 'contentGrowth':
-                            contentGrowthChart.data.labels = data.labels;
-                            contentGrowthChart.data.datasets[0].data = data.setlists;
-                            contentGrowthChart.data.datasets[1].data = data.artists;
-                            contentGrowthChart.update();
-                            break;
-                        case 'activity':
-                            userActivityChart.data.labels = data.labels;
-                            userActivityChart.data.datasets[0].data = data.values;
-                            userActivityChart.update();
-                            break;
-                        case 'topArtists':
-                            topArtistsChart.data.labels = data.labels;
-                            topArtistsChart.data.datasets[0].data = data.values;
-                            topArtistsChart.update();
-                            break;
-                    }
-                });
+            return new Chart(element, {
+                type: type,
+                data: chartData,
+                options: { ...chartConfig, ...options }
+            });
         }
 
-        // Download report handler
-        document.getElementById('downloadReport').addEventListener('click', function() {
-            window.location.href = '/admin/reports/download';
-        });
+        // Initialize charts only if data exists
+        if (setlistsByArtist && Object.keys(setlistsByArtist).length > 0) {
+            initializeChart('setlistsChart', 'bar', 
+                Object.keys(setlistsByArtist),
+                Object.values(setlistsByArtist),
+                { label: 'Number of Setlists' }
+            );
+        }
+
+        if (eventsByVenue && Object.keys(eventsByVenue).length > 0) {
+            initializeChart('eventsChart', 'pie',
+                Object.keys(eventsByVenue),
+                Object.values(eventsByVenue),
+                {
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)'
+                    ]
+                }
+            );
+        }
+
+        if (songsByArtist && Object.keys(songsByArtist).length > 0) {
+            initializeChart('songsChart', 'bar',
+                Object.keys(songsByArtist),
+                Object.values(songsByArtist),
+                { 
+                    label: 'Number of Songs',
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                }
+            );
+        }
+
+        if (monthlySetlists && Object.keys(monthlySetlists).length > 0) {
+            const sortedMonths = Object.keys(monthlySetlists).sort().reverse();
+            initializeChart('monthlyChart', 'line',
+                sortedMonths,
+                sortedMonths.map(month => monthlySetlists[month]),
+                {
+                    label: 'Number of Setlists',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    tension: 0.1
+                }
+            );
+        }
+        /*]]>*/
     </script>
+
+    <style>
+        .no-data {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .report-card {
+            min-height: 300px;
+        }
+    </style>
 </body>
 </html>

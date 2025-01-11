@@ -2,7 +2,6 @@ package com.tubes.setlist.admin.repository;
 
 import com.tubes.setlist.admin.model.UserManagement;
 import com.tubes.setlist.member.model.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,12 @@ public interface AdminRepository {
     Map<String, Long> getUserStatistics();
     Map<String, Long> getContentStatistics();
     List<Map<String, Object>> getActivityLog(LocalDateTime startDate, LocalDateTime endDate);
+    
+    // Report methods
+    Map<String, Integer> getSetlistCountByArtist();
+    Map<String, Integer> getEventCountByVenue();
+    Map<String, Integer> getSongCountByArtist();
+    Map<String, Integer> getMonthlySetlistCount();
     
     // Content Management
     void approveContent(Long contentId, String contentType);

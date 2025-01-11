@@ -147,24 +147,41 @@ public class AdminController {
     }
     
     @GetMapping("/reports")
-    public String reports(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
-            HttpSession session,
-            Model model) {
+    public String showReports(HttpSession session, Model model) {
         if (!checkAdminAccess(session)) {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
-        
-        LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate) : LocalDateTime.now().minusMonths(1);
-        LocalDateTime end = endDate != null ? LocalDateTime.parse(endDate) : LocalDateTime.now();
-        
-        model.addAttribute("userStats", adminRepository.getUserStatistics());
-        model.addAttribute("contentStats", adminRepository.getContentStatistics());
-        model.addAttribute("activityLog", adminRepository.getActivityLog(start, end));
-        model.addAttribute("adminActions", adminRepository.getAdminActionLog(start, end));
-        
+
+        try {
+            // Get all report data
+            Map<String, Integer> setlistsByArtist = adminRepository.getSetlistCountByArtist();
+            Map<String, Integer> eventsByVenue = adminRepository.getEventCountByVenue();
+            Map<String, Integer> songsByArtist = adminRepository.getSongCountByArtist();
+            Map<String, Integer> monthlySetlists = adminRepository.getMonthlySetlistCount();
+
+            // Debug logs
+            System.out.println("Setlists by Artist: " + setlistsByArtist);
+            System.out.println("Events by Venue: " + eventsByVenue);
+            System.out.println("Songs by Artist: " + songsByArtist);
+            System.out.println("Monthly Setlists: " + monthlySetlists);
+
+            // Add to model
+            model.addAttribute("setlistsByArtist", setlistsByArtist.isEmpty() ? null : setlistsByArtist);
+            model.addAttribute("eventsByVenue", eventsByVenue.isEmpty() ? null : eventsByVenue);
+            model.addAttribute("songsByArtist", songsByArtist.isEmpty() ? null : songsByArtist);
+            model.addAttribute("monthlySetlists", monthlySetlists.isEmpty() ? null : monthlySetlists);
+
+        } catch (Exception e) {
+            System.err.println("Error in showReports: " + e.getMessage());
+            e.printStackTrace();
+            // Add empty data to model
+            model.addAttribute("setlistsByArtist", null);
+            model.addAttribute("eventsByVenue", null);
+            model.addAttribute("songsByArtist", null);
+            model.addAttribute("monthlySetlists", null);
+        }
+
         return "admin/reports";
     }
 }

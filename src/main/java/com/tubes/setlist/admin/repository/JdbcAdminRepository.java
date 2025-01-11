@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import java.util.LinkedHashMap;
 
 @Repository
 public class JdbcAdminRepository implements AdminRepository {
@@ -158,5 +161,135 @@ public class JdbcAdminRepository implements AdminRepository {
             ORDER BY c.comment_date DESC
         """;
         return jdbcTemplate.queryForList(sql, startDate, endDate);
+    }
+
+    @Override
+    public Map<String, Integer> getSetlistCountByArtist() {
+        try {
+            String sql = """
+                SELECT a.artist_name, COUNT(s.id_setlist) as setlist_count 
+                FROM artists a 
+                LEFT JOIN setlists s ON a.id_artist = s.id_artist 
+                WHERE a.is_deleted = false 
+                GROUP BY a.artist_name, a.id_artist
+                HAVING COUNT(s.id_setlist) > 0
+                ORDER BY setlist_count DESC 
+                LIMIT 10
+                """;
+            
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+            Map<String, Integer> result = new LinkedHashMap<>();
+            
+            for (Map<String, Object> row : rows) {
+                String artistName = (String) row.get("artist_name");
+                Integer count = ((Number) row.get("setlist_count")).intValue();
+                result.put(artistName, count);
+            }
+            
+            System.out.println("Setlist count query result: " + result);
+            return result;
+            
+        } catch (Exception e) {
+            System.err.println("Error in getSetlistCountByArtist: " + e.getMessage());
+            e.printStackTrace();
+            return new LinkedHashMap<>();
+        }
+    }
+
+    @Override
+    public Map<String, Integer> getEventCountByVenue() {
+        try {
+            String sql = """
+                SELECT v.venue_name, COUNT(e.id_event) as event_count 
+                FROM venues v 
+                LEFT JOIN events e ON v.id_venue = e.id_venue 
+                GROUP BY v.venue_name, v.id_venue
+                HAVING COUNT(e.id_event) > 0
+                ORDER BY event_count DESC 
+                LIMIT 10
+                """;
+            
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+            Map<String, Integer> result = new LinkedHashMap<>();
+            
+            for (Map<String, Object> row : rows) {
+                String venueName = (String) row.get("venue_name");
+                Integer count = ((Number) row.get("event_count")).intValue();
+                result.put(venueName, count);
+            }
+            
+            System.out.println("Event count query result: " + result);
+            return result;
+            
+        } catch (Exception e) {
+            System.err.println("Error in getEventCountByVenue: " + e.getMessage());
+            e.printStackTrace();
+            return new LinkedHashMap<>();
+        }
+    }
+
+    @Override
+    public Map<String, Integer> getSongCountByArtist() {
+        try {
+            String sql = """
+                SELECT a.artist_name, COUNT(s.id_song) as song_count 
+                FROM artists a 
+                LEFT JOIN songs s ON a.id_artist = s.id_artist
+                WHERE a.is_deleted = false 
+                GROUP BY a.artist_name, a.id_artist
+                HAVING COUNT(s.id_song) > 0
+                ORDER BY song_count DESC 
+                LIMIT 10
+                """;
+            
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+            Map<String, Integer> result = new LinkedHashMap<>();
+            
+            for (Map<String, Object> row : rows) {
+                String artistName = (String) row.get("artist_name");
+                Integer count = ((Number) row.get("song_count")).intValue();
+                result.put(artistName, count);
+            }
+            
+            System.out.println("Song count query result: " + result);
+            return result;
+            
+        } catch (Exception e) {
+            System.err.println("Error in getSongCountByArtist: " + e.getMessage());
+            e.printStackTrace();
+            return new LinkedHashMap<>();
+        }
+    }
+
+    @Override
+    public Map<String, Integer> getMonthlySetlistCount() {
+        try {
+            String sql = """
+                SELECT TO_CHAR(created_at, 'YYYY-MM') as month, 
+                       COUNT(*) as setlist_count 
+                FROM setlists 
+                WHERE is_deleted = false 
+                  AND created_at >= NOW() - INTERVAL '12 months'
+                GROUP BY month 
+                ORDER BY month DESC
+                """;
+            
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
+            Map<String, Integer> result = new LinkedHashMap<>();
+            
+            for (Map<String, Object> row : rows) {
+                String month = (String) row.get("month");
+                Integer count = ((Number) row.get("setlist_count")).intValue();
+                result.put(month, count);
+            }
+            
+            System.out.println("Monthly setlist count result: " + result);
+            return result;
+            
+        } catch (Exception e) {
+            System.err.println("Error in getMonthlySetlistCount: " + e.getMessage());
+            e.printStackTrace();
+            return new LinkedHashMap<>();
+        }
     }
 }

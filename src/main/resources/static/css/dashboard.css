@@ -676,6 +676,32 @@ footer {
     text-decoration: underline;
 }
 
+/* Reports Grid Layout */
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.report-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.report-card h2 {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.report-card canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
 @media (max-width: 768px) {
     .nav-links {
         display: none;
