@@ -176,6 +176,52 @@ public class MemberController {
         return "member/add-setlist";
     }
 
+    @PostMapping("/add-setlist")
+    public String saveSetlist(
+        @RequestParam("setlistName") String name,
+        @RequestParam("artistId") Long artistId,
+        @RequestParam("eventId") Long eventId,
+        @RequestParam(value = "songIds", required = false) List<Long> songIds,
+        @RequestParam(value = "proof", required = false) MultipartFile proof,
+        HttpSession session,
+        RedirectAttributes redirectAttributes
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            // Handle file upload if proof is provided
+            String proofUrl = null;
+            if (proof != null && !proof.isEmpty()) {
+                proofUrl = fileStorageService.storeFile(proof);
+            }
+
+            // Create new setlist
+            Long userId = ((Number) session.getAttribute("userId")).longValue();
+            Setlist setlist = new Setlist();
+            setlist.setSetlistName(name);
+            setlist.setIdArtist(artistId);
+            setlist.setIdEvent(eventId);
+            setlist.setCreatedAt(LocalDateTime.now());
+            setlist.setProofFilename(proofUrl);
+            setlist.setProofUrl(proofUrl != null ? "/images/setlists/" + proofUrl : null);
+            setlist.setDeleted(false);
+            
+            // Save setlist and its songs
+            Long setlistId = repo.addSetlist(setlist);
+            if (songIds != null && !songIds.isEmpty()) {
+                repo.addSetlistSongs(setlistId, songIds);
+            }
+
+            redirectAttributes.addFlashAttribute("message", "Setlist added successfully!");
+            return "redirect:/member/setlists";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to add setlist: " + e.getMessage());
+            return "redirect:/member/add-setlist";
+        }
+    }
+
     @GetMapping("/api/songs/by-artist/{artistId}")
     @ResponseBody
     public List<Songs> getSongsByArtist(@PathVariable Long artistId) {

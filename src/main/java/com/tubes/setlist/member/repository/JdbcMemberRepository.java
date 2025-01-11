@@ -1,11 +1,17 @@
 package com.tubes.setlist.member.repository;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -15,24 +21,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.tubes.setlist.member.model.*;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Optional;
-
-import com.tubes.setlist.member.model.Artists;
-import com.tubes.setlist.member.model.Categories;
-import com.tubes.setlist.member.model.Comment;
-import com.tubes.setlist.member.model.Edit;
-import com.tubes.setlist.member.model.Events;
-import com.tubes.setlist.member.model.EventsVenues;
-import com.tubes.setlist.member.model.GenreView;
-import com.tubes.setlist.member.model.Venues;
-import com.tubes.setlist.member.model.Songs;
-import com.tubes.setlist.member.model.Setlist;
 
 @Repository
 public class JdbcMemberRepository implements MemberRepository {
@@ -387,6 +375,38 @@ public class JdbcMemberRepository implements MemberRepository {
         return setlistId;
     }
 
+    @Override
+    public Long addSetlist(Setlist setlist) {
+        String sql = """
+            INSERT INTO setlists (setlist_name, id_artist, id_event, proof_filename, proof_original_filename, proof_url, created_at, is_deleted)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING id_setlist
+        """;
+        
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id_setlist"});
+            ps.setString(1, setlist.getSetlistName());
+            ps.setLong(2, setlist.getIdArtist());
+            ps.setLong(3, setlist.getIdEvent());
+            ps.setString(4, setlist.getProofFilename());
+            ps.setString(5, setlist.getProofOriginalFilename());
+            ps.setString(6, setlist.getProofUrl());
+            ps.setTimestamp(7, Timestamp.valueOf(setlist.getCreatedAt()));
+            ps.setBoolean(8, setlist.isDeleted());
+            return ps;
+        }, keyHolder);
+
+        return ((Number) keyHolder.getKeys().get("id_setlist")).longValue();
+    }
+
+    @Override
+    public void addSetlistSongs(Long setlistId, List<Long> songIds) {
+        String sql = "INSERT INTO setlists_songs (id_setlist, id_song) VALUES (?, ?)";
+        for (Long songId : songIds) {
+            jdbcTemplate.update(sql, setlistId, songId);
+        }
+    }
 
     @Override
     public void updateSetlist(Long id, String name, Long artistId, Long eventId, 
@@ -401,7 +421,7 @@ public class JdbcMemberRepository implements MemberRepository {
                 proof_url = COALESCE(?, proof_url)
             WHERE id_setlist = ?
         """;
-        
+
         String proofUrl = proofFilename != null ? 
             "/images/setlists/" + proofFilename : null;
         
@@ -566,7 +586,20 @@ public class JdbcMemberRepository implements MemberRepository {
 
         return jdbcTemplate.query(
             sql.toString(),
-            params.toArray(),
+            ps -> {
+                int paramIndex = 1;
+                if (query != null && !query.trim().isEmpty()) {
+                    String searchPattern = "%" + query.trim() + "%";
+                    ps.setString(paramIndex++, searchPattern);
+                    ps.setString(paramIndex++, searchPattern);
+                }
+                if (startDate != null) {
+                    ps.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+                }
+                if (endDate != null) {
+                    ps.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+                }
+            },
             (rs, rowNum) -> new EventsVenues(
                 rs.getLong("id_event"),
                 rs.getLong("id_venue"),

@@ -58,6 +58,8 @@ public interface MemberRepository {
   void updateSetlist(Long id, String name, Long artistId, Long eventId, List<Long> songIds, String proofFilename, String proofOriginalFilename);
   void deleteSetlist(Long id);
   List<Long> getSetlistSongs(Long idSetlist);
+  Long addSetlist(Setlist setlist);
+  void addSetlistSongs(Long setlistId, List<Long> songIds);
 
   // Comment related methods
   List<Comment> findCommentsBySetlistId(Long idSetlist);
@@ -69,4 +71,3 @@ public interface MemberRepository {
   Edit saveEdit(Edit edit);
   void updateEditStatus(Long idSetlist, LocalDate dateAdded, String status);
 }
-

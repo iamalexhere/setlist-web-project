@@ -35,7 +35,7 @@
 
                 <!-- Member Navigation -->
                 <div class="nav-links" th:if="${session.role == 'Member'}">
-                    <a class="nav-link" th:href="@{/member/events}" 
+                    <a class="nav-link" th:href="@{/member/shows}" 
                        th:classappend="${activePage == 'events' ? 'active' : ''}">Events</a>
                     <a class="nav-link" th:href="@{/member/artists}" 
                        th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
