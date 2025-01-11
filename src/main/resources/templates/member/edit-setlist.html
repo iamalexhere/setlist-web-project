@@ -82,38 +82,61 @@
                             <i class="fas fa-music"></i>
                             Songs
                         </h3>
-                        <div id="songList">
-                            <div class="song-entry" th:each="song, songStat : ${currentSongs}">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>
-                                            <i class="fas fa-music"></i>
-                                            Song
-                                        </label>
-                                        <select th:name="'songIds[' + ${songStat.index} + ']'" required>
-                                            <option value="">Select Song</option>
-                                            <option th:each="s : ${songs}" 
-                                                    th:value="${s.idSong}"
-                                                    th:text="${s.songName}"
-                                                    th:selected="${s.idSong == song.idSong}">
-                                                Song Name
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="button" class="btn-remove" onclick="removeSong(this)">
-                                            <i class="fas fa-trash"></i>
-                                            Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="song-selection">
+                            <select id="songSelect" class="song-dropdown">
+                                <option value="">Select a song...</option>
+                                <option th:each="song : ${songs}" 
+                                        th:value="${song.idSong}"
+                                        th:text="${song.songName}">
+                                    Song Name
+                                </option>
+                            </select>
+                            <button type="button" onclick="addSelectedSong()" class="btn-secondary">
+                                <i class="fas fa-plus"></i>
+                                Add Song
+                            </button>
                         </div>
-                        <button type="button" onclick="addSong()" class="btn-secondary">
-                            <i class="fas fa-plus"></i>
-                            Add Another Song
-                        </button>
+                        <div id="selectedSongs" class="selected-songs">
+                            <!-- Current songs will be loaded here -->
+                        </div>
+                        <div id="songInputs">
+                            <!-- Hidden inputs for selected songs -->
+                        </div>
                     </div>
+
+                    <style>
+                    .song-selection {
+                        display: flex;
+                        gap: 10px;
+                        margin-bottom: 10px;
+                    }
+
+                    .song-dropdown {
+                        flex: 1;
+                        padding: 8px;
+                    }
+
+                    .selected-songs {
+                        margin-top: 10px;
+                    }
+
+                    .song-item {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 8px;
+                        margin: 4px 0;
+                        background: #f5f5f5;
+                        border-radius: 4px;
+                    }
+
+                    .song-item button {
+                        background: none;
+                        border: none;
+                        color: #dc3545;
+                        cursor: pointer;
+                    }
+                    </style>
 
                     <div class="form-group">
                         <label for="proof">
@@ -149,45 +172,81 @@
 
     <script th:src="@{/js/main.js}"></script>
     <script th:inline="javascript">
-        let songCount = /*[[${currentSongs.size()}]]*/ 0;
-        const songs = /*[[${songs}]]*/ [];
+        const currentSongs = /*[[${currentSongs}]]*/ [];
 
-        function addSong() {
-            const songList = document.getElementById('songList');
-            const songEntry = document.createElement('div');
-            songEntry.className = 'song-entry';
-            
-            let songOptions = songs.map(song => 
-                `<option value="${song.idSong}">${song.songName}</option>`
-            ).join('');
+        function loadCurrentSongs() {
+            const selectedSongs = document.getElementById('selectedSongs');
+            const songInputs = document.getElementById('songInputs');
 
-            songEntry.innerHTML = `
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-music"></i>
-                            Song
-                        </label>
-                        <select name="songIds[${songCount}]" required>
-                            <option value="">Select Song</option>
-                            ${songOptions}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" class="btn-remove" onclick="removeSong(this)">
-                            <i class="fas fa-trash"></i>
-                            Remove
-                        </button>
-                    </div>
-                </div>
+            currentSongs.forEach(song => {
+                // Add song display
+                const songElement = document.createElement('div');
+                songElement.className = 'song-item';
+                songElement.innerHTML = `
+                    <span>${song.songName}</span>
+                    <button type="button" onclick="removeSong(this, ${song.idSong})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                selectedSongs.appendChild(songElement);
+
+                // Add hidden input
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'songIds';
+                input.value = song.idSong;
+                songInputs.appendChild(input);
+            });
+        }
+
+        function addSelectedSong() {
+            const songSelect = document.getElementById('songSelect');
+            const selectedSongId = songSelect.value;
+            if (!selectedSongId) return;
+
+            const song = Array.from(songSelect.options).find(opt => opt.value === selectedSongId);
+            if (!song) return;
+
+            const selectedSongs = document.getElementById('selectedSongs');
+            const songInputs = document.getElementById('songInputs');
+
+            // Check if song is already added
+            if (document.querySelector(`input[value="${selectedSongId}"]`)) {
+                alert('This song is already in the setlist');
+                return;
+            }
+
+            // Add song display
+            const songElement = document.createElement('div');
+            songElement.className = 'song-item';
+            songElement.innerHTML = `
+                <span>${song.text}</span>
+                <button type="button" onclick="removeSong(this, ${selectedSongId})">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
-            songList.appendChild(songEntry);
-            songCount++;
+            selectedSongs.appendChild(songElement);
+
+            // Add hidden input
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'songIds';
+            input.value = selectedSongId;
+            songInputs.appendChild(input);
+
+            // Reset select
+            songSelect.value = '';
         }
 
-        function removeSong(button) {
-            button.closest('.song-entry').remove();
+        function removeSong(button, songId) {
+            // Remove display element
+            button.closest('.song-item').remove();
+            // Remove hidden input
+            document.querySelector(`input[value="${songId}"]`).remove();
         }
+
+        // Load current songs when page loads
+        document.addEventListener('DOMContentLoaded', loadCurrentSongs);
     </script>
 </body>
 </html>

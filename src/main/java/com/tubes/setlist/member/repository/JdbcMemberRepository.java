@@ -1,22 +1,32 @@
 package com.tubes.setlist.member.repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import com.tubes.setlist.member.model.*;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Optional;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
+import com.tubes.setlist.member.model.Comment;
+import com.tubes.setlist.member.model.Edit;
 import com.tubes.setlist.member.model.Events;
 import com.tubes.setlist.member.model.EventsVenues;
 import com.tubes.setlist.member.model.GenreView;
@@ -363,31 +373,20 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     @Override
-    public void addSetlist(String name, Long artistId, Long eventId, 
-                          List<Long> songIds, String proofFilename, 
-                          String proofOriginalFilename) {
-        // Insert setlist
-        String sql = """
-            INSERT INTO setlists (id_artist, id_event, setlist_name, 
-                                proof_filename, proof_original_filename, proof_url)
-            VALUES (?, ?, ?, ?, ?, ?)
-            RETURNING id_setlist
-        """;
+    public Long addSetlist(String name, Long artistId, Long eventId, List<Long> songIds, String proofFilename, String proofOriginalFilename) {
+        String sql = "INSERT INTO setlists (id_artist, id_event, setlist_name, proof_filename, proof_original_filename, proof_url) VALUES (?, ?, ?, ?, ?, ?) RETURNING id_setlist";
+        String proofUrl = proofFilename != null ? "/images/setlists/" + proofFilename : null;
+        Long setlistId = jdbcTemplate.queryForObject(sql, Long.class, artistId, eventId, name, proofFilename, proofOriginalFilename, proofUrl);
         
-        String proofUrl = proofFilename != null ? 
-            "/images/setlists/" + proofFilename : null;
-        
-        Long setlistId = jdbcTemplate.queryForObject(sql, Long.class,
-            artistId, eventId, name, proofFilename, proofOriginalFilename, proofUrl);
-        
-        // Insert setlist songs
         if (songIds != null && !songIds.isEmpty()) {
             String songsSql = "INSERT INTO setlists_songs (id_setlist, id_song) VALUES (?, ?)";
             for (Long songId : songIds) {
                 jdbcTemplate.update(songsSql, setlistId, songId);
             }
         }
+        return setlistId;
     }
+
 
     @Override
     public void updateSetlist(Long id, String name, Long artistId, Long eventId, 
@@ -480,7 +479,7 @@ public class JdbcMemberRepository implements MemberRepository {
         String sql = """
             SELECT s.id_event, v.id_venue, s.event_name, s.event_date, v.venue_name, v.city_name 
             FROM events s 
-            JOIN venues v ON s.id_venue = v.id_venue 
+            JOIN venues v ON s.id_venue = v.id_venue
             WHERE (LOWER(s.event_name) LIKE LOWER(?) AND NOT s.is_deleted)
             OR LOWER(v.venue_name) LIKE LOWER(?) 
             OR CAST(s.event_date AS TEXT) LIKE ?
@@ -504,22 +503,44 @@ public class JdbcMemberRepository implements MemberRepository {
 
     @Override
     public List<EventsVenues> findAllEvents() {
-        return findFilteredEvents("", null, null);
+        String sql = """
+            SELECT e.*, v.venue_name, v.city_name
+            FROM events e
+            JOIN venues v ON e.id_venue = v.id_venue
+            WHERE e.is_deleted = false
+            ORDER BY e.event_date DESC
+        """;
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new EventsVenues(
+            rs.getLong("id_event"),
+            rs.getLong("id_venue"),
+            rs.getString("event_name"),
+            rs.getDate("event_date").toLocalDate(),
+            rs.getString("venue_name"),
+            rs.getString("city_name")
+        ));
     }
 
     @Override
     public List<EventsVenues> findFilteredEvents(String query, LocalDate startDate, LocalDate endDate) {
         StringBuilder sql = new StringBuilder();
+        sql.append("WITH event_artists AS (");
+        sql.append("    SELECT e.id_event, ");
+        sql.append("           string_agg(DISTINCT a.artist_name, ', ') as artists, ");
+        sql.append("           COUNT(DISTINCT ss.id_song) as song_count ");
+        sql.append("    FROM events e ");
+        sql.append("    LEFT JOIN setlists s ON e.id_event = s.id_event ");
+        sql.append("    LEFT JOIN artists a ON s.id_artist = a.id_artist ");
+        sql.append("    LEFT JOIN setlists_songs ss ON s.id_setlist = ss.id_setlist ");
+        sql.append("    GROUP BY e.id_event ");
+        sql.append(") ");
         sql.append("SELECT DISTINCT e.id_event, e.id_venue, e.event_name, e.event_date, ");
         sql.append("v.venue_name, v.city_name, ");
-        sql.append("a.artist_name, ");
-        sql.append("(SELECT COUNT(*) FROM setlists_songs ss ");
-        sql.append("JOIN setlists s ON ss.id_setlist = s.id_setlist ");
-        sql.append("WHERE s.id_event = e.id_event) as song_count ");
+        sql.append("ea.artists as artist_name, ");
+        sql.append("COALESCE(ea.song_count, 0) as song_count ");
         sql.append("FROM events e ");
         sql.append("INNER JOIN venues v ON e.id_venue = v.id_venue ");
-        sql.append("LEFT JOIN setlists s ON e.id_event = s.id_event ");
-        sql.append("LEFT JOIN artists a ON s.id_artist = a.id_artist ");
+        sql.append("LEFT JOIN event_artists ea ON e.id_event = ea.id_event ");
         sql.append("WHERE e.is_deleted = false ");
 
         List<Object> params = new ArrayList<>();
@@ -730,6 +751,121 @@ public class JdbcMemberRepository implements MemberRepository {
             rs.getDate("event_date").toLocalDate(),
             rs.getBoolean("is_deleted")
         ), artistId);
+    }
+
+    @Override
+    public List<Comment> findCommentsBySetlistId(Long idSetlist) {
+        String sql = """
+            SELECT c.*, u.username 
+            FROM comments c 
+            JOIN users u ON c.id_user = u.id_user 
+            WHERE c.id_setlist = ? 
+            ORDER BY c.comment_date DESC
+        """;
+        
+        return jdbcTemplate.query(sql, 
+            (rs, rowNum) -> new Comment(
+                rs.getLong("id_comment"),
+                rs.getLong("id_setlist"),
+                rs.getLong("id_user"),
+                rs.getString("username"),
+                rs.getString("comment_text"),
+                rs.getTimestamp("comment_date").toLocalDateTime()
+            ), idSetlist);
+    }
+
+    @Override
+    public Comment saveComment(Comment comment) {
+        String sql = """
+            INSERT INTO comments (id_setlist, id_user, comment_text, comment_date) 
+            VALUES (?, ?, ?, ?) 
+            RETURNING id_comment, comment_date
+        """;
+        
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id_comment", "comment_date"});
+            ps.setLong(1, comment.getIdSetlist());
+            ps.setLong(2, comment.getIdUser());
+            ps.setString(3, comment.getCommentText());
+            ps.setTimestamp(4, Timestamp.valueOf(comment.getCommentDate()));
+            return ps;
+        }, keyHolder);
+
+        Map<String, Object> keys = keyHolder.getKeys();
+        if (keys != null) {
+            comment.setIdComment(((Number) keys.get("id_comment")).longValue());
+            comment.setCommentDate(((Timestamp) keys.get("comment_date")).toLocalDateTime());
+        }
+        
+        // Get username for the saved comment
+        String username = jdbcTemplate.queryForObject(
+            "SELECT username FROM users WHERE id_user = ?",
+            String.class,
+            comment.getIdUser()
+        );
+        comment.setUsername(username);
+        
+        return comment;
+    }
+
+    @Override
+    public void deleteComment(Long idComment) {
+        String sql = "DELETE FROM comments WHERE id_comment = ?";
+        jdbcTemplate.update(sql, idComment);
+    }
+
+    @Override
+    public List<Edit> findEditsBySetlistId(Long idSetlist) {
+        String sql = "SELECT * FROM edits WHERE id_setlist = ? ORDER BY date_added DESC";
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new Edit(
+                        rs.getLong("id_setlist"),
+                        rs.getDate("date_added").toLocalDate(),
+                        rs.getLong("id_user"),
+                        rs.getString("edit_description"),
+                        rs.getString("status")
+                ),
+                idSetlist
+        );
+    }
+
+    @Override
+    public Edit saveEdit(Edit edit) {
+        try {
+            String sql = """
+                INSERT INTO edits (id_setlist, id_user, edit_description, date_added, status) 
+                VALUES (?, ?, ?, CURRENT_DATE, 'pending')
+                ON CONFLICT (id_setlist, date_added) 
+                DO UPDATE SET 
+                    edit_description = CASE 
+                        WHEN edits.id_user = ? THEN edits.edit_description || E'\n' ||?
+                        ELSE edits.edit_description
+                    END
+                RETURNING date_added
+            """;
+
+            LocalDate dateAdded = jdbcTemplate.queryForObject(sql,
+                    (rs, rowNum) -> rs.getDate("date_added").toLocalDate(),
+                    edit.getIdSetlist(),
+                    edit.getIdUser(),
+                    edit.getEditDescription(),
+                    edit.getIdUser(),
+                    edit.getEditDescription()
+            );
+
+            edit.setDateAdded(dateAdded);
+            edit.setStatus("pending");
+            return edit;
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving edit: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateEditStatus(Long idSetlist, LocalDate dateAdded, String status) {
+        String sql = "UPDATE edits SET status = ? WHERE id_setlist = ? AND date_added = ?";
+        jdbcTemplate.update(sql, status, idSetlist, dateAdded);
     }
 
 }

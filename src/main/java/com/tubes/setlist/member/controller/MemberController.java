@@ -2,6 +2,7 @@ package com.tubes.setlist.member.controller;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.tubes.setlist.member.model.Events;
+import com.tubes.setlist.member.model.Edit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,6 +32,7 @@ import com.tubes.setlist.member.model.Venues;
 import com.tubes.setlist.member.model.Categories;
 import com.tubes.setlist.member.model.Songs;
 import com.tubes.setlist.member.model.Setlist;
+import com.tubes.setlist.member.model.Comment;
 
 import com.tubes.setlist.member.repository.MemberRepository;
 import com.tubes.setlist.member.service.FileStorageService;
@@ -180,55 +183,63 @@ public class MemberController {
     }
 
     @GetMapping("/setlists/{id}")
-    public String getSetlistDetail(@PathVariable Long id, Model model, HttpSession session) {
+    public String viewSetlist(@PathVariable("id") Long id, Model model, HttpSession session) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
-        
+
         Setlist setlist = repo.findSetlistById(id);
         if (setlist == null) {
             return "redirect:/member/setlists";
         }
-        
+
+        // Get comments and edits
+        List<Comment> comments = repo.findCommentsBySetlistId(id);
+        List<Edit> edits = repo.findEditsBySetlistId(id);
+
         model.addAttribute("setlist", setlist);
+        model.addAttribute("comments", comments);
+        model.addAttribute("edits", edits);
+        
         return "member/setlist-detail";
     }
 
-    @PostMapping("/setlists/add")
-    public String addSetlist(
-        @RequestParam("name") String setlistName,
-        @RequestParam("artistId") Long artistId,
-        @RequestParam("eventId") Long eventId,
-        @RequestParam(value = "songIds", required = false) List<Long> songIds,
-        @RequestParam(value = "proof", required = false) MultipartFile proof,
-        HttpSession session,
-        Model model
-    ) {
+    @PostMapping("/setlists/{id}/comment")
+    public String addComment(
+            @PathVariable("id") Long id,
+            @RequestParam("commentText") String commentText,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
-        addUserAttributes(session, model);
+
+        Long userId = ((Number) session.getAttribute("userId")).longValue();
+        String username = (String) session.getAttribute("username");
+        Comment comment = new Comment(null, id, userId, username, commentText, LocalDateTime.now());
+        repo.saveComment(comment);
         
-        try {
-            String proofFilename = null;
-            String proofOriginalFilename = null;
+        redirectAttributes.addFlashAttribute("message", "Comment added successfully");
+        return "redirect:/member/setlists/" + id;
+    }
 
-            if (proof != null && !proof.isEmpty()) {
-                proofFilename = fileStorageService.storeFile(proof);
-                proofOriginalFilename = proof.getOriginalFilename();
-            }
-
-            repo.addSetlist(setlistName, artistId, eventId, songIds, proofFilename, proofOriginalFilename);
-            return "redirect:/member/setlists";
-        } catch (Exception e) {
-            // Repopulate dropdowns in case of error
-            List<Artists> artists = repo.findArtistsByName("");
-            List<EventsVenues> events = repo.findAllEvents();
-            model.addAttribute("artists", artists);
-            model.addAttribute("events", events);
-            model.addAttribute("error", "An error occurred while adding the setlist: " + e.getMessage());
-            return "member/add-setlist";
+    @PostMapping("/setlists/{id}/i-was-there")
+    public String recordIWasThere(
+            @PathVariable("id") Long id,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
         }
+
+        Long userId = ((Number) session.getAttribute("userId")).longValue();
+        Edit edit = new Edit(id, LocalDate.now(), userId, "I was there", "pending");
+        repo.saveEdit(edit);
+        
+        redirectAttributes.addFlashAttribute("message", "Thanks for confirming you were there!");
+        return "redirect:/member/setlists/" + id;
     }
 
     @GetMapping("/setlists/{id}/edit")

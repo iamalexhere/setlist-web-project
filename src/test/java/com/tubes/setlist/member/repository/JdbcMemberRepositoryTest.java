@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
+import com.tubes.setlist.member.model.Comment;
+import com.tubes.setlist.member.model.Edit;
 import com.tubes.setlist.member.model.GenreView;
 
 @SpringBootTest
@@ -166,5 +168,40 @@ public class JdbcMemberRepositoryTest {
             genre.getGenreName().equals("Rock")));
         assertTrue(genres.stream().anyMatch(genre -> 
             genre.getGenreName().equals("Pop")));
+    }
+
+    @Test
+    public void testCommentOperations() {
+        // Create a test comment
+        Comment comment = new Comment(null, 1L, 1L, "testuser", "Test comment", java.time.LocalDateTime.now());
+        
+        // Save comment
+        Comment savedComment = memberRepository.saveComment(comment);
+        assertNotNull(savedComment.getIdComment());
+        
+        // Find comments
+        List<Comment> comments = memberRepository.findCommentsBySetlistId(1L);
+        assertFalse(comments.isEmpty());
+        assertTrue(comments.stream().anyMatch(c -> c.getCommentText().equals("Test comment")));
+    }
+
+    @Test
+    public void testEditOperations() {
+        // Create a test edit
+        Edit edit = new Edit(1L, java.time.LocalDate.now(), 1L, "Test edit", "pending");
+        
+        // Save edit
+        Edit savedEdit = memberRepository.saveEdit(edit);
+        assertNotNull(savedEdit.getDateAdded());
+        
+        // Find edits
+        List<Edit> edits = memberRepository.findEditsBySetlistId(1L);
+        assertFalse(edits.isEmpty());
+        assertTrue(edits.stream().anyMatch(e -> e.getEditDescription().equals("Test edit")));
+        
+        // Update edit status
+        memberRepository.updateEditStatus(1L, savedEdit.getDateAdded(), "approved");
+        edits = memberRepository.findEditsBySetlistId(1L);
+        assertTrue(edits.stream().anyMatch(e -> e.getStatus().equals("approved")));
     }
 }
