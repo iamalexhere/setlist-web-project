@@ -520,6 +520,114 @@
     background-color: var(--purple);
 }
 
+.artist-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+}
+
+.action-btn i {
+    font-size: 1rem;
+}
+
+.edit-btn {
+    background-color: var(--primary);
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.delete-btn {
+    background-color: var(--error);
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: var(--error-dark);
+}
+
+.shows-btn {
+    background-color: var(--accent);
+    color: white;
+}
+
+.shows-btn:hover {
+    background-color: var(--accent-dark);
+}
+
+.delete-form {
+    margin: 0;
+    padding: 0;
+}
+
+.delete-form button {
+    width: 100%;
+}
+
+.artist-card:hover .artist-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.artist-card .artist-actions {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.artist-card:hover .manage-buttons {
+    opacity: 1;
+}
+
+.manage-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.manage-btn i {
+    font-size: 1rem;
+}
+
+.manage-btn.edit-btn {
+    background-color: var(--primary);
+}
+
+.manage-btn.delete-btn {
+    background-color: var(--error);
+}
+
+.manage-btn.shows-btn {
+    background-color: var(--accent);
+}
+
+.manage-btn:hover {
+    transform: scale(1.1);
+}
+
 /* Form Styles */
 .form-section {
     max-width: 600px;

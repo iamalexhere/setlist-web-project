@@ -434,6 +434,39 @@ public class JdbcMemberRepository implements MemberRepository {
         ));
     }
 
+    @Override
+    public void deleteArtist(Long id) {
+        try {
+            // Start with child tables first
+            
+            // 1. Delete from setlists_songs for any setlists of this artist
+            String setlistSongsSql = """
+                DELETE FROM setlists_songs 
+                WHERE id_setlist IN (SELECT id_setlist FROM setlists WHERE id_artist = ?)
+            """;
+            jdbcTemplate.update(setlistSongsSql, id);
+
+            // 2. Delete from setlists
+            String setlistSql = "DELETE FROM setlists WHERE id_artist = ?";
+            jdbcTemplate.update(setlistSql, id);
+
+            // 3. Delete from songs
+            String songSql = "DELETE FROM songs WHERE id_artist = ?";
+            jdbcTemplate.update(songSql, id);
+
+            // 4. Delete from artists_categories
+            String categorySql = "DELETE FROM artists_categories WHERE id_artist = ?";
+            jdbcTemplate.update(categorySql, id);
+
+            // 5. Finally delete the artist
+            String artistSql = "DELETE FROM artists WHERE id_artist = ?";
+            jdbcTemplate.update(artistSql, id);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete artist: " + e.getMessage());
+        }
+    }
+
     private Categories mapRowToCategories(ResultSet resultSet, int rowNum) throws SQLException {
         return new Categories(
             resultSet.getLong("id_category"),

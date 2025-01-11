@@ -597,4 +597,22 @@ public class MemberController {
         
         return "member/artist-shows";
     }
+
+    @PostMapping("/artists/{id}/delete")
+    public String deleteArtist(
+        @PathVariable Long id,
+        HttpSession session
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            repo.deleteArtist(id);
+        } catch (Exception e) {
+            // Handle error if needed
+        }
+
+        return "redirect:/member/artists";
+    }
 }
