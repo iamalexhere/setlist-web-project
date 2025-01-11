@@ -385,7 +385,7 @@ public class MemberController {
         Model model,
         @RequestParam(defaultValue = "") String name,
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "8") int size
+        @RequestParam(defaultValue = "12") int size
     ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
@@ -465,6 +465,9 @@ public class MemberController {
             return "redirect:/member/songs";
         }
 
+        // Get list of artists for dropdown
+        List<Artists> artists = repo.findArtistsByName("");
+        model.addAttribute("artists", artists);
         model.addAttribute("song", song);
         return "member/edit-song";
     }

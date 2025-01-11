@@ -15,14 +15,11 @@
     <main class="container">
         <section class="songs-header">
             <h1>Edit Song</h1>
-            <p>Update song information</p>
+            <p>Update song details</p>
         </section>
 
         <div class="form-container">
-            <form th:action="@{/member/songs/{id}/edit(id=${song.idSong})}" 
-                  method="post" 
-                  class="form">
-                
+            <form th:action="@{/member/songs/{id}/edit(id=${song.idSong})}" method="post" class="form">
                 <div th:if="${error}" class="alert alert-error">
                     <i class="fas fa-exclamation-circle"></i>
                     <span th:text="${error}"></span>
@@ -41,20 +38,25 @@
                                id="name" 
                                name="name" 
                                class="form-input" 
-                               th:value="${song.songName}" 
+                               th:value="${song.songName}"
                                required>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="artistName">Artist</label>
+                    <label for="artistId">Artist</label>
                     <div class="input-group">
                         <i class="fas fa-user"></i>
-                        <input type="text" 
-                               id="artistName" 
-                               class="form-input" 
-                               th:value="${song.artistName}" 
-                               readonly>
+                        <select id="artistId" 
+                                name="artistId" 
+                                class="form-input" 
+                                required>
+                            <option th:each="artist : ${artists}" 
+                                    th:value="${artist.idArtist}" 
+                                    th:text="${artist.artistName}"
+                                    th:selected="${artist.idArtist == song.idArtist}">
+                            </option>
+                        </select>
                     </div>
                 </div>
 
