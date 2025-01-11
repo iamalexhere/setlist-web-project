@@ -56,50 +56,52 @@
             </div>
         </section>
 
-        <!-- Edit Suggestions Section -->
-        <section class="edit-suggestions-section">
-            <h2>Edit Suggestions</h2>
-            <div class="edit-form">
-                <form th:action="@{/member/setlists/{id}/edits(id=${setlist.idSetlist})}" method="post">
-                    <textarea name="editDescription" rows="3" placeholder="Suggest an edit for this setlist..." required></textarea>
-                    <button type="submit" class="btn btn-primary">Submit Suggestion</button>
-                </form>
-            </div>
-            <div class="edit-suggestions" th:if="${not #lists.isEmpty(edits)}">
-                <div class="edit-item" th:each="edit : ${edits}">
-                    <div class="edit-meta">
-                        <span class="edit-date" th:text="${#temporals.format(edit.dateAdded, 'MMMM d, yyyy')}">January 1, 2024</span>
-                        <span class="edit-status" th:text="${edit.status}">pending</span>
-                    </div>
-                    <p class="edit-text" th:text="${edit.editDescription}">Edit suggestion text</p>
-                </div>
-            </div>
-            <div class="empty-state" th:if="${#lists.isEmpty(edits)}">
-                <p>No edit suggestions yet</p>
-            </div>
-        </section>
+        <!-- Edits and Comments Section -->
+        <div class="activity-section">
+            <!-- I WAS THERE Button -->
+            <form th:action="@{/member/setlists/{id}/i-was-there(id=${setlist.idSetlist})}" method="post" class="i-was-there-form">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> I WAS THERE
+                </button>
+            </form>
 
-        <!-- Comments Section -->
-        <section class="comments-section">
-            <h2>Comments</h2>
-            <div class="comment-form">
-                <form th:action="@{/member/setlists/{id}/comments(id=${setlist.idSetlist})}" method="post">
-                    <textarea name="commentText" rows="3" placeholder="Leave a comment..." required></textarea>
-                    <button type="submit" class="btn btn-primary">Post Comment</button>
-                </form>
-            </div>
-            <div class="comments" th:if="${not #lists.isEmpty(comments)}">
-                <div class="comment-item" th:each="comment : ${comments}">
-                    <div class="comment-meta">
-                        <span class="comment-date" th:text="${#temporals.format(comment.commentDate, 'MMMM d, yyyy h:mm a')}">January 1, 2024 3:30 PM</span>
+            <!-- Edit History -->
+            <section class="edits-section">
+                <h3>Edits and Comments</h3>
+                <div class="activity-list">
+                    <!-- Edits -->
+                    <div th:each="edit : ${edits}" class="activity-item edit">
+                        <div class="activity-meta">
+                            <span class="activity-type">Setlist edited</span>
+                            <span class="activity-date" th:text="${#temporals.format(edit.dateAdded, 'dd MMM yyyy, HH:mm')}">28 Sep 2024, 14:19</span>
+                        </div>
+                        <div class="activity-content">
+                            <p th:text="${edit.editDescription}">18 songs</p>
+                        </div>
                     </div>
-                    <p class="comment-text" th:text="${comment.commentText}">Comment text</p>
+
+                    <!-- Comments -->
+                    <div th:each="comment : ${comments}" class="activity-item comment">
+                        <div class="activity-meta">
+                            <span class="activity-user" th:text="${comment.username}">User</span>
+                            <span class="activity-date" th:text="${#temporals.format(comment.commentDate, 'dd MMM yyyy, HH:mm')}">28 Sep 2024, 11:45</span>
+                        </div>
+                        <div class="activity-content">
+                            <p th:text="${comment.commentText}">I was hoping we would have a different setlist tonight</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="empty-state" th:if="${#lists.isEmpty(comments)}">
-                <p>No comments yet</p>
-            </div>
-        </section>
+            </section>
+
+            <!-- Add Comment Form -->
+            <section class="comment-form-section">
+                <h3>New comment</h3>
+                <form th:action="@{/member/setlists/{id}/comment(id=${setlist.idSetlist})}" method="post">
+                    <textarea name="commentText" rows="4" required placeholder="Write your comment here..."></textarea>
+                    <button type="submit" class="btn btn-primary">Add Comment</button>
+                </form>
+            </section>
+        </div>
 
         <!-- Empty State -->
         <div class="empty-state" th:if="${#lists.isEmpty(setlist.songs)}">

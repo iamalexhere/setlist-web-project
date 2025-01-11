@@ -1,19 +1,27 @@
 package com.tubes.setlist.member.repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import com.tubes.setlist.member.model.*;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Optional;
 
 import com.tubes.setlist.member.model.Artists;
 import com.tubes.setlist.member.model.Categories;
@@ -495,7 +503,22 @@ public class JdbcMemberRepository implements MemberRepository {
 
     @Override
     public List<EventsVenues> findAllEvents() {
-        return findFilteredEvents("", null, null);
+        String sql = """
+            SELECT e.*, v.venue_name, v.city_name
+            FROM events e
+            JOIN venues v ON e.id_venue = v.id_venue
+            WHERE e.is_deleted = false
+            ORDER BY e.event_date DESC
+        """;
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new EventsVenues(
+            rs.getLong("id_event"),
+            rs.getLong("id_venue"),
+            rs.getString("event_name"),
+            rs.getDate("event_date").toLocalDate(),
+            rs.getString("venue_name"),
+            rs.getString("city_name")
+        ));
     }
 
     @Override
@@ -732,36 +755,58 @@ public class JdbcMemberRepository implements MemberRepository {
 
     @Override
     public List<Comment> findCommentsBySetlistId(Long idSetlist) {
-        String sql = "SELECT * FROM comments WHERE id_setlist = ? ORDER BY comment_date DESC";
-        return jdbcTemplate.query(sql,
-                (rs, rowNum) -> new Comment(
-                        rs.getLong("id_comment"),
-                        rs.getLong("id_setlist"),
-                        rs.getLong("id_user"),
-                        rs.getString("comment_text"),
-                        rs.getTimestamp("comment_date").toLocalDateTime()
-                ),
-                idSetlist
-        );
+        String sql = """
+            SELECT c.*, u.username 
+            FROM comments c 
+            JOIN users u ON c.id_user = u.id_user 
+            WHERE c.id_setlist = ? 
+            ORDER BY c.comment_date DESC
+        """;
+        
+        return jdbcTemplate.query(sql, 
+            (rs, rowNum) -> new Comment(
+                rs.getLong("id_comment"),
+                rs.getLong("id_setlist"),
+                rs.getLong("id_user"),
+                rs.getString("username"),
+                rs.getString("comment_text"),
+                rs.getTimestamp("comment_date").toLocalDateTime()
+            ), idSetlist);
     }
 
     @Override
     public Comment saveComment(Comment comment) {
         String sql = """
             INSERT INTO comments (id_setlist, id_user, comment_text, comment_date) 
-            VALUES (?, ?, ?, CURRENT_TIMESTAMP) 
+            VALUES (?, ?, ?, ?) 
             RETURNING id_comment, comment_date
         """;
-        return jdbcTemplate.queryForObject(sql,
-                (rs, rowNum) -> {
-                    comment.setIdComment(rs.getLong("id_comment"));
-                    comment.setCommentDate(rs.getTimestamp("comment_date").toLocalDateTime());
-                    return comment;
-                },
-                comment.getIdSetlist(),
-                comment.getIdUser(),
-                comment.getCommentText()
+        
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id_comment", "comment_date"});
+            ps.setLong(1, comment.getIdSetlist());
+            ps.setLong(2, comment.getIdUser());
+            ps.setString(3, comment.getCommentText());
+            ps.setTimestamp(4, Timestamp.valueOf(comment.getCommentDate()));
+            return ps;
+        }, keyHolder);
+
+        Map<String, Object> keys = keyHolder.getKeys();
+        if (keys != null) {
+            comment.setIdComment(((Number) keys.get("id_comment")).longValue());
+            comment.setCommentDate(((Timestamp) keys.get("comment_date")).toLocalDateTime());
+        }
+        
+        // Get username for the saved comment
+        String username = jdbcTemplate.queryForObject(
+            "SELECT username FROM users WHERE id_user = ?",
+            String.class,
+            comment.getIdUser()
         );
+        comment.setUsername(username);
+        
+        return comment;
     }
 
     @Override
@@ -787,20 +832,34 @@ public class JdbcMemberRepository implements MemberRepository {
 
     @Override
     public Edit saveEdit(Edit edit) {
-        String sql = """
-            INSERT INTO edits (id_setlist, id_user, edit_description, date_added, status) 
-            VALUES (?, ?, ?, CURRENT_DATE, 'pending')
-            RETURNING date_added
-        """;
-        LocalDate dateAdded = jdbcTemplate.queryForObject(sql,
-                (rs, rowNum) -> rs.getDate("date_added").toLocalDate(),
-                edit.getIdSetlist(),
-                edit.getIdUser(),
-                edit.getEditDescription()
-        );
-        edit.setDateAdded(dateAdded);
-        edit.setStatus("pending");
-        return edit;
+        try {
+            String sql = """
+                INSERT INTO edits (id_setlist, id_user, edit_description, date_added, status) 
+                VALUES (?, ?, ?, CURRENT_DATE, 'pending')
+                ON CONFLICT (id_setlist, date_added) 
+                DO UPDATE SET 
+                    edit_description = CASE 
+                        WHEN edits.id_user = ? THEN edits.edit_description || E'\n' ||?
+                        ELSE edits.edit_description
+                    END
+                RETURNING date_added
+            """;
+
+            LocalDate dateAdded = jdbcTemplate.queryForObject(sql,
+                    (rs, rowNum) -> rs.getDate("date_added").toLocalDate(),
+                    edit.getIdSetlist(),
+                    edit.getIdUser(),
+                    edit.getEditDescription(),
+                    edit.getIdUser(),
+                    edit.getEditDescription()
+            );
+
+            edit.setDateAdded(dateAdded);
+            edit.setStatus("pending");
+            return edit;
+        } catch (Exception e) {
+            throw new RuntimeException("Error saving edit: " + e.getMessage(), e);
+        }
     }
 
     @Override

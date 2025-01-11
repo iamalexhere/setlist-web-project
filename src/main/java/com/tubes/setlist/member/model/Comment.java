@@ -10,6 +10,7 @@ public class Comment {
     private Long idComment;
     private Long idSetlist;
     private Long idUser;
+    private String username;
     private String commentText;
     private LocalDateTime commentDate;
 }
