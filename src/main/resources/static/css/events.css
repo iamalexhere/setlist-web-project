@@ -457,3 +457,136 @@
     font-size: 1.1rem;
     margin-bottom: 2rem;
 }
+
+/* Form Section Styles */
+.form-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-card {
+    background: var(--surface);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.form-group label i {
+    color: var(--accent);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    background: var(--surface-light);
+    border: 1px solid var(--overlay);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Stats Styles */
+.show-stats {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.stats-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--subtext);
+    font-size: 0.875rem;
+}
+
+.stats-item i {
+    color: var(--accent);
+}
+
+/* Action Buttons */
+.event-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    background: var(--accent-secondary);
+    color: var(--background);
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.action-btn i {
+    font-size: 1rem;
+}
+
+.btn-accent {
+    background: var(--accent-secondary);
+    color: var(--background);
+}
+
+.btn-accent:hover {
+    opacity: 0.9;
+}
