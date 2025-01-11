@@ -59,7 +59,7 @@
                             <option th:each="venue : ${venues}" 
                                     th:if="${venue.idVenue != events.idVenue}"
                                     th:value="${venue.idVenue}" 
-                                    th:text="${venue.venueName + ' - ' + venue.cityName}">Venue Name - City</option>
+                                    th:text="${venue.venueName + ' - ' + venue.venueCity}">Venue Name - City</option>
                         </select>
                     </div>
 
