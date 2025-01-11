@@ -1,5 +1,6 @@
 package com.tubes.setlist.admin.repository;
 
+import com.tubes.setlist.admin.model.Statistics;
 import com.tubes.setlist.admin.model.UserManagement;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -158,5 +159,54 @@ public class JdbcAdminRepository implements AdminRepository {
             ORDER BY c.comment_date DESC
         """;
         return jdbcTemplate.queryForList(sql, startDate, endDate);
+    }
+
+    @Override
+    public Statistics getStatistics() {
+        Statistics stats = new Statistics();
+        
+        // Get total counts
+        stats.setTotalUsers(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM users WHERE deleted = false", Integer.class));
+        
+        stats.setTotalArtists(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM artists WHERE deleted = false", Integer.class));
+        
+        stats.setTotalSetlists(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM setlists WHERE deleted = false", Integer.class));
+        
+        // Calculate growth (comparing with last month)
+        LocalDateTime lastMonth = LocalDateTime.now().minusMonths(1);
+        
+        int lastMonthUsers = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM users WHERE created_at < ? AND deleted = false",
+            Integer.class, lastMonth);
+        
+        int lastMonthArtists = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM artists WHERE created_at < ? AND deleted = false",
+            Integer.class, lastMonth);
+        
+        int lastMonthSetlists = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM setlists WHERE created_at < ? AND deleted = false",
+            Integer.class, lastMonth);
+        
+        // Calculate growth percentages
+        stats.setUserGrowth(calculateGrowth(lastMonthUsers, stats.getTotalUsers()));
+        stats.setArtistGrowth(calculateGrowth(lastMonthArtists, stats.getTotalArtists()));
+        stats.setSetlistGrowth(calculateGrowth(lastMonthSetlists, stats.getTotalSetlists()));
+        
+        return stats;
+    }
+    
+    private double calculateGrowth(int oldValue, int newValue) {
+        if (oldValue == 0) return 100.0; // If starting from zero, growth is 100%
+        return ((double)(newValue - oldValue) / oldValue) * 100.0;
+    }
+    
+    @Override
+    public byte[] generateReport() {
+        // TODO: Implement report generation using Apache POI or similar library
+        // For now, return empty byte array
+        return new byte[0];
     }
 }

@@ -2,6 +2,7 @@ package com.tubes.setlist.admin.controller;
 
 import com.tubes.setlist.admin.repository.AdminRepository;
 import com.tubes.setlist.admin.model.UserManagement;
+import com.tubes.setlist.admin.model.Statistics;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -144,6 +145,33 @@ public class AdminController {
         );
         
         return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/reports")
+    public String reports(HttpSession session, Model model) {
+        if (!checkAdminAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+        
+        // Add statistics for reports
+        model.addAttribute("stats", adminRepository.getStatistics());
+        
+        return "admin/reports";
+    }
+    
+    @GetMapping("/reports/download")
+    public ResponseEntity<byte[]> downloadReport(HttpSession session) {
+        if (!checkAdminAccess(session)) {
+            return ResponseEntity.status(403).build();
+        }
+        
+        byte[] report = adminRepository.generateReport();
+        
+        return ResponseEntity.ok()
+            .header("Content-Type", "application/vnd.ms-excel")
+            .header("Content-Disposition", "attachment; filename=\"setlist-report.xlsx\"")
+            .body(report);
     }
     
     @GetMapping("/reports")
