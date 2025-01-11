@@ -346,20 +346,239 @@ public class MemberController {
         return "member/shows";
     }
     
-    @GetMapping("/add-show")
-    public String addShow(HttpSession session, Model model) {
+    @GetMapping("/shows/add")
+    public String showAddShowForm(HttpSession session, Model model) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
         }
         addUserAttributes(session, model);
 
-        List<Artists> artists = this.repo.findAllArtists();
+        // Add necessary data for dropdowns
+        List<Artists> artists = repo.findArtistsByName("");
+        List<Venues> venues = repo.findAllVenues();
+        model.addAttribute("artists", artists);
+        model.addAttribute("venues", venues);
+        
+        return "member/add-show";
+    }
+
+    @PostMapping("/shows/add")
+    public String memberAddShow(
+            @RequestParam("eventName") String eventName,
+            @RequestParam("artistId") Long artistId,
+            @RequestParam("venueId") Long venueId,
+            @RequestParam("eventDate") LocalDate eventDate,
+            HttpSession session,
+            Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        try {
+            Optional<Events> existingEvent = repo.searchEvents(venueId, eventName, eventDate);
+            if (existingEvent.isPresent()) {
+                List<Artists> artists = repo.findArtistsByName("");
+                List<Venues> venues = repo.findAllVenues();
+                model.addAttribute("artists", artists);
+                model.addAttribute("venues", venues);
+                model.addAttribute("error", "A show with this name already exists at this venue on this date");
+                return "member/add-show";
+            }
+
+            repo.addEvents(venueId, eventName, eventDate);
+            return "redirect:/member/shows";
+        } catch (Exception e) {
+            List<Artists> artists = repo.findArtistsByName("");
+            List<Venues> venues = repo.findAllVenues();
+            model.addAttribute("artists", artists);
+            model.addAttribute("venues", venues);
+            model.addAttribute("error", "An error occurred while adding the show: " + e.getMessage());
+            return "member/add-show";
+        }
+    }
+
+    @GetMapping("/artists/{id}/edit")
+    public String editArtist(
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Artists artist = repo.findArtistById(id);
+        if (artist == null) {
+            return "redirect:/member/artists";
+        }
+
+        model.addAttribute("artist", artist);
+        return "member/edit-artist";
+    }
+
+    @PostMapping("/artists/{id}/edit")
+    public String updateArtist(
+        @PathVariable Long id,
+        @RequestParam("artistName") String artistName,
+        @RequestParam(value = "image", required = false) MultipartFile image,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        try {
+            String imageFilename = null;
+            String originalFilename = null;
+
+            if (image != null && !image.isEmpty()) {
+                imageFilename = fileStorageService.storeFile(image);
+                originalFilename = image.getOriginalFilename();
+            }
+
+            repo.updateArtist(id, artistName, imageFilename, originalFilename);
+            return "redirect:/member/artists";
+        } catch (Exception e) {
+            Artists artist = repo.findArtistById(id);
+            model.addAttribute("artist", artist);
+            model.addAttribute("error", "An error occurred while updating the artist: " + e.getMessage());
+            return "member/edit-artist";
+        }
+    }
+
+    @GetMapping("/artists/{id}/shows")
+    public String getArtistShows(
+        @PathVariable Long id,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "8") int size,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        Artists artist = repo.findArtistById(id);
+        if (artist == null) {
+            return "redirect:/member/artists";
+        }
+
+        // Get events for this artist
+        List<Events> events = repo.findEventsByArtist(id);
+
+        // Get setlists for this artist
+        List<Setlist> setlists = repo.findSetlists(artist.getArtistName(), "", page, size);
+        long totalSetlists = repo.getTotalSetlists(artist.getArtistName(), "");
+        int totalPages = (int) Math.ceil((double) totalSetlists / size);
+
+        model.addAttribute("artist", artist);
+        model.addAttribute("events", events);
+        model.addAttribute("setlists", setlists);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        
+        return "member/artist-shows";
+    }
+
+    @PostMapping("/artists/{id}/delete")
+    public String deleteArtist(
+        @PathVariable Long id,
+        HttpSession session,
+        RedirectAttributes redirectAttributes
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            // Get artist name before deletion for the message
+            Artists artist = repo.findArtistById(id);
+            if (artist == null) {
+                redirectAttributes.addFlashAttribute("error", "Artist not found");
+                return "redirect:/member/artists";
+            }
+
+            String artistName = artist.getArtistName();
+            repo.deleteArtist(id);
+            redirectAttributes.addFlashAttribute("success", "Artist '" + artistName + "' has been successfully deleted");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete artist: " + e.getMessage());
+        }
+
+        return "redirect:/member/artists";
+    }
+
+    @PostMapping("/shows/{id}/delete") 
+    public String deleteShow(
+        @PathVariable Long id,
+        HttpSession session
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            this.repo.deleteEvent(id);
+        } catch (Exception e) {
+            // Handle error if needed
+        }
+
+        return "redirect:/member/shows";
+    }
+
+    @GetMapping("/shows/{id}/edit")
+    public String editShows(
+        @PathVariable Long id,
+        HttpSession session,
+        Model model
+    ) {
+        if(!checkMemberAccess(session)) {
+            return "redirect/auth/login";
+        }
+        addUserAttributes(session, model);
+        EventsVenues event = this.repo.findEventsById(id);
         List<Venues> venues = this.repo.findAllVenues();
 
-        model.addAttribute("artist", artists);
+        if(event==null) {
+            return "redirect:/member/shows";
+        }
+
+        model.addAttribute("events", event);
         model.addAttribute("venues", venues);
 
-        return "member/add-show";
+        return "member/edit-show";
+
+    }
+
+    @PostMapping("/shows/{id}/edit")
+    public String updateShows(
+        @PathVariable Long id,
+        @RequestParam("eventName") String eventName,
+        @RequestParam("eventDate") LocalDate eventDate,
+        @RequestParam("venueId") Long venueId,
+        HttpSession session,
+        Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        
+        try {
+            repo.updateEvent(id, venueId, eventName, eventDate);
+            return "redirect:/member/shows";
+        } catch (Exception e) {
+            EventsVenues event = repo.findEventsById(id);
+            List<Venues> venues = repo.findAllVenues();
+            model.addAttribute("events", event);
+            model.addAttribute("venues", venues);
+            model.addAttribute("error", "An error occurred: " + e.getMessage());
+            return "member/edit-show";
+        }
     }
 
     @PostMapping("/artists/add")
@@ -576,226 +795,5 @@ public class MemberController {
 
         return "redirect:/member/songs";
     }
-
-    @PostMapping("/shows/{id}/delete") 
-    public String deleteShow(
-        @PathVariable Long id,
-        HttpSession session
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
-
-        try {
-            this.repo.deleteEvent(id);
-        } catch (Exception e) {
-            // Handle error if needed
-        }
-
-        return "redirect:/member/shows";
-    }
-
-    @GetMapping("/artists/{id}/edit")
-    public String editArtist(
-        @PathVariable Long id,
-        HttpSession session,
-        Model model
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
-        addUserAttributes(session, model);
-
-        Artists artist = repo.findArtistById(id);
-        if (artist == null) {
-            return "redirect:/member/artists";
-        }
-
-        model.addAttribute("artist", artist);
-        return "member/edit-artist";
-    }
-
-    @PostMapping("/artists/{id}/edit")
-    public String updateArtist(
-        @PathVariable Long id,
-        @RequestParam("artistName") String artistName,
-        @RequestParam(value = "image", required = false) MultipartFile image,
-        HttpSession session,
-        Model model
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
-        
-        try {
-            String imageFilename = null;
-            String originalFilename = null;
-
-            if (image != null && !image.isEmpty()) {
-                imageFilename = fileStorageService.storeFile(image);
-                originalFilename = image.getOriginalFilename();
-            }
-
-            repo.updateArtist(id, artistName, imageFilename, originalFilename);
-            return "redirect:/member/artists";
-        } catch (Exception e) {
-            Artists artist = repo.findArtistById(id);
-            model.addAttribute("artist", artist);
-            model.addAttribute("error", "An error occurred while updating the artist: " + e.getMessage());
-            return "member/edit-artist";
-        }
-    }
-
-    @GetMapping("/artists/{id}/shows")
-    public String getArtistShows(
-        @PathVariable Long id,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "8") int size,
-        HttpSession session,
-        Model model
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
-        addUserAttributes(session, model);
-
-        Artists artist = repo.findArtistById(id);
-        if (artist == null) {
-            return "redirect:/member/artists";
-        }
-
-        // Get events for this artist
-        List<Events> events = repo.findEventsByArtist(id);
-
-        // Get setlists for this artist
-        List<Setlist> setlists = repo.findSetlists(artist.getArtistName(), "", page, size);
-        long totalSetlists = repo.getTotalSetlists(artist.getArtistName(), "");
-        int totalPages = (int) Math.ceil((double) totalSetlists / size);
-
-        model.addAttribute("artist", artist);
-        model.addAttribute("events", events);
-        model.addAttribute("setlists", setlists);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", totalPages);
-        
-        return "member/artist-shows";
-    }
-
-    @PostMapping("/artists/{id}/delete")
-    public String deleteArtist(
-        @PathVariable Long id,
-        HttpSession session,
-        RedirectAttributes redirectAttributes
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
-
-        try {
-            // Get artist name before deletion for the message
-            Artists artist = repo.findArtistById(id);
-            if (artist == null) {
-                redirectAttributes.addFlashAttribute("error", "Artist not found");
-                return "redirect:/member/artists";
-            }
-
-            String artistName = artist.getArtistName();
-            repo.deleteArtist(id);
-            redirectAttributes.addFlashAttribute("success", "Artist '" + artistName + "' has been successfully deleted");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Failed to delete artist: " + e.getMessage());
-        }
-
-        return "redirect:/member/artists";
-    }
-
-    @PostMapping("/shows/add")
-    public String memberAddShow(
-        @RequestParam("eventName") String eventName,
-        @RequestParam("artistId") Long artistId,
-        @RequestParam("venueId") Long venueId,
-        @RequestParam("eventDate") LocalDate eventDate,
-        HttpSession session,
-        Model model
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
-
-        try {
-            Optional<Events> existingEvent = repo.searchEvents(venueId, eventName, eventDate);
-            if (existingEvent.isPresent()) {
-                List<Artists> artists = repo.findAllArtists();
-                List<Venues> venues = repo.findAllVenues();
-                model.addAttribute("artists", artists);
-                model.addAttribute("venues", venues);
-                model.addAttribute("error", "A show with this name already exists at this venue on this date");
-                return "member/add-show";
-            }
-
-            repo.addEvents(venueId, eventName, eventDate);
-            return "redirect:/member/shows";
-        } catch (Exception e) {
-            List<Artists> artists = repo.findAllArtists();
-            List<Venues> venues = repo.findAllVenues();
-            model.addAttribute("artists", artists);
-            model.addAttribute("venues", venues);
-            model.addAttribute("error", "An error occurred: " + e.getMessage());
-            return "member/add-show";
-        }
-    }
-
-    @GetMapping("/shows/{id}/edit")
-    public String editShows(
-        @PathVariable Long id,
-        HttpSession session,
-        Model model
-    ) {
-        if(!checkMemberAccess(session)) {
-            return "redirect/auth/login";
-        }
-        addUserAttributes(session, model);
-        EventsVenues event = this.repo.findEventsById(id);
-        List<Venues> venues = this.repo.findAllVenues();
-
-        if(event==null) {
-            return "redirect:/member/shows";
-        }
-
-        model.addAttribute("events", event);
-        model.addAttribute("venues", venues);
-
-        return "member/edit-show";
-
-    }
-
-    @PostMapping("/shows/{id}/edit")
-    public String updateShows(
-        @PathVariable Long id,
-        @RequestParam("eventName") String eventName,
-        @RequestParam("eventDate") LocalDate eventDate,
-        @RequestParam("venueId") Long venueId,
-        HttpSession session,
-        Model model
-    ) {
-        if (!checkMemberAccess(session)) {
-            return "redirect:/auth/login";
-        }
-        
-        try {
-            repo.updateEvent(id, venueId, eventName, eventDate);
-            return "redirect:/member/shows";
-        } catch (Exception e) {
-            EventsVenues event = repo.findEventsById(id);
-            List<Venues> venues = repo.findAllVenues();
-            model.addAttribute("events", event);
-            model.addAttribute("venues", venues);
-            model.addAttribute("error", "An error occurred: " + e.getMessage());
-            return "member/edit-show";
-        }
-    }
-
-
-
 
 }
