@@ -41,4 +41,9 @@ public interface GuestRepository {
     List<VenueView> findAllVenues();
     List<VenueView> searchVenues(String query);
     VenueView findVenueById(Long id);
+
+    // Song related queries
+    List<SongView> findSongsByArtist(Long idArtist);
+    List<SongView> searchSongs(String query);
+    SongView findSongById(Long idSong);
 }

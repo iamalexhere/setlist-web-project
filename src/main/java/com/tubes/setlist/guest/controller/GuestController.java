@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
+import com.tubes.setlist.guest.model.SongView;
 import com.tubes.setlist.guest.model.VenueView;
 import com.tubes.setlist.guest.repository.GuestRepository;
 
@@ -243,5 +244,55 @@ public class GuestController {
         VenueView venue = guestRepository.findVenueById(id);
         model.addAttribute("venue", venue);
         return "guest/venue-detail";
+    }
+
+    @GetMapping("/songs")
+    public String viewSongs(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "12") int size,
+            Model model) {
+        List<SongView> allSongs;
+        
+        if (query != null && !query.trim().isEmpty()) {
+            allSongs = guestRepository.searchSongs(query);
+            model.addAttribute("query", query);
+        } else {
+            allSongs = guestRepository.searchSongs("");
+        }
+        
+        // Handle pagination
+        int totalSongs = allSongs.size();
+        int totalPages = (int) Math.ceil((double) totalSongs / size);
+        
+        // Ensure page is within bounds
+        page = Math.max(1, Math.min(page, Math.max(1, totalPages)));
+        
+        int start = (page - 1) * size;
+        int end = Math.min(start + size, totalSongs);
+        
+        List<SongView> paginatedSongs = allSongs.subList(
+            Math.min(start, totalSongs), 
+            Math.min(end, totalSongs)
+        );
+        
+        model.addAttribute("songs", paginatedSongs);
+        model.addAttribute("activePage", "songs");
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageSize", size);
+        return "guest/songs";
+    }
+
+    @GetMapping("/artists/{artistId}/songs")
+    public String viewArtistSongs(
+            @PathVariable Long artistId,
+            Model model) {
+        List<SongView> songs = guestRepository.findSongsByArtist(artistId);
+        ArtistView artist = guestRepository.findArtistById(artistId);
+        
+        model.addAttribute("songs", songs);
+        model.addAttribute("artist", artist);
+        return "guest/songs";
     }
 }

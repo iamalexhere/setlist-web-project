@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import com.tubes.setlist.guest.model.ArtistView;
 import com.tubes.setlist.guest.model.EventView;
 import com.tubes.setlist.guest.model.SetlistView;
+import com.tubes.setlist.guest.model.SongView;
 import com.tubes.setlist.guest.model.VenueView;
 
 @Repository
@@ -596,5 +597,50 @@ public class JdbcGuestRepository implements GuestRepository {
                     List.of()
             );
         }
+    }
+
+    @Override
+    public List<SongView> findSongsByArtist(Long idArtist) {
+        String sql = """
+            SELECT s.id_song, s.id_artist, a.artist_name, s.song_name
+            FROM songs s
+            JOIN artists a ON s.id_artist = a.id_artist
+            WHERE s.id_artist = ?
+            ORDER BY s.song_name
+        """;
+        return jdbcTemplate.query(sql, this::mapToSongView, idArtist);
+    }
+
+    @Override
+    public List<SongView> searchSongs(String query) {
+        String sql = """
+            SELECT s.id_song, s.id_artist, a.artist_name, s.song_name
+            FROM songs s
+            JOIN artists a ON s.id_artist = a.id_artist
+            WHERE LOWER(s.song_name) LIKE LOWER(?) OR LOWER(a.artist_name) LIKE LOWER(?)
+            ORDER BY s.song_name
+        """;
+        String searchPattern = "%" + query + "%";
+        return jdbcTemplate.query(sql, this::mapToSongView, searchPattern, searchPattern);
+    }
+
+    @Override
+    public SongView findSongById(Long idSong) {
+        String sql = """
+            SELECT s.id_song, s.id_artist, a.artist_name, s.song_name
+            FROM songs s
+            JOIN artists a ON s.id_artist = a.id_artist
+            WHERE s.id_song = ?
+        """;
+        return jdbcTemplate.queryForObject(sql, this::mapToSongView, idSong);
+    }
+
+    private SongView mapToSongView(ResultSet rs, int rowNum) throws SQLException {
+        return new SongView(
+            rs.getLong("id_song"),
+            rs.getLong("id_artist"),
+            rs.getString("artist_name"),
+            rs.getString("song_name")
+        );
     }
 }
