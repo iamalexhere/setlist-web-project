@@ -1,3 +1,21 @@
+:root {
+    --background: #1e1e2e;
+    --text: #cdd6f4;
+    --subtext: #bac2de;
+    --overlay: #6c7086;
+    --surface: #313244;
+    --surface-light: #45475a;
+    --accent: #89b4fa;
+    --accent-secondary: #f5c2e7;
+
+    /* Derived variables */
+    --surface-alt: var(--surface-light);
+    --primary: var(--accent);
+    --secondary: var(--accent-secondary);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 .artist-header {
     text-align: center;
     padding: 6rem 0 2rem;
@@ -628,6 +646,32 @@
     transform: scale(1.1);
 }
 
+.event-actions .action-btn,
+.setlist-actions .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    background: var(--accent-secondary);
+    color: var(--background);
+}
+
+.event-actions .action-btn:hover,
+.setlist-actions .action-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.event-actions .action-btn i,
+.setlist-actions .action-btn i {
+    font-size: 1rem;
+}
+
 /* Form Styles */
 .form-section {
     max-width: 600px;
@@ -769,4 +813,205 @@
 
 .alert i {
     font-size: 1.25rem;
+}
+
+/* Artist Profile Styles */
+.artist-profile {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.artist-profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 1rem;
+    object-fit: cover;
+}
+
+.artist-profile-info {
+    flex: 1;
+}
+
+.artist-profile-info h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: var(--text);
+}
+
+/* Shows Section Styles */
+.shows-section {
+    background: var(--surface);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text);
+}
+
+/* Event Grid Styles */
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.event-card {
+    background: var(--surface-alt);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.2s;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.event-date {
+    background: var(--accent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    color: white;
+    border-radius: 0.5rem;
+    min-width: 80px;
+}
+
+.event-date .month {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.event-date .day {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0.25rem 0;
+}
+
+.event-date .year {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.event-info {
+    flex: 1;
+}
+
+.event-name {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.125rem;
+    color: var(--text);
+}
+
+/* Setlist Grid Styles */
+.setlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.setlist-card {
+    background: var(--surface-alt);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.2s;
+}
+
+.setlist-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.setlist-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.setlist-name {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text);
+}
+
+.setlist-info .event-name {
+    color: var(--accent);
+    font-weight: 600;
+    margin: 0;
+}
+
+.setlist-info .event-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--subtext);
+    font-size: 0.875rem;
+    background: none;
+    padding: 0;
+    min-width: auto;
+}
+
+.setlist-songs {
+    margin-top: 0.5rem;
+}
+
+.song-count {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--subtext);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.setlist-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Empty State Styles */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: var(--surface-alt);
+    border-radius: 1rem;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text);
+}
+
+.empty-state p {
+    margin: 0;
+    color: var(--subtext);
 }
