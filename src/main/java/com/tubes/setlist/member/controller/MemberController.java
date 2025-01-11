@@ -61,7 +61,7 @@ public class MemberController {
         @RequestParam(defaultValue = "") String name,
         @RequestParam(required = false) String genre,
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "4") int size
+        @RequestParam(defaultValue = "6") int size
     ) {
         if (!checkMemberAccess(session)) {
             return "redirect:/auth/login";
@@ -79,13 +79,13 @@ public class MemberController {
         int totalPages = (int) Math.ceil((double) totalArtists / size);
         
         // Ensure page is within bounds
-        page = Math.max(1, Math.min(page, Math.max(1, totalPages)));
+        page = Math.max(1, Math.min(page, totalPages));
         
-        // Now get just the page we need
-        List<Artists> paginatedArtists = repo.findArtistsByNameAndGenre(name, genre, page, size);
+        // Get paginated artists
+        List<Artists> artists = repo.findArtistsByNameAndGenre(name, genre, page, size);
 
         // Add all necessary attributes to model
-        model.addAttribute("artists", paginatedArtists);
+        model.addAttribute("artists", artists);
         model.addAttribute("genreCounts", genreCounts);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);

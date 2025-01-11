@@ -4,38 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Artist - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/artist.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div th:replace="fragments/navbar :: navbar"></div>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb">
-        <ol>
-            <li><a th:href="@{/member/artists}">Artists</a></li>
-            <li>Edit Artist</li>
-        </ol>
-    </nav>
+    <main class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <ol>
+                <li><a th:href="@{/member/artists}">Artists</a></li>
+                <li th:text="${'Edit ' + artist.artistName}">Edit Artist</li>
+            </ol>
+        </nav>
 
-    <div class="hero artist-hero">
-        <h1>Edit Artist</h1>
-        <p>Update artist details</p>
-    </div>
+        <section class="form-section">
+            <h1 th:text="${'Edit ' + artist.artistName}">Edit Artist</h1>
+            <p class="form-description">Update artist information</p>
 
-    <section class="form-section">
-        <form th:action="@{/member/artists/{id}/edit(id=${artist.idArtist})}" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="artistName">Artist Name</label>
-                <input type="text" id="artistName" name="artistName" th:value="${artist.artistName}" required>
+            <!-- Error Message -->
+            <div class="alert alert-error" th:if="${error}">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${error}"></span>
             </div>
-            <div class="form-group">
-                <label for="image">Image</label>
-                <input type="file" id="image" name="image">
-                <p th:if="${artist.imageUrl}">Current Image: <img th:src="${artist.imageUrl}" alt="Current Artist Image" style="width: 100px; height: auto;"></p>
-            </div>
-            <button type="submit" class="btn btn-primary">Update Artist</button>
-        </form>
-    </section>
+
+            <form th:action="@{/member/artists/{id}/edit(id=${artist.idArtist})}" 
+                  method="post" 
+                  enctype="multipart/form-data" 
+                  class="artist-form">
+                <div class="form-group">
+                    <label for="artistName">Artist Name <span class="required">*</span></label>
+                    <input type="text" id="artistName" name="artistName" 
+                           th:value="${artist.artistName}" required
+                           placeholder="Enter artist name"
+                           class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Artist Image</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="image" name="image" 
+                               accept="image/*" class="file-input"
+                               onchange="previewImage(event)">
+                        <div class="file-input-preview">
+                            <img id="imagePreview" 
+                                 th:src="${artist.imageUrl != null ? artist.imageUrl : 'https://placehold.co/400x400'}" 
+                                 th:alt="${artist.artistName + ' Image'}">
+                            <div class="file-input-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>Change Image</span>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="form-text">Leave empty to keep current image</small>
+                </div>
+
+                <div class="form-actions">
+                    <a th:href="@{/member/artists}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        function previewImage(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </body>
 </html>

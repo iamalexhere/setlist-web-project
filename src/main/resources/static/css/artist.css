@@ -473,3 +473,192 @@
     background-color: var(--accent);
     color: var(--background);
 }
+
+/* Management specific styles */
+.action-buttons {
+    margin-top: 1.5rem;
+}
+
+.manage-buttons {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.artist-image:hover .manage-buttons {
+    opacity: 1;
+}
+
+.manage-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--surface);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.manage-btn:hover {
+    background-color: var(--accent);
+    color: var(--surface);
+}
+
+.edit-btn:hover {
+    background-color: var(--green);
+}
+
+.shows-btn:hover {
+    background-color: var(--purple);
+}
+
+/* Form Styles */
+.form-section {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.form-section h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.form-description {
+    color: var(--subtext);
+    margin-bottom: 2rem;
+}
+
+.artist-form {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.required {
+    color: var(--red);
+    margin-left: 0.25rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--surface-light);
+    border-radius: 0.5rem;
+    background: var(--background);
+    color: var(--text);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.1);
+}
+
+.file-input-wrapper {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.file-input-preview {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.file-input-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.file-input-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.file-input-wrapper:hover .file-input-overlay {
+    opacity: 1;
+}
+
+.file-input-overlay i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--subtext);
+    font-size: 0.85rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-error {
+    background: var(--red-light);
+    color: var(--red);
+    border: 1px solid var(--red);
+}
+
+.alert i {
+    font-size: 1.25rem;
+}
