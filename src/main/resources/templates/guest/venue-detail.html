@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${venue.venueName + ' - Setlist'}">Venue - Setlist</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/venue.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main>
+        <section class="venue-detail-header">
+            <div class="container">
+                <div class="venue-detail-info">
+                    <h1 th:text="${venue.venueName}">Venue Name</h1>
+                    <div class="venue-detail-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span th:text="${venue.cityName}">City Name</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container">
+            <!-- Upcoming Events -->
+            <section class="events-section" th:if="${not #lists.isEmpty(venue.upcomingEvents)}">
+                <h2>Upcoming Events</h2>
+                <p class="section-description">Don't miss out on these upcoming performances</p>
+
+                <div class="event-grid">
+                    <div class="event-card" th:each="event : ${venue.upcomingEvents}">
+                        <div class="event-info">
+                            <div class="event-date">
+                                <i class="far fa-calendar"></i>
+                                <span th:text="${#temporals.format(event.eventDate, 'EEE, MMM d, yyyy')}">Jan 1, 2024</span>
+                            </div>
+                            <h3 th:text="${event.eventName}">Event Name</h3>
+                            <div class="event-artists" th:if="${not #lists.isEmpty(event.artists)}">
+                                <div class="artist-tags">
+                                    <span class="artist-tag" th:each="artist : ${event.artists}" th:text="${artist}">
+                                        Artist Name
+                                    </span>
+                                </div>
+                            </div>
+                            <a th:href="@{/guest/events/{id}(id=${event.idEvent})}" class="view-event">
+                                <span>View Details</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Past Events -->
+            <section class="events-section" th:if="${not #lists.isEmpty(venue.pastEvents)}">
+                <h2>Past Events</h2>
+                <p class="section-description">Check out the amazing shows that happened here</p>
+
+                <div class="event-grid">
+                    <div class="event-card" th:each="event : ${venue.pastEvents}">
+                        <div class="event-info">
+                            <div class="event-date">
+                                <i class="far fa-calendar"></i>
+                                <span th:text="${#temporals.format(event.eventDate, 'EEE, MMM d, yyyy')}">Jan 1, 2024</span>
+                            </div>
+                            <h3 th:text="${event.eventName}">Event Name</h3>
+                            <div class="event-artists" th:if="${not #lists.isEmpty(event.artists)}">
+                                <div class="artist-tags">
+                                    <span class="artist-tag" th:each="artist : ${event.artists}" th:text="${artist}">
+                                        Artist Name
+                                    </span>
+                                </div>
+                            </div>
+                            <a th:href="@{/guest/events/{id}(id=${event.idEvent})}" class="view-event">
+                                <span>View Details</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${#lists.isEmpty(venue.upcomingEvents) and #lists.isEmpty(venue.pastEvents)}">
+                <div class="empty-content">
+                    <i class="fas fa-calendar-xmark"></i>
+                    <h3>No Events Found</h3>
+                    <p>There are no events scheduled at this venue yet</p>
+                    <a th:href="@{/guest/events}" class="btn-primary">
+                        <span>Browse All Events</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Setlist. All rights reserved.</p>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>
