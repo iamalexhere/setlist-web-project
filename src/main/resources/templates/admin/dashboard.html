@@ -4,159 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Admin Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-sidebar-header">
-                <h1>Admin Panel</h1>
-            </div>
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item active">
-                    <span class="icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="/admin/members" class="admin-nav-item">
-                    <span class="icon">👥</span>
-                    Members
-                </a>
-                <a href="/admin/setlists" class="admin-nav-item">
-                    <span class="icon">📝</span>
-                    Setlists
-                </a>
-                <a href="/admin/corrections" class="admin-nav-item">
-                    <span class="icon">✏️</span>
-                    Corrections
-                </a>
-                <a href="/admin/reports" class="admin-nav-item">
-                    <span class="icon">📈</span>
-                    Reports
-                </a>
-            </nav>
-        </aside>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <h2>Dashboard</h2>
-                <div class="admin-header-actions">
-                    <div class="admin-profile">
-                        <span class="admin-name">Admin</span>
-                        <a href="/logout" class="btn btn-secondary">Logout</a>
-                    </div>
+    <main class="container">
+        <!-- Welcome Hero -->
+        <section class="hero admin-hero">
+            <div class="hero-content">
+                <h1>Welcome, <span th:text="${username}">Admin</span>!</h1>
+                <p>Manage users, content, and monitor platform activity.</p>
+                <div class="hero-actions">
+                    <a th:href="@{/admin/members}" class="btn btn-primary">
+                        <i class="fas fa-users"></i> Manage Users
+                    </a>
+                    <a th:href="@{/admin/reports}" class="btn btn-secondary">
+                        <i class="fas fa-chart-line"></i> View Reports
+                    </a>
                 </div>
-            </header>
+            </div>
+        </section>
 
-            <!-- Statistics Cards -->
+        <!-- Statistics Overview -->
+        <section class="stats-overview">
+            <div class="section-header">
+                <h2 class="section-title">Platform Statistics</h2>
+            </div>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: var(--blue)">👥</div>
+                    <i class="fas fa-users"></i>
                     <div class="stat-content">
-                        <h3>Total Members</h3>
-                        <p class="stat-number" th:text="${totalMembers}">150</p>
+                        <h3>Total Users</h3>
+                        <p class="stat-number" th:text="${userStats.totalUsers}">0</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: var(--green)">📝</div>
+                    <i class="fas fa-user-plus"></i>
+                    <div class="stat-content">
+                        <h3>New Users This Month</h3>
+                        <p class="stat-number" th:text="${userStats.newUsersThisMonth}">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-music"></i>
+                    <div class="stat-content">
+                        <h3>Total Artists</h3>
+                        <p class="stat-number" th:text="${contentStats.totalArtists}">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-list"></i>
                     <div class="stat-content">
                         <h3>Total Setlists</h3>
-                        <p class="stat-number" th:text="${totalSetlists}">324</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: var(--yellow)">⏳</div>
-                    <div class="stat-content">
-                        <h3>Pending Setlists</h3>
-                        <p class="stat-number" th:text="${pendingSetlists}">12</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: var(--red)">✏️</div>
-                    <div class="stat-content">
-                        <h3>Pending Corrections</h3>
-                        <p class="stat-number" th:text="${pendingCorrections}">8</p>
+                        <p class="stat-number" th:text="${contentStats.totalSetlists}">0</p>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Recent Activity -->
-            <section class="admin-section">
-                <div class="section-header">
-                    <h3>Recent Activity</h3>
-                    <a href="/admin/activity" class="btn btn-text">View All</a>
-                </div>
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background: var(--blue)">📝</div>
-                        <div class="activity-content">
-                            <p class="activity-text">New setlist added by <strong>johndoe</strong></p>
-                            <p class="activity-meta">Taylor Swift - Eras Tour - Singapore National Stadium</p>
-                            <span class="activity-time">2 minutes ago</span>
-                        </div>
-                        <div class="activity-actions">
-                            <a href="/admin/setlists/1" class="btn btn-secondary">Review</a>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background: var(--yellow)">✏️</div>
-                        <div class="activity-content">
-                            <p class="activity-text">Correction submitted by <strong>jane_smith</strong></p>
-                            <p class="activity-meta">Coldplay - Music of the Spheres - Tokyo Dome</p>
-                            <span class="activity-time">15 minutes ago</span>
-                        </div>
-                        <div class="activity-actions">
-                            <a href="/admin/corrections/1" class="btn btn-secondary">Review</a>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background: var(--green)">👤</div>
-                        <div class="activity-content">
-                            <p class="activity-text">New member registered</p>
-                            <p class="activity-meta">mark_wilson</p>
-                            <span class="activity-time">1 hour ago</span>
-                        </div>
-                        <div class="activity-actions">
-                            <a href="/admin/members/1" class="btn btn-secondary">View</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+            <div class="section-header">
+                <h2 class="section-title">Quick Actions</h2>
+            </div>
+            <div class="action-grid">
+                <a th:href="@{/admin/members}" class="action-card">
+                    <i class="fas fa-user-shield"></i>
+                    <h3>User Management</h3>
+                    <p>Manage user accounts and permissions</p>
+                </a>
+                <a th:href="@{/admin/content/pending}" class="action-card">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Content Moderation</h3>
+                    <p>Review and moderate pending content</p>
+                </a>
+                <a th:href="@{/admin/reports}" class="action-card">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Analytics</h3>
+                    <p>View detailed platform statistics</p>
+                </a>
+            </div>
+        </section>
 
-            <!-- Quick Actions -->
-            <section class="admin-section">
-                <div class="section-header">
-                    <h3>Quick Actions</h3>
+        <!-- Recent Activity -->
+        <section class="recent-activity">
+            <div class="section-header">
+                <h2 class="section-title">Recent Activity</h2>
+            </div>
+            <div class="activity-list">
+                <div th:each="activity : ${recentActivity}" class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-text">
+                            <span class="user-name" th:text="${activity.username}">User</span>
+                            <span th:text="${activity.action}">performed an action</span>
+                        </p>
+                        <p class="activity-time" th:text="${#dates.format(activity.action_date, 'dd MMM yyyy HH:mm')}">
+                            01 Jan 2024 12:00
+                        </p>
+                    </div>
                 </div>
-                <div class="quick-actions">
-                    <a th:href="@{/admin/setlists?status=pending}" class="action-card">
-                        <div class="action-icon" style="background: var(--yellow)">⏳</div>
-                        <h4>Review Pending Setlists</h4>
-                        <p>Review and approve new setlist submissions</p>
-                    </a>
-                    <a th:href="@{/admin/corrections}" class="action-card">
-                        <div class="action-icon" style="background: var(--red)">✏️</div>
-                        <h4>Review Corrections</h4>
-                        <p>Review and approve setlist corrections</p>
-                    </a>
-                    <a th:href="@{/admin/members}" class="action-card">
-                        <div class="action-icon" style="background: var(--blue)">👥</div>
-                        <h4>Manage Members</h4>
-                        <p>View and manage member accounts</p>
-                    </a>
-                    <a th:href="@{/admin/reports}" class="action-card">
-                        <div class="action-icon" style="background: var(--green)">📊</div>
-                        <h4>Generate Reports</h4>
-                        <p>View site statistics and generate reports</p>
-                    </a>
-                </div>
-            </section>
-        </main>
-    </div>
+            </div>
+        </section>
+    </main>
 
-    <script>
-        // Add any dashboard-specific JavaScript here
-    </script>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
 </body>
 </html>

@@ -3,544 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports & Analytics - Admin - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>Analytics & Reports - Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Admin Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-sidebar-header">
-                <h1>Admin Panel</h1>
-            </div>
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item">
-                    <span class="icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="/admin/members" class="admin-nav-item">
-                    <span class="icon">👥</span>
-                    Members
-                </a>
-                <a href="/admin/setlists" class="admin-nav-item">
-                    <span class="icon">📝</span>
-                    Setlists
-                </a>
-                <a href="/admin/corrections" class="admin-nav-item">
-                    <span class="icon">✏️</span>
-                    Corrections
-                </a>
-                <a href="/admin/reports" class="admin-nav-item active">
-                    <span class="icon">📈</span>
-                    Reports
-                </a>
-            </nav>
-        </aside>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <h2>Reports & Analytics</h2>
-                <div class="admin-header-actions">
-                    <div class="date-range">
-                        <select id="timeRange" class="form-control">
-                            <option value="7">Last 7 days</option>
-                            <option value="30" selected>Last 30 days</option>
-                            <option value="90">Last 3 months</option>
-                            <option value="365">Last year</option>
-                        </select>
-                    </div>
-                    <div class="admin-profile">
-                        <span class="admin-name">Admin</span>
-                        <a href="/logout" class="btn btn-secondary">Logout</a>
+    <main class="container">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="header-content">
+                <h1>Analytics & Reports</h1>
+                <p>Platform statistics and insights</p>
+            </div>
+        </section>
+
+        <!-- Overview Statistics -->
+        <section class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-content">
+                        <h3>Total Users</h3>
+                        <p class="stat-number" th:text="${stats.totalUsers}">0</p>
+                        <p class="stat-change" th:text="${stats.userGrowth + '%'}">+5%</p>
                     </div>
                 </div>
-            </header>
+                <div class="stat-card">
+                    <i class="fas fa-music"></i>
+                    <div class="stat-content">
+                        <h3>Total Artists</h3>
+                        <p class="stat-number" th:text="${stats.totalArtists}">0</p>
+                        <p class="stat-change" th:text="${stats.artistGrowth + '%'}">+3%</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-list"></i>
+                    <div class="stat-content">
+                        <h3>Total Setlists</h3>
+                        <p class="stat-number" th:text="${stats.totalSetlists}">0</p>
+                        <p class="stat-change" th:text="${stats.setlistGrowth + '%'}">+8%</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-edit"></i>
+                    <div class="stat-content">
+                        <h3>Total Corrections</h3>
+                        <p class="stat-number" th:text="${stats.totalCorrections}">0</p>
+                        <p class="stat-change" th:text="${stats.correctionGrowth + '%'}">+2%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            <!-- Reports Grid -->
-            <div class="reports-grid">
-                <!-- Activity Timeline -->
-                <div class="report-card wide">
-                    <div class="report-header">
-                        <h3>Activity Timeline</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-text active" data-metric="setlists">Setlists</button>
-                            <button class="btn btn-text" data-metric="corrections">Corrections</button>
-                            <button class="btn btn-text" data-metric="members">New Members</button>
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-grid">
+                <!-- User Growth Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>User Growth</h3>
+                        <div class="chart-actions">
+                            <select id="userGrowthPeriod" class="form-select">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                            </select>
                         </div>
                     </div>
-                    <div id="timelineChart" class="chart-container"></div>
+                    <div class="chart-container">
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
                 </div>
 
-                <!-- Top Artists -->
-                <div class="report-card">
-                    <div class="report-header">
+                <!-- Content Growth Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Content Growth</h3>
+                        <div class="chart-actions">
+                            <select id="contentGrowthPeriod" class="form-select">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="contentGrowthChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- User Activity Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>User Activity</h3>
+                        <div class="chart-actions">
+                            <select id="activityPeriod" class="form-select">
+                                <option value="24">Last 24 Hours</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="userActivityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Artists Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
                         <h3>Top Artists</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-icon" title="Download CSV">📥</button>
+                        <div class="chart-actions">
+                            <select id="topArtistsPeriod" class="form-select">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                            </select>
                         </div>
                     </div>
-                    <div id="artistsChart" class="chart-container"></div>
-                </div>
-
-                <!-- Popular Venues -->
-                <div class="report-card">
-                    <div class="report-header">
-                        <h3>Popular Venues</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-icon" title="Download CSV">📥</button>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="topArtistsChart"></canvas>
                     </div>
-                    <div id="venuesChart" class="chart-container"></div>
-                </div>
-
-                <!-- Member Growth -->
-                <div class="report-card wide">
-                    <div class="report-header">
-                        <h3>Member Growth</h3>
-                        <div class="report-actions">
-                            <button class="btn btn-text active" data-view="cumulative">Cumulative</button>
-                            <button class="btn btn-text" data-view="monthly">Monthly</button>
-                        </div>
-                    </div>
-                    <div id="memberGrowthChart" class="chart-container"></div>
-                </div>
-
-                <!-- Contribution Distribution -->
-                <div class="report-card">
-                    <div class="report-header">
-                        <h3>Contribution Distribution</h3>
-                    </div>
-                    <div id="contributionChart" class="chart-container"></div>
-                </div>
-
-                <!-- Correction Success Rate -->
-                <div class="report-card">
-                    <div class="report-header">
-                        <h3>Correction Success Rate</h3>
-                    </div>
-                    <div id="correctionRateChart" class="chart-container"></div>
                 </div>
             </div>
-        </main>
-    </div>
+        </section>
 
+        <!-- Detailed Reports -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Detailed Reports</h2>
+                <div class="section-actions">
+                    <button id="downloadReport" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
+                </div>
+            </div>
+
+            <div class="report-grid">
+                <!-- User Activity Report -->
+                <div class="report-card">
+                    <h3>User Activity</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Count</th>
+                                <th>Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="activity : ${userActivity}">
+                                <td th:text="${activity.action}">Setlist Creation</td>
+                                <td th:text="${activity.count}">150</td>
+                                <td>
+                                    <span class="change-indicator" 
+                                          th:classappend="${activity.change >= 0 ? 'positive' : 'negative'}"
+                                          th:text="${activity.change + '%'}">+5%</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Content Report -->
+                <div class="report-card">
+                    <h3>Content Overview</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Content Type</th>
+                                <th>Total</th>
+                                <th>This Month</th>
+                                <th>Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="content : ${contentOverview}">
+                                <td th:text="${content.type}">Artists</td>
+                                <td th:text="${content.total}">500</td>
+                                <td th:text="${content.thisMonth}">50</td>
+                                <td>
+                                    <span class="change-indicator" 
+                                          th:classappend="${content.change >= 0 ? 'positive' : 'negative'}"
+                                          th:text="${content.change + '%'}">+10%</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script th:src="@{/js/dashboard.js}"></script>
     <script th:inline="javascript">
-        // Get data from Thymeleaf
-        const timelineData = /*[[${timelineData}]]*/ [];
-        const artistData = /*[[${artistData}]]*/ [];
-        const venueData = /*[[${venueData}]]*/ [];
-        const memberGrowthData = /*[[${memberGrowthData}]]*/ [];
-        const contributionData = /*[[${contributionData}]]*/ [];
-        const correctionRateData = /*[[${correctionRateData}]]*/ [];
+        // Chart.js Configurations
+        const userGrowthData = /*[[${userGrowthData}]]*/ {};
+        const contentGrowthData = /*[[${contentGrowthData}]]*/ {};
+        const userActivityData = /*[[${userActivityData}]]*/ {};
+        const topArtistsData = /*[[${topArtistsData}]]*/ {};
 
-        // Initialize charts when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            initTimelineChart();
-            initArtistsChart();
-            initVenuesChart();
-            initMemberGrowthChart();
-            initContributionChart();
-            initCorrectionRateChart();
-        });
-
-        // Activity Timeline Chart
-        function initTimelineChart() {
-            const margin = {top: 20, right: 30, bottom: 30, left: 40};
-            const width = document.getElementById('timelineChart').clientWidth - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
-
-            const svg = d3.select('#timelineChart')
-                .append('svg')
-                    .attr('width', width + margin.left + margin.right)
-                    .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                    .attr('transform', `translate(${margin.left},${margin.top})`);
-
-            // Create scales
-            const x = d3.scaleTime()
-                .domain(d3.extent(timelineData, d => new Date(d.date)))
-                .range([0, width]);
-
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(timelineData, d => d.value)])
-                .range([height, 0]);
-
-            // Add axes
-            svg.append('g')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-
-            svg.append('g')
-                .call(d3.axisLeft(y));
-
-            // Create line generator
-            const line = d3.line()
-                .x(d => x(new Date(d.date)))
-                .y(d => y(d.value))
-                .curve(d3.curveMonotoneX);
-
-            // Add the line path
-            svg.append('path')
-                .datum(timelineData)
-                .attr('class', 'line')
-                .attr('d', line)
-                .attr('fill', 'none')
-                .attr('stroke', 'var(--blue)')
-                .attr('stroke-width', 2);
-
-            // Add dots
-            svg.selectAll('.dot')
-                .data(timelineData)
-                .enter().append('circle')
-                .attr('class', 'dot')
-                .attr('cx', d => x(new Date(d.date)))
-                .attr('cy', d => y(d.value))
-                .attr('r', 4)
-                .attr('fill', 'var(--blue)');
-
-            // Add hover effects
-            const tooltip = d3.select('#timelineChart')
-                .append('div')
-                .attr('class', 'tooltip')
-                .style('opacity', 0);
-
-            svg.selectAll('.dot')
-                .on('mouseover', function(event, d) {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .attr('r', 6);
-
-                    tooltip.transition()
-                        .duration(200)
-                        .style('opacity', .9);
-                    
-                    tooltip.html(`${d.date}<br/>${d.value} items`)
-                        .style('left', (event.pageX + 10) + 'px')
-                        .style('top', (event.pageY - 28) + 'px');
-                })
-                .on('mouseout', function() {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .attr('r', 4);
-
-                    tooltip.transition()
-                        .duration(500)
-                        .style('opacity', 0);
-                });
-        }
-
-        // Top Artists Chart (Horizontal Bar Chart)
-        function initArtistsChart() {
-            const margin = {top: 20, right: 30, bottom: 40, left: 90};
-            const width = document.getElementById('artistsChart').clientWidth - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
-
-            const svg = d3.select('#artistsChart')
-                .append('svg')
-                    .attr('width', width + margin.left + margin.right)
-                    .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                    .attr('transform', `translate(${margin.left},${margin.top})`);
-
-            // Create scales
-            const x = d3.scaleLinear()
-                .domain([0, d3.max(artistData, d => d.count)])
-                .range([0, width]);
-
-            const y = d3.scaleBand()
-                .domain(artistData.map(d => d.name))
-                .range([0, height])
-                .padding(0.1);
-
-            // Add axes
-            svg.append('g')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-
-            svg.append('g')
-                .call(d3.axisLeft(y));
-
-            // Add bars
-            svg.selectAll('rect')
-                .data(artistData)
-                .enter()
-                .append('rect')
-                    .attr('y', d => y(d.name))
-                    .attr('height', y.bandwidth())
-                    .attr('x', 0)
-                    .attr('width', d => x(d.count))
-                    .attr('fill', 'var(--blue)')
-                    .attr('rx', 4)
-                    .attr('ry', 4);
-
-            // Add value labels
-            svg.selectAll('.value')
-                .data(artistData)
-                .enter()
-                .append('text')
-                    .attr('class', 'value')
-                    .attr('x', d => x(d.count) + 5)
-                    .attr('y', d => y(d.name) + y.bandwidth() / 2)
-                    .attr('dy', '.35em')
-                    .text(d => d.count);
-        }
-
-        // Popular Venues Chart (Donut Chart)
-        function initVenuesChart() {
-            const width = document.getElementById('venuesChart').clientWidth;
-            const height = 300;
-            const radius = Math.min(width, height) / 2;
-
-            const svg = d3.select('#venuesChart')
-                .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                .append('g')
-                    .attr('transform', `translate(${width/2},${height/2})`);
-
-            const color = d3.scaleOrdinal()
-                .domain(venueData.map(d => d.name))
-                .range(d3.schemeCategory10);
-
-            const pie = d3.pie()
-                .value(d => d.count)
-                .sort(null);
-
-            const arc = d3.arc()
-                .innerRadius(radius * 0.6)
-                .outerRadius(radius * 0.8);
-
-            const outerArc = d3.arc()
-                .innerRadius(radius * 0.9)
-                .outerRadius(radius * 0.9);
-
-            // Add the arcs
-            const paths = svg.selectAll('path')
-                .data(pie(venueData))
-                .enter()
-                .append('path')
-                    .attr('d', arc)
-                    .attr('fill', d => color(d.data.name))
-                    .attr('stroke', 'var(--base)')
-                    .style('stroke-width', '2px');
-
-            // Add labels
-            const labels = svg.selectAll('text')
-                .data(pie(venueData))
-                .enter()
-                .append('text')
-                    .attr('dy', '.35em')
-                    .text(d => `${d.data.name} (${d.data.count})`);
-
-            function midAngle(d) {
-                return d.startAngle + (d.endAngle - d.startAngle) / 2;
+        // User Growth Chart
+        const userGrowthChart = new Chart(
+            document.getElementById('userGrowthChart'),
+            {
+                type: 'line',
+                data: {
+                    labels: userGrowthData.labels,
+                    datasets: [{
+                        label: 'New Users',
+                        data: userGrowthData.values,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
             }
+        );
 
-            labels.attr('transform', function(d) {
-                const pos = outerArc.centroid(d);
-                pos[0] = radius * (midAngle(d) < Math.PI ? 1 : -1);
-                return `translate(${pos})`;
-            })
-            .style('text-anchor', function(d) {
-                return midAngle(d) < Math.PI ? 'start' : 'end';
-            });
+        // Content Growth Chart
+        const contentGrowthChart = new Chart(
+            document.getElementById('contentGrowthChart'),
+            {
+                type: 'line',
+                data: {
+                    labels: contentGrowthData.labels,
+                    datasets: [
+                        {
+                            label: 'Setlists',
+                            data: contentGrowthData.setlists,
+                            borderColor: 'rgb(255, 99, 132)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Artists',
+                            data: contentGrowthData.artists,
+                            borderColor: 'rgb(54, 162, 235)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        );
 
-            // Add polylines
-            const polylines = svg.selectAll('polyline')
-                .data(pie(venueData))
-                .enter()
-                .append('polyline');
+        // User Activity Chart
+        const userActivityChart = new Chart(
+            document.getElementById('userActivityChart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: userActivityData.labels,
+                    datasets: [{
+                        label: 'Active Users',
+                        data: userActivityData.values,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+        );
 
-            polylines.attr('points', function(d) {
-                const pos = outerArc.centroid(d);
-                pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
-                return [arc.centroid(d), outerArc.centroid(d), pos];
-            })
-            .style('fill', 'none')
-            .style('stroke', 'var(--text-op)')
-            .style('stroke-width', '1px');
-        }
+        // Top Artists Chart
+        const topArtistsChart = new Chart(
+            document.getElementById('topArtistsChart'),
+            {
+                type: 'doughnut',
+                data: {
+                    labels: topArtistsData.labels,
+                    datasets: [{
+                        data: topArtistsData.values,
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 205, 86)',
+                            'rgb(75, 192, 192)',
+                            'rgb(153, 102, 255)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        );
 
-        // Member Growth Chart (Area Chart)
-        function initMemberGrowthChart() {
-            const margin = {top: 20, right: 30, bottom: 30, left: 40};
-            const width = document.getElementById('memberGrowthChart').clientWidth - margin.left - margin.right;
-            const height = 300 - margin.top - margin.bottom;
+        // Period change handlers
+        document.getElementById('userGrowthPeriod').addEventListener('change', function(e) {
+            updateChart('userGrowth', e.target.value);
+        });
 
-            const svg = d3.select('#memberGrowthChart')
-                .append('svg')
-                    .attr('width', width + margin.left + margin.right)
-                    .attr('height', height + margin.top + margin.bottom)
-                .append('g')
-                    .attr('transform', `translate(${margin.left},${margin.top})`);
+        document.getElementById('contentGrowthPeriod').addEventListener('change', function(e) {
+            updateChart('contentGrowth', e.target.value);
+        });
 
-            // Create scales
-            const x = d3.scaleTime()
-                .domain(d3.extent(memberGrowthData, d => new Date(d.date)))
-                .range([0, width]);
+        document.getElementById('activityPeriod').addEventListener('change', function(e) {
+            updateChart('activity', e.target.value);
+        });
 
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(memberGrowthData, d => d.count)])
-                .range([height, 0]);
+        document.getElementById('topArtistsPeriod').addEventListener('change', function(e) {
+            updateChart('topArtists', e.target.value);
+        });
 
-            // Add axes
-            svg.append('g')
-                .attr('transform', `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-
-            svg.append('g')
-                .call(d3.axisLeft(y));
-
-            // Create area generator
-            const area = d3.area()
-                .x(d => x(new Date(d.date)))
-                .y0(height)
-                .y1(d => y(d.count))
-                .curve(d3.curveMonotoneX);
-
-            // Add the area
-            svg.append('path')
-                .datum(memberGrowthData)
-                .attr('class', 'area')
-                .attr('d', area)
-                .attr('fill', 'var(--blue)')
-                .attr('fill-opacity', 0.2);
-
-            // Add the line
-            const line = d3.line()
-                .x(d => x(new Date(d.date)))
-                .y(d => y(d.count))
-                .curve(d3.curveMonotoneX);
-
-            svg.append('path')
-                .datum(memberGrowthData)
-                .attr('class', 'line')
-                .attr('d', line)
-                .attr('fill', 'none')
-                .attr('stroke', 'var(--blue)')
-                .attr('stroke-width', 2);
-        }
-
-        // Contribution Distribution Chart (Pie Chart)
-        function initContributionChart() {
-            const width = document.getElementById('contributionChart').clientWidth;
-            const height = 300;
-            const radius = Math.min(width, height) / 2;
-
-            const svg = d3.select('#contributionChart')
-                .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                .append('g')
-                    .attr('transform', `translate(${width/2},${height/2})`);
-
-            const color = d3.scaleOrdinal()
-                .domain(contributionData.map(d => d.type))
-                .range(['var(--blue)', 'var(--green)', 'var(--yellow)']);
-
-            const pie = d3.pie()
-                .value(d => d.count)
-                .sort(null);
-
-            const arc = d3.arc()
-                .innerRadius(0)
-                .outerRadius(radius * 0.8);
-
-            // Add the arcs
-            const arcs = svg.selectAll('arc')
-                .data(pie(contributionData))
-                .enter()
-                .append('g')
-                .attr('class', 'arc');
-
-            arcs.append('path')
-                .attr('d', arc)
-                .attr('fill', d => color(d.data.type))
-                .attr('stroke', 'var(--base)')
-                .style('stroke-width', '2px');
-
-            // Add labels
-            arcs.append('text')
-                .attr('transform', d => `translate(${arc.centroid(d)})`)
-                .attr('dy', '.35em')
-                .style('text-anchor', 'middle')
-                .text(d => `${d.data.type}: ${d.data.count}`);
-        }
-
-        // Correction Success Rate Chart (Gauge Chart)
-        function initCorrectionRateChart() {
-            const width = document.getElementById('correctionRateChart').clientWidth;
-            const height = 300;
-            const radius = Math.min(width, height) / 2;
-
-            const svg = d3.select('#correctionRateChart')
-                .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                .append('g')
-                    .attr('transform', `translate(${width/2},${height/2})`);
-
-            const successRate = correctionRateData.approved / 
-                (correctionRateData.approved + correctionRateData.rejected) * 100;
-
-            const arc = d3.arc()
-                .innerRadius(radius * 0.7)
-                .outerRadius(radius * 0.9)
-                .startAngle(-Math.PI / 2);
-
-            // Background arc
-            svg.append('path')
-                .datum({endAngle: Math.PI / 2})
-                .style('fill', 'var(--surface0)')
-                .attr('d', arc);
-
-            // Foreground arc
-            const foreground = svg.append('path')
-                .datum({endAngle: -Math.PI / 2})
-                .style('fill', 'var(--green)')
-                .attr('d', arc);
-
-            // Add the percentage text
-            svg.append('text')
-                .attr('text-anchor', 'middle')
-                .attr('dy', '0.35em')
-                .style('font-size', '2em')
-                .text(`${Math.round(successRate)}%`);
-
-            // Animate the foreground arc
-            foreground.transition()
-                .duration(1000)
-                .attrTween('d', function(d) {
-                    const interpolate = d3.interpolate(d.endAngle, (-Math.PI / 2) + (Math.PI * (successRate / 100)));
-                    return function(t) {
-                        d.endAngle = interpolate(t);
-                        return arc(d);
-                    };
+        // Chart update function
+        function updateChart(chartType, period) {
+            fetch(`/admin/reports/data/${chartType}?period=${period}`)
+                .then(response => response.json())
+                .then(data => {
+                    switch(chartType) {
+                        case 'userGrowth':
+                            userGrowthChart.data.labels = data.labels;
+                            userGrowthChart.data.datasets[0].data = data.values;
+                            userGrowthChart.update();
+                            break;
+                        case 'contentGrowth':
+                            contentGrowthChart.data.labels = data.labels;
+                            contentGrowthChart.data.datasets[0].data = data.setlists;
+                            contentGrowthChart.data.datasets[1].data = data.artists;
+                            contentGrowthChart.update();
+                            break;
+                        case 'activity':
+                            userActivityChart.data.labels = data.labels;
+                            userActivityChart.data.datasets[0].data = data.values;
+                            userActivityChart.update();
+                            break;
+                        case 'topArtists':
+                            topArtistsChart.data.labels = data.labels;
+                            topArtistsChart.data.datasets[0].data = data.values;
+                            topArtistsChart.update();
+                            break;
+                    }
                 });
         }
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            // Clear all charts
-            d3.selectAll('.chart-container svg').remove();
-
-            // Reinitialize charts
-            initTimelineChart();
-            initArtistsChart();
-            initVenuesChart();
-            initMemberGrowthChart();
-            initContributionChart();
-            initCorrectionRateChart();
-        });
-
-        // Handle time range changes
-        document.getElementById('timeRange').addEventListener('change', function(e) {
-            // TODO: Fetch new data based on selected time range
-            // and update charts
+        // Download report handler
+        document.getElementById('downloadReport').addEventListener('click', function() {
+            window.location.href = '/admin/reports/download';
         });
     </script>
 </body>

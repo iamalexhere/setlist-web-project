@@ -3,212 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Members - Admin - Setlist</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>User Management - Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Admin Sidebar -->
-        <aside class="admin-sidebar">
-            <div class="admin-sidebar-header">
-                <h1>Admin Panel</h1>
-            </div>
-            <nav class="admin-nav">
-                <a href="/admin" class="admin-nav-item">
-                    <span class="icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="/admin/members" class="admin-nav-item active">
-                    <span class="icon">👥</span>
-                    Members
-                </a>
-                <a href="/admin/setlists" class="admin-nav-item">
-                    <span class="icon">📝</span>
-                    Setlists
-                </a>
-                <a href="/admin/corrections" class="admin-nav-item">
-                    <span class="icon">✏️</span>
-                    Corrections
-                </a>
-                <a href="/admin/reports" class="admin-nav-item">
-                    <span class="icon">📈</span>
-                    Reports
-                </a>
-            </nav>
-        </aside>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <!-- Main Content -->
-        <main class="admin-main">
-            <header class="admin-header">
-                <h2>Manage Members</h2>
-                <div class="admin-header-actions">
+    <main class="container">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="header-content">
+                <h1>User Management</h1>
+                <p>Manage and monitor user accounts</p>
+            </div>
+        </section>
+
+        <!-- User Statistics -->
+        <section class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-content">
+                        <h3>Total Users</h3>
+                        <p class="stat-number" th:text="${userStats.totalUsers}">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-user-plus"></i>
+                    <div class="stat-content">
+                        <h3>New Users</h3>
+                        <p class="stat-number" th:text="${userStats.newUsersThisMonth}">0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- User List -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">User List</h2>
+                <div class="section-actions">
                     <div class="search-box">
-                        <input type="text" id="memberSearch" placeholder="Search members..." class="form-control">
+                        <input type="text" id="userSearch" placeholder="Search users...">
+                        <i class="fas fa-search"></i>
                     </div>
-                    <div class="admin-profile">
-                        <span class="admin-name">Admin</span>
-                        <a href="/logout" class="btn btn-secondary">Logout</a>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Filters -->
-            <div class="filter-bar">
-                <div class="filter-group">
-                    <label>Status:</label>
-                    <select class="form-control" id="statusFilter">
-                        <option value="">All</option>
-                        <option value="active">Active</option>
-                        <option value="suspended">Suspended</option>
-                        <option value="pending">Pending</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Sort by:</label>
-                    <select class="form-control" id="sortBy">
-                        <option value="joined">Join Date</option>
-                        <option value="contributions">Contributions</option>
-                        <option value="username">Username</option>
-                    </select>
                 </div>
             </div>
 
-            <!-- Members Table -->
-            <div class="table-container">
-                <table class="admin-table">
+            <div class="table-responsive">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Username</th>
                             <th>Email</th>
-                            <th>Join Date</th>
-                            <th>Contributions</th>
+                            <th>Role</th>
+                            <th>Created</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="member : ${members}">
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.username}">username</td>
+                            <td th:text="${user.email}">email@example.com</td>
                             <td>
-                                <div class="member-info">
-                                    <img th:src="${member.avatar}" alt="Avatar" class="member-avatar">
-                                    <span th:text="${member.username}">johndoe</span>
-                                </div>
+                                <span class="badge" th:classappend="${user.idRole == 1 ? 'badge-admin' : 'badge-member'}"
+                                      th:text="${user.idRole == 1 ? 'Admin' : 'Member'}">Role</span>
                             </td>
-                            <td th:text="${member.email}">john@example.com</td>
-                            <td th:text="${#temporals.format(member.joinDate, 'dd MMM yyyy')}">01 Jan 2024</td>
+                            <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">01 Jan 2024</td>
                             <td>
-                                <div class="contribution-stats">
-                                    <span class="stat" th:text="${member.setlistCount} + ' setlists'">5 setlists</span>
-                                    <span class="stat" th:text="${member.correctionCount} + ' corrections'">2 corrections</span>
-                                </div>
+                                <span class="badge" th:classappend="${user.deleted ? 'badge-blocked' : 'badge-active'}"
+                                      th:text="${user.deleted ? 'Blocked' : 'Active'}">Status</span>
                             </td>
-                            <td>
-                                <span th:class="'status-badge ' + ${member.status}" th:text="${member.status}">Active</span>
-                            </td>
-                            <td>
-                                <div class="table-actions">
-                                    <a th:href="@{/admin/members/{id}(id=${member.id})}" class="btn btn-icon" title="View Details">👁️</a>
-                                    <button class="btn btn-icon" th:if="${member.status == 'active'}" 
-                                            th:onclick="'suspendMember(' + ${member.id} + ')'" title="Suspend Member">🚫</button>
-                                    <button class="btn btn-icon" th:if="${member.status == 'suspended'}" 
-                                            th:onclick="'activateMember(' + ${member.id} + ')'" title="Activate Member">✅</button>
-                                </div>
+                            <td class="actions">
+                                <button th:if="${!user.deleted}" class="btn btn-danger btn-sm"
+                                        th:onclick="'blockUser(' + ${user.idUser} + ')'">
+                                    <i class="fas fa-ban"></i> Block
+                                </button>
+                                <button th:if="${user.deleted}" class="btn btn-success btn-sm"
+                                        th:onclick="'unblockUser(' + ${user.idUser} + ')'">
+                                    <i class="fas fa-check"></i> Unblock
+                                </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+        </section>
+    </main>
 
-            <!-- Pagination -->
-            <div class="pagination">
-                <button class="btn btn-secondary" th:disabled="${currentPage == 1}">Previous</button>
-                <span class="pagination-info" th:text="${currentPage + ' of ' + totalPages}">1 of 5</span>
-                <button class="btn btn-secondary" th:disabled="${currentPage == totalPages}">Next</button>
-            </div>
-        </main>
-    </div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
-    <!-- Member Action Modal -->
-    <div id="actionModal" class="modal">
-        <div class="modal-content">
-            <h3>Confirm Action</h3>
-            <p id="modalMessage">Are you sure you want to suspend this member?</p>
-            <div class="form-group">
-                <label for="actionReason">Reason:</label>
-                <textarea id="actionReason" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="confirmAction()">Confirm</button>
-            </div>
-        </div>
-    </div>
-
+    <script th:src="@{/js/dashboard.js}"></script>
     <script>
-        // Member management functions
-        function suspendMember(memberId) {
-            showModal('suspend', memberId);
+        function blockUser(userId) {
+            if (confirm('Are you sure you want to block this user?')) {
+                fetch(`/admin/members/${userId}/block`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to block user');
+                    }
+                });
+            }
         }
 
-        function activateMember(memberId) {
-            showModal('activate', memberId);
+        function unblockUser(userId) {
+            if (confirm('Are you sure you want to unblock this user?')) {
+                fetch(`/admin/members/${userId}/unblock`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Failed to unblock user');
+                    }
+                });
+            }
         }
 
-        function showModal(action, memberId) {
-            const modal = document.getElementById('actionModal');
-            const message = document.getElementById('modalMessage');
+        // Search functionality
+        document.getElementById('userSearch').addEventListener('input', function(e) {
+            const searchText = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
             
-            modal.dataset.action = action;
-            modal.dataset.memberId = memberId;
-            
-            message.textContent = action === 'suspend' 
-                ? 'Are you sure you want to suspend this member?' 
-                : 'Are you sure you want to activate this member?';
-            
-            modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('actionModal');
-            modal.style.display = 'none';
-            document.getElementById('actionReason').value = '';
-        }
-
-        function confirmAction() {
-            const modal = document.getElementById('actionModal');
-            const action = modal.dataset.action;
-            const memberId = modal.dataset.memberId;
-            const reason = document.getElementById('actionReason').value;
-
-            fetch(`/admin/members/${memberId}/status`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    status: action === 'suspend' ? 'suspended' : 'active',
-                    reason: reason
-                })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                }
+            rows.forEach(row => {
+                const username = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                const visible = username.includes(searchText) || email.includes(searchText);
+                row.style.display = visible ? '' : 'none';
             });
-
-            closeModal();
-        }
-
-        // Search and filter functionality
-        document.getElementById('memberSearch').addEventListener('input', function(e) {
-            // Implement search functionality
-        });
-
-        document.getElementById('statusFilter').addEventListener('change', function(e) {
-            // Implement status filtering
-        });
-
-        document.getElementById('sortBy').addEventListener('change', function(e) {
-            // Implement sorting
         });
     </script>
 </body>
