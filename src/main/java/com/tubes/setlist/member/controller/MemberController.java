@@ -51,7 +51,7 @@ public class MemberController {
     
     private boolean checkMemberAccess(HttpSession session) {
         String role = (String) session.getAttribute("role");
-        return role != null && role.equals("Member");
+        return role != null && (role.equals("Member") || role.equals("Admin"));
     }
     
     private void addUserAttributes(HttpSession session, Model model) {

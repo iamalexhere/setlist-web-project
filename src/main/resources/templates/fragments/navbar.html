@@ -12,9 +12,9 @@
         <div class="container">
             <div class="nav-content">
                 <div class="left-nav">
-                    <a th:href="${session.role == 'Member' ? '/member/dashboard' : '/'}" class="brand">SETLIST</a>
+                    <a th:href="${session.role == 'Admin' ? '/admin/dashboard' : (session.role == 'Member' ? '/member/dashboard' : '/')}" class="brand">SETLIST</a>
                     <div class="search-container">
-                        <form th:action="@{/guest/events}" method="get">
+                        <form th:action="${session.role == 'Admin' ? '/admin/events' : (session.role == 'Member' ? '/member/events' : '/guest/events')}" method="get">
                             <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gray-400)"></i>
                             <input type="text" name="query" class="search-box" placeholder="What do you want to see live?">
                         </form>
@@ -22,11 +22,9 @@
                 </div>
                 
                 <!-- Guest Navigation -->
-                <div class="nav-links" th:if="${session.role == null || session.role != 'Member'}">
+                <div class="nav-links" th:if="${session.role == null}">
                     <a class="nav-link" th:href="@{/guest/events}" 
                        th:classappend="${activePage == 'events' ? 'active' : ''}">Events</a>
-                    <a class="nav-link" th:href="@{/guest/artists}" 
-                       th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
                     <a class="nav-link" th:href="@{/guest/venues}" 
                        th:classappend="${activePage == 'venues' ? 'active' : ''}">Venues</a>
                     <a class="nav-link" th:href="@{/guest/setlists}" 
@@ -37,14 +35,42 @@
 
                 <!-- Member Navigation -->
                 <div class="nav-links" th:if="${session.role == 'Member'}">
+                    <a class="nav-link" th:href="@{/member/events}" 
+                       th:classappend="${activePage == 'events' ? 'active' : ''}">Events</a>
                     <a class="nav-link" th:href="@{/member/artists}" 
                        th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
-                    <a class="nav-link" th:href="@{/member/shows}" 
-                       th:classappend="${activePage == 'shows' ? 'active' : ''}">Shows</a>
                     <a class="nav-link" th:href="@{/member/setlists}" 
                        th:classappend="${activePage == 'setlists' ? 'active' : ''}">Setlists</a>
                     <a class="nav-link" th:href="@{/member/songs}" 
                        th:classappend="${activePage == 'songs' ? 'active' : ''}">Songs</a>
+                </div>
+
+                <!-- Admin Navigation -->
+                <div class="nav-links admin-nav" th:if="${session.role == 'Admin'}">
+                    <!-- Regular menu items -->
+                    <div class="regular-menu">
+                        <a class="nav-link" th:href="@{/member/events}" 
+                           th:classappend="${activePage == 'events' ? 'active' : ''}">Events</a>
+                        <a class="nav-link" th:href="@{/member/artists}" 
+                           th:classappend="${activePage == 'artists' ? 'active' : ''}">Artists</a>
+                        <a class="nav-link" th:href="@{/member/venues}" 
+                           th:classappend="${activePage == 'venues' ? 'active' : ''}">Venues</a>
+                        <a class="nav-link" th:href="@{/member/setlists}" 
+                           th:classappend="${activePage == 'setlists' ? 'active' : ''}">Setlists</a>
+                        <a class="nav-link" th:href="@{/member/songs}" 
+                           th:classappend="${activePage == 'songs' ? 'active' : ''}">Songs</a>
+                    </div>
+                    <!-- Admin specific menu items -->
+                    <div class="admin-menu">
+                        <a class="nav-link admin-link" th:href="@{/admin/dashboard}" 
+                           th:classappend="${activePage == 'dashboard' ? 'active' : ''}">
+                           <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                        <a class="nav-link admin-link" th:href="@{/admin/reports}" 
+                           th:classappend="${activePage == 'reports' ? 'active' : ''}">
+                           <i class="fas fa-file-alt"></i> Reports
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Authentication -->
