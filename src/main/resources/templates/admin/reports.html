@@ -98,7 +98,38 @@
         const songsByArtist = /*[[${songsByArtist}]]*/ {};
         const monthlySetlists = /*[[${monthlySetlists}]]*/ {};
 
-        // Chart configurations with larger font sizes for better readability in PDF
+        // Initialize charts object to store chart instances
+        let charts = {};
+
+        // Color schemes
+        const colorSchemes = {
+            blue: {
+                primary: '#4A90E2',
+                secondary: '#357ABD'
+            },
+            green: {
+                primary: '#2ECC71',
+                secondary: '#27AE60'
+            },
+            purple: {
+                primary: '#9B59B6',
+                secondary: '#8E44AD'
+            },
+            orange: {
+                primary: '#E67E22',
+                secondary: '#D35400'
+            }
+        };
+
+        // Create gradient
+        function createGradient(ctx, colorScheme) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, colorScheme.primary + '80');  // 50% opacity
+            gradient.addColorStop(1, colorScheme.secondary + '20'); // 12.5% opacity
+            return gradient;
+        }
+
+        // Chart configurations with improved styling
         const chartConfig = {
             responsive: true,
             maintainAspectRatio: false,
@@ -106,51 +137,148 @@
                 legend: {
                     position: 'bottom',
                     labels: {
+                        padding: 20,
                         font: {
-                            size: 14
-                        }
+                            size: 14,
+                            family: "'Plus Jakarta Sans', sans-serif",
+                            weight: '500'
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
                     }
                 },
                 title: {
                     display: true,
                     font: {
                         size: 18,
-                        weight: 'bold'
+                        family: "'Plus Jakarta Sans', sans-serif",
+                        weight: '600'
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 30
                     }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#000',
+                    titleFont: {
+                        size: 16,
+                        family: "'Plus Jakarta Sans', sans-serif",
+                        weight: '600'
+                    },
+                    bodyColor: '#666',
+                    bodyFont: {
+                        size: 14,
+                        family: "'Plus Jakarta Sans', sans-serif"
+                    },
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true
                 }
             },
             scales: {
                 x: {
+                    grid: {
+                        display: false
+                    },
                     ticks: {
                         font: {
-                            size: 12
-                        }
+                            size: 12,
+                            family: "'Plus Jakarta Sans', sans-serif"
+                        },
+                        padding: 10
                     }
                 },
                 y: {
+                    grid: {
+                        borderDash: [2, 2],
+                        color: '#e0e0e0'
+                    },
                     ticks: {
                         font: {
-                            size: 12
+                            size: 12,
+                            family: "'Plus Jakarta Sans', sans-serif"
+                        },
+                        padding: 10,
+                        callback: function(value) {
+                            return value % 1 === 0 ? value : '';
                         }
-                    }
+                    },
+                    beginAtZero: true
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeOutQuart'
+            },
+            elements: {
+                line: {
+                    tension: 0.4
+                },
+                point: {
+                    radius: 6,
+                    hoverRadius: 8
+                }
+            },
+            layout: {
+                padding: {
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    left: 20
                 }
             }
         };
 
-        // Helper function to safely initialize charts
+        // Helper function to safely initialize charts with improved styling
         function initializeChart(elementId, type, labels, data, options = {}) {
             const element = document.getElementById(elementId);
             if (!element) return;
 
-            const chartData = {
-                labels: labels || [],
-                datasets: [{
+            const ctx = element.getContext('2d');
+            const colorScheme = options.colorScheme || colorSchemes.blue;
+            const gradient = createGradient(ctx, colorScheme);
+
+            let datasets = [];
+            if (type === 'pie') {
+                datasets = [{
+                    data: data || [],
+                    backgroundColor: [
+                        colorSchemes.blue.primary + '80',
+                        colorSchemes.green.primary + '80',
+                        colorSchemes.purple.primary + '80',
+                        colorSchemes.orange.primary + '80'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    hoverBorderColor: '#fff',
+                    hoverBorderWidth: 3,
+                    hoverOffset: 10
+                }];
+            } else {
+                datasets = [{
                     label: options.label || '',
                     data: data || [],
-                    backgroundColor: options.backgroundColor || 'rgba(54, 162, 235, 0.5)',
-                    borderColor: options.borderColor,
-                    tension: options.tension
-                }]
+                    backgroundColor: type === 'line' ? 'transparent' : gradient,
+                    borderColor: type === 'line' ? colorScheme.primary : 'transparent',
+                    borderWidth: type === 'line' ? 3 : 0,
+                    fill: type === 'line',
+                    pointBackgroundColor: type === 'line' ? colorScheme.primary : 'transparent',
+                    pointBorderColor: type === 'line' ? '#fff' : 'transparent',
+                    pointBorderWidth: type === 'line' ? 2 : 0,
+                    pointHoverBackgroundColor: type === 'line' ? colorScheme.secondary : 'transparent',
+                    pointHoverBorderColor: type === 'line' ? '#fff' : 'transparent',
+                    pointHoverBorderWidth: type === 'line' ? 3 : 0,
+                    pointHoverRadius: type === 'line' ? 8 : 0
+                }];
+            }
+
+            const chartData = {
+                labels: labels || [],
+                datasets: datasets
             };
 
             const config = { 
@@ -165,6 +293,14 @@
                 }
             };
 
+            if (type === 'bar') {
+                config.scales.y.grid.display = false;
+                config.scales.x.grid.display = false;
+                config.barThickness = 'flex';
+                config.barPercentage = 0.8;
+                config.categoryPercentage = 0.7;
+            }
+
             return new Chart(element, {
                 type: type,
                 data: chartData,
@@ -172,16 +308,15 @@
             });
         }
 
-        // Initialize charts only if data exists
-        let charts = {};
-
+        // Initialize charts with improved styling
         if (setlistsByArtist && Object.keys(setlistsByArtist).length > 0) {
             charts.setlists = initializeChart('setlistsChart', 'bar', 
                 Object.keys(setlistsByArtist),
                 Object.values(setlistsByArtist),
                 { 
                     label: 'Number of Setlists',
-                    title: 'Setlists by Artist'
+                    title: 'Setlists by Artist',
+                    colorScheme: colorSchemes.blue
                 }
             );
         }
@@ -191,12 +326,6 @@
                 Object.keys(eventsByVenue),
                 Object.values(eventsByVenue),
                 {
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.5)',
-                        'rgba(54, 162, 235, 0.5)',
-                        'rgba(255, 206, 86, 0.5)',
-                        'rgba(75, 192, 192, 0.5)'
-                    ],
                     title: 'Events by Venue'
                 }
             );
@@ -208,8 +337,8 @@
                 Object.values(songsByArtist),
                 { 
                     label: 'Number of Songs',
-                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                    title: 'Songs by Artist'
+                    title: 'Songs by Artist',
+                    colorScheme: colorSchemes.green
                 }
             );
         }
@@ -221,9 +350,9 @@
                 sortedMonths.map(month => monthlySetlists[month]),
                 {
                     label: 'Number of Setlists',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    tension: 0.1,
-                    title: 'Monthly Setlist Submissions'
+                    title: 'Monthly Setlist Submissions',
+                    colorScheme: colorSchemes.purple,
+                    fill: true
                 }
             );
         }
@@ -352,77 +481,113 @@
             align-items: center;
             height: 200px;
             background-color: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 12px;
             color: #6c757d;
             font-size: 1.1rem;
+            border: 2px dashed #dee2e6;
         }
 
         .report-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-height: 300px;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 
+                        0 1px 3px rgba(0,0,0,0.1);
+            min-height: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1), 
+                        0 2px 4px rgba(0,0,0,0.05);
         }
 
         .report-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        .report-header h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0;
+            font-size: 1.25rem;
         }
 
         .btn {
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: none;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-weight: 500;
-            transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.2s ease;
         }
 
         .btn-primary {
             background-color: #4A90E2;
             color: white;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
         }
 
         .btn-primary:hover {
             background-color: #357ABD;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.3);
         }
 
         .btn-outline {
             background-color: transparent;
-            border: 1px solid #4A90E2;
+            border: 2px solid #4A90E2;
             color: #4A90E2;
         }
 
         .btn-outline:hover {
             background-color: #4A90E2;
             color: white;
+            transform: translateY(-1px);
         }
 
         .btn-sm {
-            padding: 4px 8px;
-            font-size: 0.9rem;
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            border-radius: 6px;
         }
 
         .header-actions {
-            margin-top: 20px;
+            margin-top: 24px;
         }
 
         .reports-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-top: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 32px;
+            margin-top: 32px;
+            padding: 0 16px;
         }
 
         canvas {
             width: 100% !important;
-            height: 250px !important;
+            height: 300px !important;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .reports-grid {
+                grid-template-columns: 1fr;
+                padding: 0 8px;
+            }
+
+            canvas {
+                height: 250px !important;
+            }
         }
     </style>
 </body>
