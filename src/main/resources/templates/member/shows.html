@@ -15,104 +15,86 @@
     <main class="container">
         <section class="event-header">
             <h1>Manage Shows</h1>
-
             <p>Create and manage your events and setlists</p>
             <div class="action-buttons">
-                <a href="/member/shows/add" class="btn btn-accent">
-                    <i class="fas fa-plus"></i> Add New Show
+                <a href="/member/shows/add" class="action-btn btn-accent">
+                    <i class="fas fa-plus"></i>
+                    Add New Show
                 </a>
             </div>
         </section>
 
-        <section class="event-filters">
-            <form th:action="@{/member/shows}" method="get" class="filter-form">
+        <div class="empty-state" th:if="${#lists.isEmpty(shows)}">
+            <h3>No Shows Found</h3>
+            <p>Start by adding your first show!</p>
+            <a href="/member/shows/add" class="action-btn btn-accent">
+                <i class="fas fa-plus"></i>
+                Add New Show
+            </a>
+        </div>
+
+        <form th:action="@{/member/shows}" method="get" class="event-filters">
+            <div class="filter-form">
                 <div class="filter-group">
                     <div class="search-events">
-                        <input type="text" name="query" th:value="${query}"
-                               placeholder="Search shows by name..." class="event-search">
+                        <input type="text" name="query" th:value="${query}" placeholder="Search shows by name or venue..." class="event-search">
                         <button type="submit" class="search-btn">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
                     <div class="date-group">
-                        <input type="date" name="startDate" 
-                               th:value="${startDate != null ? #temporals.format(startDate, 'yyyy-MM-dd') : ''}"
-                               class="date-input" placeholder="Start Date">
-                        <input type="date" name="endDate" 
-                               th:value="${endDate != null ? #temporals.format(endDate, 'yyyy-MM-dd') : ''}"
-                               class="date-input" placeholder="End Date">
+                        <input type="date" id="startDate" name="startDate" th:value="${startDate}" class="date-input" placeholder="From">
+                        <input type="date" id="endDate" name="endDate" th:value="${endDate}" class="date-input" placeholder="To">
                     </div>
+                    <button type="submit" class="action-btn btn-accent">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
                 </div>
-            </form>
-        </section>
-
-        <!-- Empty State -->
-        <div class="empty-state" th:if="${#lists.isEmpty(shows)}">
-            <i class="fas fa-calendar-plus"></i>
-            <h3>No Shows Found</h3>
-            <p>Start by adding your first show!</p>
-            <a href="/member/shows/add" class="btn btn-accent">Add New Show</a>
-        </div>
-        <br>
-    
-        <form th:action="@{/member/shows}" method="get">
-            <div class="search-bar">
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search shows by artist, venue, or date..." id="showSearch">
-                <button type="submit" class="search-button btn-secondary" id="searchButton">Search</button>
             </div>
         </form>
-
 
         <section class="event-grid" th:if="${not #lists.isEmpty(shows)}">
             <div class="event-card" th:each="show : ${shows}">
                 <div class="event-info">
                     <div class="event-date">
                         <i class="far fa-calendar"></i>
-                        <span th:text="${#temporals.format(show.date, 'EEE, MMM d, yyyy')}">Jan 1, 2024</span>
+                        <span th:text="${#temporals.format(show.eventDate, 'EEE, MMM d, yyyy')}">Jan 1, 2024</span>
                     </div>
-                    <h3 th:text="${show.artist.name}">Artist Name</h3>
-                    <p class="venue-info">
+                    <h3 th:text="${show.eventName}">Event Name</h3>
+                    <div class="venue-info">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span th:text="${show.venue.name + ', ' + show.venue.city}">Venue Name</span>
-                    </p>
+                        <span th:text="${show.venueName + ', ' + show.cityName}">Venue Name</span>
+                    </div>
                     <div class="show-stats">
                         <span class="stats-item">
                             <i class="fas fa-music"></i>
                             <span th:text="${show.songCount + ' songs'}">20 songs</span>
                         </span>
-                        <span class="stats-item" th:if="${show.setlistStatus != null}">
-                            <i class="fas fa-check-circle"></i>
-                            <span th:text="${show.setlistStatus}">Verified</span>
-                        </span>
                     </div>
                     <div class="event-actions">
-                        <a th:href="@{/member/shows/{id}/edit(id=${show.id})}" class="action-btn">
+                        <a th:href="@{/member/shows/{id}/edit(id=${show.idEvent})}" class="action-btn">
                             <i class="fas fa-edit"></i>
                             <span>Edit</span>
                         </a>
-                        <a th:href="@{/member/shows/{id}/setlist(id=${show.id})}" class="action-btn">
+                        <a th:href="@{/member/setlists/{id}(id=${show.idEvent})}" class="action-btn">
                             <i class="fas fa-list"></i>
-                            <span>Manage Setlist</span>
+                            <span>Setlist</span>
                         </a>
                     </div>
-                </div>
-                    
-                </div>
-                
+                </div>
             </div>
         </section>
 
-
-        <!-- Pagination -->
         <div class="pagination" th:if="${totalPages > 1}">
             <a th:href="@{/member/shows(page=${currentPage - 1}, query=${query}, startDate=${startDate}, endDate=${endDate})}" 
-               class="page-btn prev-page"
+               class="page-btn"
                th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <span class="page-info" th:text="${currentPage + ' of ' + totalPages}">Page 1 of 10</span>
             <a th:href="@{/member/shows(page=${currentPage + 1}, query=${query}, startDate=${startDate}, endDate=${endDate})}" 
-               class="page-btn next-page"
+               class="page-btn"
                th:classappend="${currentPage >= totalPages ? 'disabled' : ''}">
                 <i class="fas fa-chevron-right"></i>
             </a>
@@ -126,3 +108,4 @@
     <script th:src="@{/js/main.js}"></script>
 </body>
 </html>
+

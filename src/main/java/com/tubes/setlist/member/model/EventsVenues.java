@@ -14,4 +14,11 @@ public class EventsVenues {
     private LocalDate eventDate;
     private String venueName;
     private String cityName;
+    private String artistName;
+    private Integer songCount;
+    
+    // Constructor for backward compatibility
+    public EventsVenues(Long idEvent, Long idVenue, String eventName, LocalDate eventDate, String venueName, String cityName) {
+        this(idEvent, idVenue, eventName, eventDate, venueName, cityName, null, 0);
+    }
 }

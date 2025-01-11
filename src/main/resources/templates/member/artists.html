@@ -17,6 +17,19 @@
             <h1>Manage Artists</h1>
 
             <p>Add and manage your artists</p>
+
+            <!-- Success Message -->
+            <div class="alert alert-success" th:if="${success}" role="alert">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${success}"></span>
+            </div>
+
+            <!-- Error Message -->
+            <div class="alert alert-error" th:if="${error}" role="alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${error}"></span>
+            </div>
+
             <div class="action-buttons">
                 <a th:href="@{/member/add-artist}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Add New Artist
