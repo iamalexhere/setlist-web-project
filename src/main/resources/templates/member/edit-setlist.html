@@ -35,7 +35,10 @@
 
         <section class="container">
             <div class="setlist-content">
-                <form th:action="@{/member/setlists/{id}/edit(id=${setlist.idSetlist})}" method="post" class="event-form">
+                <form th:action="@{/member/setlists/{id}/edit(id=${setlist.idSetlist})}" 
+                      method="post" 
+                      class="event-form" 
+                      enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="name">
                             <i class="fas fa-signature"></i>
@@ -138,17 +141,37 @@
                     }
                     </style>
 
+                    <style>
+                        .current-proof {
+                            margin-top: 15px;
+                            padding: 15px;
+                            border: 1px solid #ddd;
+                            border-radius: 8px;
+                        }
+                        .current-proof img {
+                            max-width: 100%;
+                            height: auto;
+                            border-radius: 4px;
+                            margin-top: 10px;
+                        }
+                        .current-proof p {
+                            margin: 0;
+                            color: #666;
+                            font-size: 14px;
+                        }
+                    </style>
+
                     <div class="form-group">
                         <label for="proof">
                             <i class="fas fa-image"></i>
                             Setlist Proof
                         </label>
-                        <input type="file" id="proof" name="proof" accept="image/*">
-                        <small class="form-text text-muted">Upload a new photo to replace the existing one (optional)</small>
-                        <div th:if="${setlist.proofUrl}" class="current-proof">
+                        <div th:if="${setlist.proofUrl != null}" class="current-proof">
                             <p>Current proof image:</p>
-                            <img th:src="${setlist.proofUrl}" alt="Current setlist proof">
+                            <img th:src="@{${setlist.proofUrl}}" alt="Current setlist proof">
                         </div>
+                        <input type="file" id="proof" name="proof" accept="image/*" class="form-control">
+                        <small class="form-text text-muted">Upload a new photo to replace the existing one (optional)</small>
                     </div>
 
                     <div class="form-actions">
