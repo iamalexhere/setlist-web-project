@@ -332,6 +332,42 @@ public class MemberController {
         }
     }
     
+    @PostMapping("/setlists/add")
+    public String addSetlist(
+            @RequestParam("name") String setlistName,
+            @RequestParam("artistId") Long artistId,
+            @RequestParam("eventId") Long eventId,
+            @RequestParam(value = "songIds", required = false) List<Long> songIds,
+            @RequestParam(value = "proof", required = false) MultipartFile proof,
+            HttpSession session,
+            Model model
+    ) {
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+        addUserAttributes(session, model);
+
+        try {
+            String proofFilename = null;
+            String proofOriginalFilename = null;
+
+            if (proof != null && !proof.isEmpty()) {
+                proofFilename = fileStorageService.storeFile(proof);
+                proofOriginalFilename = proof.getOriginalFilename();
+            }
+
+            repo.addSetlist(setlistName, artistId, eventId, songIds, proofFilename, proofOriginalFilename);
+            return "redirect:/member/setlists";
+        } catch (Exception e) {
+            List<Artists> artists = repo.findArtistsByName("");
+            List<EventsVenues> events = repo.findAllEvents();
+            model.addAttribute("artists", artists);
+            model.addAttribute("events", events);
+            model.addAttribute("error", "An error occurred while creating the setlist: " + e.getMessage());
+            return "member/add-setlist";
+        }
+    }
+    
     @GetMapping("/shows")
     public String shows(
         HttpSession session, 
@@ -805,6 +841,26 @@ public class MemberController {
         }
 
         return "redirect:/member/songs";
+    }
+
+    @PostMapping("/setlists/{id}/delete")
+    public String deleteSetlist(
+            @PathVariable("id") Long id,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        if (!checkMemberAccess(session)) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            repo.deleteSetlist(id);
+            redirectAttributes.addFlashAttribute("message", "Setlist has been deleted successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete setlist: " + e.getMessage());
+        }
+        
+        return "redirect:/member/setlists";
     }
 
 }
