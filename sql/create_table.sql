@@ -91,7 +91,7 @@ CREATE TABLE setlists(
 CREATE TABLE comments(
     id_comment SERIAL PRIMARY KEY,
     id_setlist INT NOT NULL,
-    id_user INT NOT NULL,
+    id_user INT NOT NULL,	--Long (?)
     comment_text TEXT NOT NULL,
     comment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_setlist) REFERENCES setlists(id_setlist),
