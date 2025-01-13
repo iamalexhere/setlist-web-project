@@ -1,15 +1,19 @@
 package com.tubes.setlist.admin.controller;
 
-import com.tubes.setlist.admin.repository.AdminRepository;
+import com.tubes.setlist.admin.model.Correction;
+import com.tubes.setlist.admin.model.CorrectionStats;
 import com.tubes.setlist.admin.model.UserManagement;
+import com.tubes.setlist.admin.repository.AdminRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -103,8 +107,48 @@ public class AdminController {
         }
         addUserAttributes(session, model);
         
-        model.addAttribute("pendingContent", adminRepository.getPendingApprovals());
-        return "admin/pending-approvals";
+        List<Map<String, Object>> pendingContent = adminRepository.getPendingApprovals();
+        
+        // Convert to Correction objects
+        List<Correction> corrections = pendingContent.stream()
+            .map(content -> {
+                Object dateObj = content.get("submitted_at");
+                LocalDateTime submittedAt;
+                if (dateObj instanceof java.sql.Timestamp) {
+                    submittedAt = ((java.sql.Timestamp) dateObj).toLocalDateTime();
+                } else if (dateObj instanceof java.sql.Date) {
+                    submittedAt = ((java.sql.Date) dateObj).toLocalDate().atStartOfDay();
+                } else {
+                    submittedAt = LocalDateTime.now(); // fallback
+                }
+                
+                return new Correction(
+                    ((Number) content.get("content_id")).longValue(),
+                    (String) content.get("content_type"),
+                    (String) content.get("content_name"),
+                    (String) content.get("status"),
+                    (String) content.get("submitted_by"),
+                    submittedAt
+                );
+            })
+            .collect(Collectors.toList());
+        
+        model.addAttribute("corrections", corrections);
+        
+        // Add correction stats
+        CorrectionStats stats = new CorrectionStats(
+            (long) corrections.size(),
+            corrections.stream()
+                .filter(c -> "PENDING".equals(c.getStatus()))
+                .count(),
+            corrections.stream()
+                .filter(c -> "APPROVED".equals(c.getStatus()))
+                .filter(c -> c.getSubmittedAt().toLocalDate().equals(LocalDate.now()))
+                .count()
+        );
+        model.addAttribute("correctionStats", stats);
+        
+        return "admin/corrections";
     }
     
     @PostMapping("/content/{contentType}/{contentId}/approve")

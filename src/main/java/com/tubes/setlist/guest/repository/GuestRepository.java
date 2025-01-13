@@ -36,6 +36,7 @@ public interface GuestRepository {
     
     // Random artist images
     List<String> getRandomArtistImages(int limit);
+    Map<Long, String> getRandomArtistImagesForEvents(List<Long> eventIds);
     
     // Venue related queries
     List<VenueView> findAllVenues();

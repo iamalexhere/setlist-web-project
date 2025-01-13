@@ -35,6 +35,11 @@ public class GuestController {
             .limit(4)
             .collect(Collectors.toList());
 
+        // Get random artist images for events
+        Map<Long, String> eventArtistImages = guestRepository.getRandomArtistImagesForEvents(
+            recentEvents.stream().map(EventView::getIdEvent).collect(Collectors.toList())
+        );
+
         // Get random artists by category
         Map<String, ArtistView> categoryArtists = guestRepository.getRandomArtistsByCategory(1, 0);
         
@@ -43,13 +48,12 @@ public class GuestController {
 
         model.addAttribute("activePage", "dashboard");
         model.addAttribute("recentEvents", recentEvents);
+        model.addAttribute("eventArtistImages", eventArtistImages);
         model.addAttribute("categoryArtists", categoryArtists);
         model.addAttribute("heroImages", heroImages);
         
         return "guest/index";
     }
-
-
 
     @GetMapping("/artists")
     public String listArtists(
