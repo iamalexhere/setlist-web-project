@@ -70,8 +70,8 @@
             <div class="corrections-grid">
                 <div class="correction-card" th:each="correction : ${corrections}">
                     <div class="correction-header">
-                        <h3 class="correction-title" th:text="${correction.setlist.artistName + ' - ' + correction.setlist.eventName}">
-                            Artist - Event
+                        <h3 class="correction-title" th:text="${correction.contentName}">
+                            Content Name
                         </h3>
                         <span class="badge" 
                               th:classappend="${correction.status == 'PENDING' ? 'badge-warning' : 
@@ -92,38 +92,30 @@
                                     01 Jan 2024 12:00
                                 </strong>
                             </p>
+                            <p class="detail-item">
+                                <i class="fas fa-tag"></i>
+                                <span>Type: </span>
+                                <strong th:text="${#strings.capitalize(correction.contentType)}">Type</strong>
+                            </p>
                         </div>
-                        <div class="correction-changes">
-                            <h4>Proposed Changes</h4>
-                            <div class="changes-list">
-                                <div class="change-item" th:each="change : ${correction.changes}">
-                                    <div class="change-field" th:text="${change.field}">Field</div>
-                                    <div class="change-values">
-                                        <div class="old-value">
-                                            <span>Old:</span>
-                                            <span th:text="${change.oldValue}">Old value</span>
-                                        </div>
-                                        <div class="new-value">
-                                            <span>New:</span>
-                                            <span th:text="${change.newValue}">New value</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="correction-notes" th:if="${correction.notes}">
-                            <h4>Notes</h4>
-                            <p th:text="${correction.notes}">Correction notes</p>
+                        <div class="correction-actions" th:if="${correction.status == 'PENDING'}">
+                            <button class="btn btn-success" 
+                                    th:onclick="'approveCorrection(' + ${correction.contentId} + ')'">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="btn btn-danger" 
+                                    th:onclick="'rejectCorrection(' + ${correction.contentId} + ')'">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
                         </div>
                     </div>
-                    <div class="correction-actions" th:if="${correction.status == 'PENDING'}">
-                        <button class="btn btn-success" th:onclick="'approveCorrection(' + ${correction.id} + ')'">
-                            <i class="fas fa-check"></i> Approve
-                        </button>
-                        <button class="btn btn-danger" th:onclick="'rejectCorrection(' + ${correction.id} + ')'">
-                            <i class="fas fa-times"></i> Reject
-                        </button>
-                    </div>
+                </div>
+                
+                <!-- Empty state -->
+                <div class="empty-state" th:if="${#lists.isEmpty(corrections)}">
+                    <i class="fas fa-inbox fa-3x"></i>
+                    <h3>No Corrections</h3>
+                    <p>There are no corrections to review at this time.</p>
                 </div>
             </div>
 

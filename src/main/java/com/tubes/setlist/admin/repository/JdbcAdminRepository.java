@@ -131,15 +131,19 @@ public class JdbcAdminRepository implements AdminRepository {
     @Override
     public List<Map<String, Object>> getPendingApprovals() {
         String sql = """
-            SELECT 'artist' as content_type, id_artist as content_id, artist_name as content_name, created_at 
-            FROM artists WHERE is_deleted = false
-            UNION ALL
-            SELECT 'event' as content_type, id_event as content_id, event_name as content_name, created_at 
-            FROM events WHERE is_deleted = false
-            UNION ALL
-            SELECT 'setlist' as content_type, id_setlist as content_id, setlist_name as content_name, created_at 
-            FROM setlists WHERE is_deleted = false
-            ORDER BY created_at DESC
+            SELECT 
+                'setlist' as content_type, 
+                s.id_setlist as content_id, 
+                s.setlist_name as content_name,
+                e.edit_description,
+                u.username as submitted_by,
+                e.date_added::timestamp as submitted_at,
+                e.status
+            FROM setlists s
+            JOIN edits e ON s.id_setlist = e.id_setlist
+            JOIN users u ON e.id_user = u.id_user
+            WHERE s.is_deleted = false
+            ORDER BY e.date_added DESC
         """;
         return jdbcTemplate.queryForList(sql);
     }

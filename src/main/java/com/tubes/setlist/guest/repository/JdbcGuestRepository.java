@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -580,6 +581,34 @@ public class JdbcGuestRepository implements GuestRepository {
         }
         
         return venue;
+    }
+
+    @Override
+    public Map<Long, String> getRandomArtistImagesForEvents(List<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        String sql = """
+            WITH event_artists AS (
+                SELECT DISTINCT s.id_event, a.image_url
+                FROM setlists s
+                JOIN artists a ON s.id_artist = a.id_artist
+                WHERE s.id_event = ANY(?)
+                AND a.image_url IS NOT NULL
+            )
+            SELECT id_event, 
+                   (array_agg(image_url ORDER BY random()))[1] as random_image
+            FROM event_artists
+            GROUP BY id_event
+        """;
+
+        Long[] eventIdArray = eventIds.toArray(new Long[0]);
+        return jdbcTemplate.query(
+            sql,
+            ps -> ps.setArray(1, ps.getConnection().createArrayOf("bigint", eventIdArray)),
+            (rs, rowNum) -> Map.entry(rs.getLong("id_event"), rs.getString("random_image"))
+        ).stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private class EventRowMapper implements RowMapper<EventView> {

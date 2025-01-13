@@ -36,7 +36,12 @@
                 <div class="event-slider">
                     <div class="event-card" th:each="event : ${recentEvents}">
                         <div class="event-image">
-                            <img src="https://placehold.co/400x300" alt="Event Image">
+                            <img th:if="${eventArtistImages.containsKey(event.idEvent)}"
+                                 th:src="${eventArtistImages.get(event.idEvent)}"
+                                 th:alt="${'Image for ' + event.eventName}">
+                            <img th:unless="${eventArtistImages.containsKey(event.idEvent)}"
+                                 src="https://placehold.co/400x300"
+                                 th:alt="${'Placeholder for ' + event.eventName}">
                             <button class="favorite-btn">
                                 <i class="far fa-heart"></i>
                             </button>
